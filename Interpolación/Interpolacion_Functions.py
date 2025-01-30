@@ -46,3 +46,5 @@ def create_eos(type, p_range, n):
     data.to_excel("data.xlsx", index=False)
     
     return None
+
+    print ("test")
