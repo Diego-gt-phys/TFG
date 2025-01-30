@@ -2,7 +2,7 @@
 """
 Created on Thu Jan 30 20:47:59 2025
 
-In this code I create and test the functions that will be used in the main scrypt.
+Code That writes test eos
 
 @author: Usuario
 """
