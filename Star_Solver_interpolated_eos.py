@@ -72,46 +72,6 @@ def create_eos(Type, p_range, n, plot=False):
         
     return None
 
-def read_data(name, plot = False):
-    """
-    Reads data of the equation of state and guives the data points to latter do an interpolation.
-
-    Parameters
-    ----------
-    name : string
-        Name of the excel document where de data is stored.
-    plot : Boolian, optional
-        Wether or not the code should make a plot of the created eos. The default is False.
-
-    Returns
-    -------
-    list
-        List containing te datapoints (in the form of np.arrays) for the preassure (x-axis) and the density (y-axis). The structure is: [p_data, rho_data].
-
-    """
-    
-    data = pd.read_excel(name + ".xlsx")
-    rho_data = data['Density'].values
-    p_data = data['Pressure'].values
-    
-    if plot==True:
-        plt.figure(figsize=(8, 8))
-        plt.plot(p_data, rho_data, label = r'$p(\rho)$', color = "red", linewidth = 2, linestyle = '-', marker = '.', markersize = 10)
-        plt.xlabel(r'$p$ $\left[ M_{\odot}/km^3 \right]$', fontsize=15, loc='center', fontweight='bold')
-        plt.ylabel(r'$\rho$ $\left[ M_{\odot}/km^3 \right]$', fontsize=15, loc='center', fontweight='bold')
-        plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
-        plt.tick_params(axis='both', which='major', direction='in', length=10, width=1.5, labelsize=12, top=True, right=True)
-        plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2, labelsize=10, top=True, right=True)
-        plt.minorticks_on()
-        plt.gca().spines['top'].set_linewidth(1.7)
-        plt.gca().spines['right'].set_linewidth(1.7)
-        plt.gca().spines['bottom'].set_linewidth(1.7)
-        plt.gca().spines['left'].set_linewidth(1.7)
-        plt.legend(fontsize=17, frameon=False)
-        plt.show()
-        
-    return [p_data, rho_data]
-
 def eos(p):
     """
     Guiven the arrays p_data and rho_data which contain the information for the equation of state, this funtion interpolates the value of rho for a guiven  p. 
