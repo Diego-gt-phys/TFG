@@ -149,27 +149,27 @@ def M_R_curve (pc_range, r_range, h, n):
     return np.array(R_values), np.array(M_values)
 
 # Using the functions
-R, M = M_R_curve((1e-9,1e5), (1e-6,20), 0.0005, 50)
+r,m,p = TOV_solver([0,1.5e-4], (1e-6,20), 0.0005)
 
 # Create the plot
 plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
 colors = sns.color_palette("Set1", 5) # Generate a color palette
-plt.plot(R, M, label = r'$M(R)$', color = 'black', linewidth = 2, linestyle = '-', marker = '', markersize = 5)
+plt.plot(r, p, label = r'$p(r)$', color = 'black', linewidth = 2, linestyle = '-', marker = '', markersize = 5)
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(r'Curva MR para eos $p=K\rho^\Gamma$; Con $\Gamma=2$ y $K=150$', loc='left', fontsize=15, fontweight='bold')
-plt.xlabel(r'R $[km]$', fontsize=15, loc='center', fontweight='bold')
-plt.ylabel(r'M $[M_{\odot}]$', fontsize=15, loc='center', fontweight='bold')
+#plt.title(r'Curva MR para eos $p=K\rho^\Gamma$; Con $\Gamma=2$ y $K=150$', loc='left', fontsize=15, fontweight='bold')
+plt.xlabel(r'r $[km]$', fontsize=15, loc='center', fontweight='bold')
+plt.ylabel(r'p $[M_{\odot}/km^3]$', fontsize=15, loc='center', fontweight='bold')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(3,13)
-plt.ylim(0, 1.4)
+#plt.xlim(3,13)
+#plt.ylim(0, 1.4)
 
 # Add grid
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -180,8 +180,8 @@ plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2,
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(3, 13.01, 1))  # Major x ticks 
-plt.gca().set_yticks(np.arange(0, 1.41, 0.2))  # Major y ticks 
+#plt.gca().set_xticks(np.arange(3, 13.01, 1))  # Major x ticks 
+#plt.gca().set_yticks(np.arange(0, 1.41, 0.2))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
@@ -193,7 +193,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig("Polytropic_MR_less_p.pdf", format="pdf", bbox_inches="tight")
+#plt.savefig("Polytropic_MR_less_p.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()

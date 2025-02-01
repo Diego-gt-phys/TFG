@@ -16,7 +16,7 @@ K = 150
 gamma = 2
 
 # Generate 20 points for density (rho) in a reasonable range
-p_values = np.linspace(1e-9, 1e5, 10)  # Adjust range as needed
+p_values = np.linspace(1e-9, 1e5, 20)  # Adjust range as needed
 rho_values = (p_values / K) ** (1 / gamma)
 
 # Create a DataFrame

@@ -14,23 +14,122 @@ from scipy.interpolate import interp1d
 # Physical parameters (solar mass = 198847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
 
+###############################################################################
+# Define the functions
+###############################################################################
+def create_eos(Type, p_range, n, plot=False):
+    """
+    Function that generates an excel containing the data of the equation of state
+
+    Parameters
+    ----------
+    Type : string
+        Type of eos that you require. For a constant density star use 'constant', for a polytropic eos use 'polytropic'.
+    p_range : touple
+        Vector that contains the initial and final preassures. The structure is: (pi, pf).
+    n : interger
+        Number of data points you want the data to have.
+    plot : Boolian, optional
+        Wether or not the code should make a plot of the created eos. The default is False.
+
+    Returns
+    -------
+    None.
+
+    """
+    
+    pi, pf = p_range
+    
+    if Type == "constant":
+        p = np.linspace(pi, pf, n)
+        rho = np.zeros(n) + 2.3873241463784e-4
+            
+    elif Type == "polytropic":
+        K=150
+        gamma=2
+        p = np.linspace(pi, pf, n)
+        rho = (p / K) ** (1 / gamma)
+    
+    data = pd.DataFrame({'Density': rho, 'Pressure': p})
+    data.to_excel("data.xlsx", index=False)
+    
+    if plot==True:
+        plt.figure(figsize=(8, 8))
+        plt.plot(p, rho, label = r'$p(\rho)$', color = "black", linewidth = 2, linestyle = '-', marker = '.', markersize = 10)
+        #plt.title(r'Created eos', loc='center', fontsize=20, fontweight='bold')
+        plt.xlabel(r'$p$ $\left[ M_{\odot}/km^3 \right]$', fontsize=15, loc='center', fontweight='bold')
+        plt.ylabel(r'$\rho$ $\left[ M_{\odot}/km^3 \right]$', fontsize=15, loc='center', fontweight='bold')
+        plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+        plt.tick_params(axis='both', which='major', direction='in', length=10, width=1.5, labelsize=12, top=True, right=True)
+        plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2, labelsize=10, top=True, right=True)
+        plt.minorticks_on()
+        plt.gca().spines['top'].set_linewidth(1.7)
+        plt.gca().spines['right'].set_linewidth(1.7)
+        plt.gca().spines['bottom'].set_linewidth(1.7)
+        plt.gca().spines['left'].set_linewidth(1.7)
+        plt.legend(fontsize=17, frameon=False)
+        plt.show()
+        
+    return None
+
+def read_data(name, plot = False):
+    """
+    Reads data of the equation of state and guives the data points to latter do an interpolation.
+
+    Parameters
+    ----------
+    name : string
+        Name of the excel document where de data is stored.
+    plot : Boolian, optional
+        Wether or not the code should make a plot of the created eos. The default is False.
+
+    Returns
+    -------
+    list
+        List containing te datapoints (in the form of np.arrays) for the preassure (x-axis) and the density (y-axis). The structure is: [p_data, rho_data].
+
+    """
+    
+    data = pd.read_excel(name + ".xlsx")
+    rho_data = data['Density'].values
+    p_data = data['Pressure'].values
+    
+    if plot==True:
+        plt.figure(figsize=(8, 8))
+        plt.plot(p_data, rho_data, label = r'$p(\rho)$', color = "red", linewidth = 2, linestyle = '-', marker = '.', markersize = 10)
+        plt.xlabel(r'$p$ $\left[ M_{\odot}/km^3 \right]$', fontsize=15, loc='center', fontweight='bold')
+        plt.ylabel(r'$\rho$ $\left[ M_{\odot}/km^3 \right]$', fontsize=15, loc='center', fontweight='bold')
+        plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+        plt.tick_params(axis='both', which='major', direction='in', length=10, width=1.5, labelsize=12, top=True, right=True)
+        plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2, labelsize=10, top=True, right=True)
+        plt.minorticks_on()
+        plt.gca().spines['top'].set_linewidth(1.7)
+        plt.gca().spines['right'].set_linewidth(1.7)
+        plt.gca().spines['bottom'].set_linewidth(1.7)
+        plt.gca().spines['left'].set_linewidth(1.7)
+        plt.legend(fontsize=17, frameon=False)
+        plt.show()
+        
+    return [p_data, rho_data]
+
 def eos(p):
     """
-    Polytropic equation of state: p = K * rho^gamma.
-    
-    Parameters:
-        p (float): Pressure.
-        K (float): Polytropic constant (default: 1e-5).
-        gamma (float): Polytropic index (default: 2).
-    
-    Returns:
-        float: Density rho.
+    Guiven the arrays p_data and rho_data which contain the information for the equation of state, this funtion interpolates the value of rho for a guiven  p. 
+
+    Parameters
+    ----------
+    p : float
+        Preassure at which we want to evaluate the eos.
+
+    Returns
+    -------
+    rho : float
+        Density associated to the preassure guiven.
+
     """
-    K=150
-    gamma=2
-    if p <= 0:
-        return 0  # Avoid invalid values
-    rho = (p / K) ** (1 / gamma)
+    interp_func = interp1d(p_data, rho_data, kind='linear', fill_value='extrapolate')
+    rho = interp_func(p)
+    
     return rho
 
 def system_of_ODE(r, y):
@@ -50,6 +149,7 @@ def system_of_ODE(r, y):
     nominator = - (rho + p) * (G * m + 4 * np.pi * G * r**3 * p)
     denominator = r * (r - 2 * G * m)
     dp_dr = nominator/denominator
+    
     return [dm_dr, dp_dr]
 
 def runge_kutta_4th_order_with_stop(system, y0, r_range, h):
@@ -150,28 +250,41 @@ def M_R_curve (pc_range, r_range, h, n):
     
     return np.array(R_values), np.array(M_values)
 
-# Using the functions
-R, M = M_R_curve((1e-9,1e5), (1e-6,20), 0.0005, 50)
+###############################################################################
+# Calculate the data
+###############################################################################
 
-# Create the plot
+create_eos("polytropic", (1e-14, 1e-3), 1000)
+
+# Read the data
+data = pd.read_excel("data.xlsx")
+rho_data = data['Density'].values
+p_data = data['Pressure'].values
+
+# Find the solution for the TOV equation.
+r,m,p = TOV_solver([0,1.5e-4], (1e-6,20), 0.0005)
+###############################################################################
+# Plot the data
+###############################################################################
+
 plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
 colors = sns.color_palette("Set1", 5) # Generate a color palette
-plt.plot(R, M, label = r'$M(R)$', color = colors[0], linewidth = 2, linestyle = '-', marker = '', markersize = 5)
+plt.plot(r, p, label = r'$p(r)$', color = colors[0], linewidth = 2, linestyle = '-', marker = '', markersize = 5)
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(r'Curva MR para eos $p=K\rho^\Gamma$; Con $\Gamma=2$ y $K=150$', loc='left', fontsize=15, fontweight='bold')
-plt.xlabel(r'R $[km]$', fontsize=15, loc='center', fontweight='bold')
-plt.ylabel(r'M $[M_{\odot}]$', fontsize=15, loc='center', fontweight='bold')
+#plt.title(r'Curva MR para eos $p=K\rho^\Gamma$; Con $\Gamma=2$ y $K=150$', loc='left', fontsize=15, fontweight='bold')
+plt.xlabel(r'r $[km]$', fontsize=15, loc='center', fontweight='bold')
+plt.ylabel(r'p $[M_{\odot}/km^3]$', fontsize=15, loc='center', fontweight='bold')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(3,13)
-plt.ylim(0, 1.4)
+#plt.xlim(3,13)
+#plt.ylim(0, 1.4)
 
 # Add grid
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -182,8 +295,8 @@ plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2,
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(3, 13.01, 1))  # Major x ticks 
-plt.gca().set_yticks(np.arange(0, 1.41, 0.2))  # Major y ticks 
+#plt.gca().set_xticks(np.arange(3, 13.01, 1))  # Major x ticks 
+#plt.gca().set_yticks(np.arange(0, 1.41, 0.2))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
@@ -195,7 +308,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-#plt.savefig("Polytropic_MR_less_p.pdf", format="pdf", bbox_inches="tight")
+#plt.savefig("TOV.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()
