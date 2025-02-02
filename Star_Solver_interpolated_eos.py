@@ -213,9 +213,6 @@ def M_R_curve (pc_range, r_range, h, n):
 ###############################################################################
 # Calculate the data
 ###############################################################################
-
-#create_eos("constant", (1e-17, 1e9), 1000)
-
 # Read the data
 data = pd.read_excel("data.xlsx")
 rho_data = data['Density'].values
@@ -269,7 +266,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig("Interpolation_constant_TOV.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("Interpolation_constant_MR.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()
