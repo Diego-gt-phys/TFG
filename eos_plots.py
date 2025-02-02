@@ -22,8 +22,8 @@ middle_preassure = middle['y'].values
 
 plt.figure(figsize=(9, 6.94))
 colors = sns.color_palette("Set1", 5)
-plt.plot(soft_density, soft_preassure, label = r'soft', color = colors[0], linewidth = 2, linestyle = '-', marker = "o",  mfc=colors[0], mec = colors[0], ms = 4)
-plt.plot(middle_density, middle_preassure, label = r'middle', color = colors[1], linewidth = 2, linestyle = '-', marker = "s",  mfc=colors[1], mec = colors[1], ms = 4)
+plt.plot(soft_density, soft_preassure, label = r'soft', color = colors[0], linewidth = 2, linestyle = '-', marker = "o",  mfc=colors[0], mec = 'k', ms = 5)
+plt.plot(middle_density, middle_preassure, label = r'middle', color = colors[1], linewidth = 2, linestyle = '-', marker = "s",  mfc=colors[1], mec = 'k', ms = 5)
 
 plt.title(r'Equations of state', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'$\mathbf{\rho} \cdot 10^3$ $[km^{-2}]$', fontsize=15, loc='center', fontweight='bold')
@@ -42,7 +42,7 @@ plt.gca().spines['top'].set_linewidth(1.6)
 plt.gca().spines['right'].set_linewidth(1.6)
 plt.gca().spines['bottom'].set_linewidth(1.6)
 plt.gca().spines['left'].set_linewidth(1.6)
-plt.legend(fontsize=15, frameon=False)
+plt.legend(fontsize=15, frameon=False, loc='upper left')
 
 plt.savefig("eos.pdf", format="pdf", bbox_inches="tight")
 plt.tight_layout()
