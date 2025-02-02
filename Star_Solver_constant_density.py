@@ -130,12 +130,12 @@ def M_R_curve (pc_range, r_range, h, n):
     return np.array(R_values), np.array(M_values)
 
 # Using the functions
-r,m,p = TOV_solver([0,1.5e-4], (1e-6,20), 0.0005)
+R, M = M_R_curve((1e-10,1e1), (1e-6,20), 0.0005, 50)
 
 # Create the plot
 plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
 colors = sns.color_palette("Set1", 5) # Generate a color palette
-plt.plot(r, p, label = r'$p(r)$', color = colors[0], linewidth = 2, linestyle = '-', marker = "", markersize=5)
+plt.plot(R, M, label = r'$M(R)$', color = colors[2], linewidth = 2, linestyle = '-', marker = "",  mfc='k', mec = 'k', ms = 6)
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
@@ -143,7 +143,7 @@ plt.plot(r, p, label = r'$p(r)$', color = colors[0], linewidth = 2, linestyle = 
 
 # Add labels and title
 #plt.title(r'Soluciones para diferentes $p_c$. $\rho_0 = 10^3$ $[M_{\odot} / R^3_{\odot}]$', loc='left', fontsize=15, fontweight='bold')
-plt.xlabel(r'R $[R_{\odot}]$', fontsize=15, loc='center', fontweight='bold')
+plt.xlabel(r'R $[km]$', fontsize=15, loc='center', fontweight='bold')
 plt.ylabel(r'M $[M_{\odot}]$', fontsize=15, loc='center', fontweight='bold')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
@@ -174,7 +174,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-#plt.savefig("Fig.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("Constant_eos_MR.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()
