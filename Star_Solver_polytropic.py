@@ -81,7 +81,7 @@ def runge_kutta_4th_order_with_stop(system, y0, r_range, h):
         y_next = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6
 
         # Check if the stopping condition is met (p < 0)
-        if y_next[1] <= 1e-16:  # p corresponds to y[1]
+        if y_next[1] <= 0:  # p corresponds to y[1]
             break
 
         r += h
@@ -149,12 +149,12 @@ def M_R_curve (pc_range, r_range, h, n):
     return np.array(R_values), np.array(M_values)
 
 # Using the functions
-r,m,p = TOV_solver([0,1.5e-4], (1e-6,20), 0.0005)
+r,m,p = TOV_solver([0,1e-4], (1e-6,20), 0.0005)
 
 # Create the plot
 plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
 colors = sns.color_palette("Set1", 5) # Generate a color palette
-plt.plot(r, p, label = r'$p(r)$', color = 'black', linewidth = 2, linestyle = '-', marker = '', markersize = 5)
+plt.plot(r, p, label = r'$p(r)$', color = colors[1], linewidth = 2, linestyle = '-', marker = '', markersize = 5)
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
@@ -193,7 +193,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-#plt.savefig("Polytropic_MR_less_p.pdf", format="pdf", bbox_inches="tight")
+#plt.savefig("Polytropic_MR.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()

@@ -42,7 +42,7 @@ def create_eos(Type, p_range, n, plot=False):
     
     if Type == "constant":
         p = np.linspace(pi, pf, n)
-        rho = np.zeros(n) + 2.3873241463784e-4
+        rho = np.zeros(n) +  2.954457325e-4
             
     elif Type == "polytropic":
         K=150
@@ -214,7 +214,7 @@ def M_R_curve (pc_range, r_range, h, n):
 # Calculate the data
 ###############################################################################
 
-create_eos("polytropic", (1e-14, 1e-3), 1000)
+create_eos("constant", (1e-17, 1e-3), 1000)
 
 # Read the data
 data = pd.read_excel("data.xlsx")

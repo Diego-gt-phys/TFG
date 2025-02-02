@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Physical parameters (solar mass = 198847e30 kg & 6.957e8 m)
-G = 2.12242e-6 # G in units of solar masses / solar radii
-rho = 1e3  # Solar density in solar units is 0.238732. In IS units it would be 1409.82
+G = 1.4765679173556 # G in units of solar masses / solar radii
+rho = 2.954457325e-4  # Solar density in solar units is 0.238732. In IS units it would be 1409.82
 
 def system_of_ODE(r, y):
     """
@@ -130,12 +130,12 @@ def M_R_curve (pc_range, r_range, h, n):
     return np.array(R_values), np.array(M_values)
 
 # Using the functions
-R, M = M_R_curve((1e1,1e8), (1e-3,20), 0.005, 20)
+r,m,p = TOV_solver([0,1.5e-4], (1e-6,20), 0.0005)
 
 # Create the plot
 plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
 colors = sns.color_palette("Set1", 5) # Generate a color palette
-plt.plot(R, M, label = r'$M(R)$', color = colors[0], linewidth = 2, linestyle = '-', marker = "", markersize=5)
+plt.plot(r, p, label = r'$p(r)$', color = colors[0], linewidth = 2, linestyle = '-', marker = "", markersize=5)
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
@@ -174,7 +174,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig("Fig.pdf", format="pdf", bbox_inches="tight")
+#plt.savefig("Fig.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()
