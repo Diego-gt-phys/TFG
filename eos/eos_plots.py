@@ -36,8 +36,8 @@ plt.xlabel(r'$\mathbf{\rho} \cdot 10^3$ $\left[M_{\odot}/km^{3}\right]$', fontsi
 plt.ylabel(r'$\mathbf{p} \cdot 10^4$ $\left[M_{\odot}/km^{3}\right]$', fontsize=15, loc='center', fontweight='bold')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
-#plt.xlim(0, 0.9)
-#plt.ylim(0, 3)
+plt.xlim(0, 0.83)
+plt.ylim(0, 2.71)
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
 plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.5, labelsize=12, top=True, right=True)
 plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2, labelsize=10, top=True, right=True)
