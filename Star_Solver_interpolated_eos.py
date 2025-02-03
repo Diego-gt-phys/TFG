@@ -214,19 +214,20 @@ def M_R_curve (pc_range, r_range, h, n):
 # Calculate the data
 ###############################################################################
 # Read the data
-data = pd.read_excel("soft.xlsx")
+data = pd.read_excel("stiff.xlsx")
 rho_data = data['Density'].values
 p_data = data['Pressure'].values
 
 # Find the solution for the TOV equation.
 r,m,p = TOV_solver([0,1e-4], (1e-6,20), 0.0005)
+#R, M = M_R_curve((5e-6, 1e-2), (1e-6,20), 0.001, 15)
 ###############################################################################
 # Plot the data
 ###############################################################################
 
 plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
 colors = sns.color_palette("Set1", 5) # Generate a color palette
-plt.plot(r, p, label = r'$p(r)$', color = colors[0], linewidth = 2, linestyle = '-', marker = "",  mfc='k', mec = 'k', ms = 6)
+plt.plot(r, p, label = r'middle', color = colors[0], linewidth = 2, linestyle = '-', marker = "",  mfc='k', mec = 'k', ms = 6)
 
 
 # Set the axis to logarithmic scale
@@ -234,15 +235,15 @@ plt.plot(r, p, label = r'$p(r)$', color = colors[0], linewidth = 2, linestyle = 
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(r'Solución hidroestática para: $p_c = 10^{-4} \, \left[M_{\odot}/km^3\right]$', loc='left', fontsize=15, fontweight='bold')
-plt.xlabel(r'r $\left[km\right]$', fontsize=15, loc='center', fontweight='bold')
-plt.ylabel(r'p $\left[M_{\odot}/km^3\right]$', fontsize=15, loc='center', fontweight='bold')
-plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
-plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
+#plt.title(r'Solución hidroestática para: $p_c = 10^{-4} \, \left[M_{\odot}/km^3\right]$', loc='left', fontsize=15, fontweight='bold')
+plt.xlabel(r'R $\left[km\right]$', fontsize=15, loc='center', fontweight='bold')
+plt.ylabel(r'M $\left[M_{\odot}\right]$', fontsize=15, loc='center', fontweight='bold')
+#plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
+#plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-#plt.xlim(3,13)
-#plt.ylim(0, 1.4)
+#plt.xlim(9,12)
+#plt.ylim(0, 2)
 
 # Add grid
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -266,7 +267,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig("TOV_soft.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("TOV_middle.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()
