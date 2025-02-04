@@ -214,7 +214,7 @@ def M_R_curve (pc_range, r_range, h, n):
 # Calculate the data
 ###############################################################################
 # Read the data
-data = pd.read_excel("middle.xlsx")
+data = pd.read_excel("stiff.xlsx")
 rho_data = data['Density'].values
 p_data = data['Pressure'].values
 
