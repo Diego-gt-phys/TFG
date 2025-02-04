@@ -144,7 +144,7 @@ def runge_kutta_4th_order_with_stop(system, y0, r_range, h):
         y_next = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6
 
         # Check if the stopping condition is met (p < 0)
-        if y_next[1] <= 0:  # p corresponds to y[1]
+        if y_next[1] < 1e-16:  # p corresponds to y[1]
             break
 
         r += h
@@ -214,13 +214,13 @@ def M_R_curve (pc_range, r_range, h, n):
 # Calculate the data
 ###############################################################################
 # Read the data
-data = pd.read_excel("soft.xlsx")
+data = pd.read_excel("middle.xlsx")
 rho_data = data['Density'].values
 p_data = data['Pressure'].values
 
 # Find the solution for the TOV equation.
-#r,m,p = TOV_solver([0,1e-4], (1e-6,20), 0.001)
-R, M = M_R_curve((1e-5, 1e-2), (1e-6,20), 0.001, 12)
+r,m,p = TOV_solver([0,1e-4], (1e-6,20), 0.001)
+#R, M = M_R_curve((1e-5, 1e-2), (1e-6,20), 0.001, 12)
 
 # Calculate the causality R > 2.9 GM
 M_casual = np.linspace(1.5, 2.3)
@@ -231,8 +231,8 @@ R_casual = 2.9 * G * M_casual
 
 plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
 colors = sns.color_palette("Set1", 5) # Generate a color palette
-plt.plot(R, M, label = r'soft', color = colors[0], linewidth = 2, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 6)
-plt.plot(R_casual, M_casual, label = r'$R=2.9GM$', color='k', linewidth=1.5, linestyle='-.')
+plt.plot(r, p, label = r'soft', color = colors[0], linewidth = 2, linestyle = '-', marker = "",  mfc='k', mec = 'k', ms = 6)
+#plt.plot(R_casual, M_casual, label = r'$R=2.9GM$', color='k', linewidth=1.5, linestyle='-.')
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
@@ -246,8 +246,8 @@ plt.ylabel(r'M $\left[M_{\odot}\right]$', fontsize=15, loc='center', fontweight=
 #plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(7,13)
-plt.ylim(0, 2.25)
+#plt.xlim(7,13)
+#plt.ylim(0, 2.25)
 
 # Add grid
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
