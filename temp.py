@@ -30,7 +30,7 @@ def eos(p):
     
     return rho
 
-data = pd.read_excel("soft.xlsx")
+data = pd.read_excel("stiff.xlsx")
 rho_data = data['Density'].values
 p_data = data['Pressure'].values
 

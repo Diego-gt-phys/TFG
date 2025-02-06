@@ -38,7 +38,7 @@ plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 plt.xscale('log')
 plt.yscale('log')
-plt.xlim(9e-6, 1e-3)
+plt.xlim(10e-6, 1e-3)
 plt.ylim(1e-7, 3e-4)
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
 plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.5, labelsize=12, top=True, right=True)
@@ -52,6 +52,6 @@ plt.gca().spines['bottom'].set_linewidth(1.6)
 plt.gca().spines['left'].set_linewidth(1.6)
 plt.legend(fontsize=15, frameon=False)
 
-plt.savefig("eos.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("eos_log.pdf", format="pdf", bbox_inches="tight")
 plt.tight_layout()
 plt.show()
