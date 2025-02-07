@@ -9,8 +9,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+from scipy.interpolate import interp1d
 
-G = 1.4765679173556 # G in units of km / solar masses
+"""
+def find_signal(p):
+    interp_func = interp1d(p_data, rho_data, kind='linear', fill_value='extrapolate')
+    rho = interp_func(p)
+    
+    return rho
+"""
 
 # Read the data
 soft = pd.read_excel("soft.xlsx")
@@ -27,19 +34,19 @@ stiff_preassure = stiff['Pressure'].values #/ G
 
 plt.figure(figsize=(9, 6.94))
 colors = sns.color_palette("Set1", 5)
-plt.plot(soft_density, soft_preassure, label = r'soft', color = colors[0], linewidth = 2, linestyle = '-', marker = "o",  mfc=colors[0], mec = 'k', ms = 5)
-plt.plot(middle_density, middle_preassure, label = r'middle', color = colors[1], linewidth = 2, linestyle = '-', marker = "s",  mfc=colors[1], mec = 'k', ms = 5)
-plt.plot(stiff_density, stiff_preassure, label = r'stiff', color = colors[2], linewidth = 2, linestyle = '-', marker = "D",  mfc=colors[2], mec = 'k', ms = 5)
+plt.plot(soft_density, soft_preassure, label = r'soft', color = colors[0], linewidth = 2, linestyle = '', marker = "o",  mfc=colors[0], mec = 'k', ms = 5)
+plt.plot(middle_density, middle_preassure, label = r'middle', color = colors[1], linewidth = 2, linestyle = '', marker = "s",  mfc=colors[1], mec = 'k', ms = 5)
+plt.plot(stiff_density, stiff_preassure, label = r'stiff', color = colors[2], linewidth = 2, linestyle = '', marker = "D",  mfc=colors[2], mec = 'k', ms = 5)
 
 plt.title(r'Equations of state', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'$\mathbf{\rho}$ $\left[M_{\odot}/km^{3}\right]$', fontsize=15, loc='center', fontweight='bold')
 plt.ylabel(r'$\mathbf{p}$ $\left[M_{\odot}/km^{3}\right]$', fontsize=15, loc='center', fontweight='bold')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim(10e-6, 1e-3)
-plt.ylim(1e-7, 3e-4)
+#plt.xscale('log')
+#plt.yscale('log')
+#plt.xlim(0, 0.84e-3)
+#plt.ylim(0, 2.7e-4)
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
 plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.5, labelsize=12, top=True, right=True)
 plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2, labelsize=10, top=True, right=True)
@@ -50,8 +57,8 @@ plt.gca().spines['top'].set_linewidth(1.6)
 plt.gca().spines['right'].set_linewidth(1.6)
 plt.gca().spines['bottom'].set_linewidth(1.6)
 plt.gca().spines['left'].set_linewidth(1.6)
-plt.legend(fontsize=15, frameon=False)
+plt.legend(fontsize=15, frameon=True, framealpha=0.9, edgecolor='k', loc = 'upper left')
 
-plt.savefig("eos_log.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("eos_data.pdf", format="pdf", bbox_inches="tight")
 plt.tight_layout()
 plt.show()
