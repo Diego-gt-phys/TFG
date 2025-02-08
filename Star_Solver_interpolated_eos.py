@@ -144,7 +144,7 @@ def runge_kutta_4th_order_with_stop(system, y0, r_range, h):
         y_next = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6
 
         # Check if the stopping condition is met (p < 0)
-        if y_next[1] < 1e-16:  # p corresponds to y[1]
+        if y_next[1] < 2e-16:  # p corresponds to y[1] DEBUG Está alargando mucho la cola.
             break
 
         r += h
@@ -219,12 +219,8 @@ rho_data = data['Density'].values
 p_data = data['Pressure'].values
 
 # Find the solution for the TOV equation.
-#r,m,p = TOV_solver([0,1e-4], (1e-6,20), 0.001)
-R, M = M_R_curve((5e-6,5e-3), (1e-6,20), 0.001, 20)
+R, M = M_R_curve((2.1e-6, 2.8e-4), (1e-6,20), 0.001, 20)
 
-# Calculate the causality R > 2.9 GM
-M_casual = np.linspace(0, 3.5)
-R_casual = 2.9 * G * M_casual
 ###############################################################################
 # Plot the data
 ###############################################################################
@@ -232,22 +228,21 @@ R_casual = 2.9 * G * M_casual
 plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
 colors = sns.color_palette("Set1", 5) # Generate a color palette
 plt.plot(R, M, label = r'stiff', color = colors[2], linewidth = 2, linestyle = '-', marker = '*', mfc='k', mec = 'k', ms = 6) # marker = '', mfc='k', mec = 'k', ms = 6
-plt.plot(R_casual, M_casual, label = r'Causality', color = 'k', linewidth = 1, linestyle = '-.')
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(r'Curva MR para eos: stiff', loc='left', fontsize=15, fontweight='bold')
+plt.title(r'Curva MR para la EOS: stiff', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'R $\left[km\right]$', fontsize=15, loc='center', fontweight='bold')
-plt.ylabel(r'M $\left[M_{\odot}\right]$', fontsize=15, loc='center', fontweight='bold')
-#plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
-#plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
+plt.ylabel(r'M $\left[M_{\odot}/km^3\right]$', fontsize=15, loc='center', fontweight='bold')
+plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
+plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(9, 15)
-plt.ylim(0, 3.5)
+plt.xlim(8, 17)
+plt.ylim(0, 3.3)
 
 # Add grid
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -258,8 +253,8 @@ plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2,
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(9, 15.1, 0.5))  # Major x ticks 
-plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
+#plt.gca().set_xticks(np.arange(9, 15.1, 0.5))  # Major x ticks 
+#plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
@@ -271,7 +266,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig("stiff_MR.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("MR_stiff.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()
