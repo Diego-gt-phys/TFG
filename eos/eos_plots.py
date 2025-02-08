@@ -43,10 +43,10 @@ plt.xlabel(r'$\mathbf{\rho}$ $\left[M_{\odot}/km^{3}\right]$', fontsize=15, loc=
 plt.ylabel(r'$\mathbf{p}$ $\left[M_{\odot}/km^{3}\right]$', fontsize=15, loc='center', fontweight='bold')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
-#plt.xscale('log')
-#plt.yscale('log')
-plt.xlim(1e-7, 9e-7)
-plt.ylim(2e-10, 1e-9)
+plt.xscale('log')
+plt.yscale('log')
+#plt.xlim(1e-7, 9e-7)
+#plt.ylim(2e-10, 1e-9)
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
 plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.5, labelsize=12, top=True, right=True)
 plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2, labelsize=10, top=True, right=True)
@@ -59,6 +59,6 @@ plt.gca().spines['bottom'].set_linewidth(1.6)
 plt.gca().spines['left'].set_linewidth(1.6)
 plt.legend(fontsize=15, frameon=True, framealpha=0.9, edgecolor='k', loc = 'upper left')
 
-#plt.savefig("eos_data.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("eos_data_log.pdf", format="pdf", bbox_inches="tight")
 plt.tight_layout()
 plt.show()
