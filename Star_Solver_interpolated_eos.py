@@ -94,14 +94,20 @@ def eos(p):
 
 def system_of_ODE(r, y):
     """
-    Defines the system of differential equations.
-    
-    Parameters:
-        r (float): Independent variable.
-        y (list): Dependent variables [m, p].
+    This functions calculate the numerical values for dm/dr, dp/dr for the differential equations that deffine stellar structure.
 
-    Returns:
-        list: Derivatives [dm/dr, dp/dr].
+    Parameters
+    ----------
+    r : float
+        Radius were we are evaluating the derivatives.
+    y : tuple
+        Vector containig the information of mass and pressure at a point r. The structure is: (m, p).
+
+    Returns
+    -------
+    list
+        Vector containing the information of the derivative values.
+
     """
     m, p = y
     rho = eos(p)
@@ -115,19 +121,28 @@ def system_of_ODE(r, y):
 def runge_kutta_4th_order_with_stop(system, y0, r_range, h):
     """
     Solves a system of ODEs using the 4th-order Runge-Kutta method, stopping
-    when a condition is met (e.g., p(r) < 0).
+    when the condition of preassure is met.
 
-    Parameters:
-        system (function): The system of ODEs as a function of r and y.
-        y0 (list): Initial conditions for the system.
-        r_range (tuple): The range of r as (r_start, r_end).
-        h (float): Step size.
+    Parameters
+    ----------
+    system : function
+        System of ODEs as a function of r and y.
+    y0 : list
+        Initial conditions of the system. The structure is: [mc, pc].
+    r_range : TYPE
+        The range of r as (r_start, r_end).
+    h : float
+        Step size of integration.
 
-    Returns:
-        tuple: (r_values, y_values) where:
+    Returns
+    -------
+    tuple
+        (r_values, y_values) where:
             r_values is an array of r points,
             y_values is an array of solution points for y.
+
     """
+
     r_start, r_end = r_range
     r_values = [r_start]
     y_values = [y0]
