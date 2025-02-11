@@ -2,6 +2,8 @@
 """
 Created on Tue Nov 26 11:20:18 2024
 
+Due to how long this takes to compute, this code should be replaced with one that calculates the MR curve and saves it. Making this calculation 3 times takes very looong.
+
 @author: Diego García Tejada
 """
 
@@ -211,38 +213,51 @@ def M_R_curve (pc_range, r_range, h, n):
     return np.array(R_values), np.array(M_values)
 
 ###############################################################################
-# Calculate the data
+# Calculate and plot the data
 ###############################################################################
-# Read the data
+plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
+colors = sns.color_palette("Set1", 5) # Generate a color palette
+
+# Read the data of siff
+data = pd.read_excel("stiff.xlsx")
+rho_data = data['Density'].values
+p_data = data['Pressure'].values
+
+R, M = M_R_curve((2.144e-6, 2.802e-4), (1e-6, 20), 0.001, 20)
+plt.plot(R, M, label = r'stiff', color = colors[2], linewidth = 2, linestyle = '-', marker = '*', mfc='k', mec = 'k', ms = 6) # marker = '', mfc='k', mec = 'k', ms = 6
+
+# Read the data of middle
+data = pd.read_excel("middle.xlsx")
+rho_data = data['Density'].values
+p_data = data['Pressure'].values
+
+R, M = M_R_curve((2.747e-6, 5.713e-4), (1e-6, 20), 0.001, 20)
+plt.plot(R, M, label = r'middle', color = colors[1], linewidth = 2, linestyle = '-', marker = '*', mfc='k', mec = 'k', ms = 6) # marker = '', mfc='k', mec = 'k', ms = 6
+
+# Read the data of soft
 data = pd.read_excel("soft.xlsx")
 rho_data = data['Density'].values
 p_data = data['Pressure'].values
 
-
-
-# Find the solution for the TOV equation.
-r,m,p = TOV_solver([0,1.6191e-5], (1e-6,20), 0.001)
+R, M = M_R_curve((2.785e-6, 5.975e-4), (1e-6, 20), 0.001, 20)
+plt.plot(R, M, label = r'soft', color = colors[0], linewidth = 2, linestyle = '-', marker = '*', mfc='k', mec = 'k', ms = 6) # marker = '', mfc='k', mec = 'k', ms = 6
 ###############################################################################
-# Plot the data
+# Make it pretty
 ###############################################################################
-plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
-colors = sns.color_palette("Set1", 5) # Generate a color palette
-plt.plot(r, p, label = r'soft', color = colors[0], linewidth = 2, linestyle = '-', marker = '', mfc='k', mec = 'k', ms = 6) # marker = '', mfc='k', mec = 'k', ms = 6
-
 # Set the axis to logarithmic scale
 #plt.xscale('log')
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(r'Solución de TOV para la EOS: soft', loc='left', fontsize=15, fontweight='bold')
-plt.xlabel(r'r $\left[km\right]$', fontsize=15, loc='center', fontweight='bold')
-plt.ylabel(r'p $\left[M_{\odot}/km^3\right]$', fontsize=15, loc='center', fontweight='bold')
+plt.title(r'Curvas de MR', loc='left', fontsize=15, fontweight='bold')
+plt.xlabel(r'R $\left[km\right]$', fontsize=15, loc='center', fontweight='bold')
+plt.ylabel(r'M $\left[M_{\odot}\right]$', fontsize=15, loc='center', fontweight='bold')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-#plt.xlim(8, 17)
-#plt.ylim(0, 3.3)
+plt.xlim(8, 17)
+plt.ylim(0, 3.5)
 
 # Add grid
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -253,8 +268,8 @@ plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2,
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-#plt.gca().set_xticks(np.arange(9, 15.1, 0.5))  # Major x ticks 
-#plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
+plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
+plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
@@ -266,7 +281,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig("TOV.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("MR.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()
