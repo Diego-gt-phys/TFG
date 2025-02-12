@@ -13,7 +13,7 @@ import seaborn as sns
 G = 1.4765679173556 # G in units of solar masses / solar radii
 #rho = 1e3  # Solar density in solar units is 0.238732. In IS units it would be 1409.82
 
-def eos(p, K=150, gamma=2):
+def eos(p, K=10, gamma=5/3): # Neutron star K=150, gamma=5/3
     """
     Polytropic equation of state: p = K * rho^gamma.
     
@@ -81,7 +81,7 @@ def runge_kutta_4th_order_with_stop(system, y0, r_range, h):
         y_next = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6
 
         # Check if the stopping condition is met (p < 0)
-        if y_next[1] <= 0:  # p corresponds to y[1]
+        if y_next[1] < y0[1]*1e-10:  # p corresponds to y[1]
             break
 
         r += h
@@ -149,12 +149,13 @@ def M_R_curve (pc_range, r_range, h, n):
     return np.array(R_values), np.array(M_values)
 
 # Using the functions
-R, M = M_R_curve((1e-10,1e1), (1e-6,20), 0.0005, 50)
+r, m, p = TOV_solver([0,1e-5], (1e-6,100), 0.0005)
+print("The star has mass:", m[-1], "and radius:", r[-1])
 
 # Create the plot
 plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
 colors = sns.color_palette("Set1", 5) # Generate a color palette
-plt.plot(R, M, label = r'$M(R)$', color = colors[1], linewidth = 2, linestyle = '-', marker = '', mfc='k', mec = 'k', ms = 6)
+plt.plot(r, p, label = r'$p(r)$', color = colors[0], linewidth = 2, linestyle = '-', marker = '', mfc='k', mec = 'k', ms = 6)
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
@@ -162,8 +163,8 @@ plt.plot(R, M, label = r'$M(R)$', color = colors[1], linewidth = 2, linestyle = 
 
 # Add labels and title
 #plt.title(r'Curva MR para eos $p=K\rho^\Gamma$; Con $\Gamma=2$ y $K=150$', loc='left', fontsize=15, fontweight='bold')
-plt.xlabel(r'R $[km]$', fontsize=15, loc='center', fontweight='bold')
-plt.ylabel(r'M $[M_{\odot}]$', fontsize=15, loc='center', fontweight='bold')
+plt.xlabel(r'r $[km]$', fontsize=15, loc='center', fontweight='bold')
+plt.ylabel(r'p $[M_{\odot}/km^3]$', fontsize=15, loc='center', fontweight='bold')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
@@ -193,7 +194,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig("Polytropic_MR.pdf", format="pdf", bbox_inches="tight")
+#plt.savefig("Polytropic_TOV.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()
