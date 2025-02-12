@@ -2,6 +2,8 @@
 """
 Created on Tue Nov 26 11:20:18 2024
 
+Solves the Tolman Oppenheimer Volkoff (TOV) equation for a star whose equation of state (eos) is in guiven by a dataset.
+This codes differs by solving the 3 eos at the same time.
 Due to how long this takes to compute, this code should be replaced with one that calculates the MR curve and saves it. Making this calculation 3 times takes very looong.
 
 @author: Diego García Tejada

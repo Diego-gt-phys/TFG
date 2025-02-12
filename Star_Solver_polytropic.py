@@ -2,6 +2,8 @@
 """
 Created on Tue Nov 26 11:20:18 2024
 
+Solves the Tolman Oppenheimer Volkoff (TOV) equation for a star of polytropic equation of state (eos).
+
 @author: Diego García Tejada
 """
 

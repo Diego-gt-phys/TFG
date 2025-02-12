@@ -2,6 +2,8 @@
 """
 Created on Tue Feb 11 15:34:28 2025
 
+Solves the Tolman Oppenheimer Volkoff (TOV) equation for a star formed of two fluids A and B.
+
 @author: Usuario
 """
 
@@ -93,3 +95,4 @@ def system_of_ODE (r, y):
     dpB_dr = -(rho_B + p_B) * dphi_dr
     
     return (dm_dr, dpA_dr, dpB_dr)
+
