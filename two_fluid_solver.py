@@ -96,3 +96,6 @@ def system_of_ODE (r, y):
     
     return (dm_dr, dpA_dr, dpB_dr)
 
+def RK4O_with_stop (y0, r_range, h):
+    
+    
