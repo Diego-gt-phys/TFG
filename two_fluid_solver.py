@@ -194,14 +194,14 @@ def TOV_solver(y0, r_range, h):
 # Main
 ###############################################################################
 
-r, m, p_A, p_B = TOV_solver((0, 1e-4, 1.4e-4), (1e-6, 20), 0.001)
+r, m, p_A, p_B = TOV_solver((0, 1.01e-4, 1.35e-4), (1e-6, 20), 0.001)
 
 plt.figure(figsize=(9.71, 6))
 colors = sns.color_palette("Set1", 5) # Generate a color palette
 
 plt.plot(r, p_A*1e4, label = r'$p_A(r) \cdot 10^4$', color = colors[0], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
 plt.plot(r, p_B*1e4, label = r'$p_B(r) \cdot 10^4$', color = colors[1], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
-plt.plot(r, m, label = r'$m(r)$', color = colors[2], linewidth = 2, linestyle = '-.') # , marker = "",  mfc='k', mec = 'k', ms = 6
+plt.plot(r, m, label = r'$m(r)$', color = colors[2], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
 
 
 # Set the axis to logarithmic scale

@@ -151,7 +151,7 @@ def M_R_curve (pc_range, r_range, h, n):
     return np.array(R_values), np.array(M_values)
 
 # Using the functions
-r, m, p = TOV_solver([0,1e-5], (1e-6,100), 0.001)
+r, m, p = TOV_solver([0,1.4e-4], (1e-6,100), 0.001)
 print("The star has mass:", m[-1], "and radius:", r[-1])
 
 # Create the plot
