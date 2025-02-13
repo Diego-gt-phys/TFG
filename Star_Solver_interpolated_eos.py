@@ -131,7 +131,7 @@ def runge_kutta_4th_order_with_stop(system, y0, r_range, h):
         System of ODEs as a function of r and y.
     y0 : list
         Initial conditions of the system. The structure is: [mc, pc].
-    r_range : TYPE
+    r_range : tuple
         The range of r as (r_start, r_end).
     h : float
         Step size of integration.
@@ -169,7 +169,7 @@ def runge_kutta_4th_order_with_stop(system, y0, r_range, h):
         y_values.append(y_next)
         y = y_next
 
-    return np.array(r_values), np.array(y_values)
+    return (np.array(r_values), np.array(y_values))
 
 def TOV_solver (y0, r_range, h):
     """

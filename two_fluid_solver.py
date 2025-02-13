@@ -35,6 +35,9 @@ def eos_A (p_A): # The A star has constant density.
         float: Density of the fluid A (rho) at preassure p_A.
     """
     
+    if p_A <= 0:
+        return 0  # Avoid invalid values
+    
     rho = 4.775e-4
     
     return rho
@@ -97,5 +100,57 @@ def system_of_ODE (r, y):
     return (dm_dr, dpA_dr, dpB_dr)
 
 def RK4O_with_stop (y0, r_range, h):
+    """
+    Function that integrates the y vector using a Runge-Kutta 4th orther method.
+    Due to the physics of our problem. The function is built with a condition that doesn't allow negative pressures. If both of them are 0 then the integration stops. 
+
+    Parameters
+    ----------
+    y0 : tuple
+        Stating conditions for our variables: (m_0, p_A_c, P_B_c)
+    r_range : tuple
+        Range of integratio: (r_0, r_max)
+    h : float
+        Step size of integration.
+
+    Returns
+    -------
+    r_values : array
+        Array containing the different values of r.
+        
+    y_values : array
+        Array containig the solutions for the vector y.
+
+    """
     
+    r_start, r_end = r_range
+    r_values = [r_start]
+    y_values = [y0]
     
+    r = r_start
+    y = np.array(y0)
+
+    while r <= r_end:
+        k1 = h * np.array(system_of_ODE(r, y))
+        k2 = h * np.array(system_of_ODE(r + h / 2, y + k1 / 2))
+        k3 = h * np.array(system_of_ODE(r + h / 2, y + k2 / 2))
+        k4 = h * np.array(system_of_ODE(r + h, y + k3))
+
+        y_next = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+
+        # Stopping conditions: p<p_c*1e-10
+        if y_next[1] < y0[1]*1e-10:  # If fluid A's pressure drops to 0, keep it that way
+            y_next[1] = 0
+            
+        if y_next[2] < y0[2]*1e-10:  # If fluid B's pressure drops to 0, keep it that way
+            y_next[2] = 0
+            
+        if y_next[1] < y0[1]*1e-10 and y_next[2] < y0[2]*1e-10: # If both pressures drop to 0 then the star stops there.
+            break
+
+        r += h
+        r_values.append(r)
+        y_values.append(y_next)
+        y = y_next
+
+    return (np.array(r_values), np.array(y_values))
