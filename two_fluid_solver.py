@@ -194,7 +194,7 @@ def TOV_solver(y0, r_range, h):
 # Main
 ###############################################################################
 
-r, m, p_A, p_B = TOV_solver((0, 1e-4, 1e-4), (1e-6, 20), 0.001)
+r, m, p_A, p_B = TOV_solver((0, 1e-4, 1.4e-4), (1e-6, 20), 0.001)
 
 plt.figure(figsize=(9.71, 6))
 colors = sns.color_palette("Set1", 5) # Generate a color palette
@@ -209,26 +209,27 @@ plt.plot(r, m, label = r'$m(r)$', color = colors[2], linewidth = 2, linestyle = 
 #plt.yscale('log')
 
 # Add labels and title
+plt.title(r'Solución de TOV para una estrella de 2 fluidos', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'r $\left[km\right]$', fontsize=15, loc='center', fontweight='bold')
-plt.ylabel(r'p $\left[M_{\odot}/km^3\right]$ ; m $\left[M_{\odot}\right]$', fontsize=15, loc='center', fontweight='bold')
+plt.ylabel(r'$\mathbf{p}\cdot10^4$ $\left[M_{\odot}/km^3\right]$ ; m $\left[M_{\odot}\right]$', fontsize=15, loc='center', fontweight='bold')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-#plt.xlim(3,13)
-#plt.ylim(0, 1.4)
+plt.xlim(0,7.5)
+plt.ylim(0, 1.4)
 
 # Add grid
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
 
 # Configure ticks for all four sides
-plt.tick_params(axis='both', which='major', direction='in', length=10, width=1.5, labelsize=12, top=True, right=True)
-plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2, labelsize=10, top=True, right=True)
+plt.tick_params(axis='both', which='major', direction='in', length=9, width=1.5, labelsize=12, top=True, right=True)
+plt.tick_params(axis='both', which='minor', direction='in', length=5, width=1.2, labelsize=10, top=True, right=True)
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-#plt.gca().set_xticks(np.arange(3, 13.01, 1))  # Major x ticks 
-#plt.gca().set_yticks(np.arange(0, 1.41, 0.2))  # Major y ticks 
+plt.gca().set_xticks(np.arange(0.5, 7.51, 0.5))  # Major x ticks 
+plt.gca().set_yticks(np.arange(0, 1.41, 0.1))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
