@@ -194,7 +194,7 @@ def TOV_solver(y0, r_range, h):
 # Main
 ###############################################################################
 
-r, m, p_A, p_B = TOV_solver((0, 1.01e-4, 1.35e-4), (1e-6, 20), 0.001)
+r, m, p_A, p_B = TOV_solver((0, 0.9e-4, 1.4e-4), (1e-6, 20), 0.001)
 
 plt.figure(figsize=(9.71, 6))
 colors = sns.color_palette("Set1", 5) # Generate a color palette
@@ -216,7 +216,7 @@ plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(0,7.5)
+plt.xlim(0,8)
 plt.ylim(0, 1.4)
 
 # Add grid
@@ -228,7 +228,7 @@ plt.tick_params(axis='both', which='minor', direction='in', length=5, width=1.2,
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(0.5, 7.51, 0.5))  # Major x ticks 
+plt.gca().set_xticks(np.arange(0.5, 8.1, 0.5))  # Major x ticks 
 plt.gca().set_yticks(np.arange(0, 1.41, 0.1))  # Major y ticks 
 
 # Set thicker axes
