@@ -2,7 +2,7 @@
 """
 Created on Tue Feb 11 15:34:28 2025
 
-Solves the Tolman Oppenheimer Volkoff (TOV) equation for a star formed of two fluids A and B.
+Solves TOV equation for a star formed of two fluids, A and B.
 
 @author: Usuario
 """
@@ -154,3 +154,4 @@ def RK4O_with_stop (y0, r_range, h):
         y = y_next
 
     return (np.array(r_values), np.array(y_values))
+
