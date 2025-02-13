@@ -107,7 +107,7 @@ def RK4O_with_stop (y0, r_range, h):
     Parameters
     ----------
     y0 : tuple
-        Stating conditions for our variables: (m_0, p_A_c, P_B_c)
+        Starting conditions for our variables: (m_0, p_A_c, P_B_c)
     r_range : tuple
         Range of integratio: (r_0, r_max)
     h : float
@@ -119,7 +119,7 @@ def RK4O_with_stop (y0, r_range, h):
         Array containing the different values of r.
         
     y_values : array
-        Array containig the solutions for the vector y.
+        Array containig the solutions for the vector y: (m_values, p_A_values, P_B_values).
 
     """
     
@@ -139,14 +139,14 @@ def RK4O_with_stop (y0, r_range, h):
         y_next = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6
 
         # Stopping conditions: p<p_c*1e-10
-        if y_next[1] < y0[1]*1e-10:  # If fluid A's pressure drops to 0, keep it that way
-            y_next[1] = 0
-            
-        if y_next[2] < y0[2]*1e-10:  # If fluid B's pressure drops to 0, keep it that way
-            y_next[2] = 0
-            
         if y_next[1] < y0[1]*1e-10 and y_next[2] < y0[2]*1e-10: # If both pressures drop to 0 then the star stops there.
             break
+        
+        elif y_next[1] < y0[1]*1e-10:  # If fluid A's pressure drops to 0, keep it that way
+            y_next[1] = 0
+            
+        elif y_next[2] < y0[2]*1e-10:  # If fluid B's pressure drops to 0, keep it that way
+            y_next[2] = 0
 
         r += h
         r_values.append(r)
@@ -155,3 +155,93 @@ def RK4O_with_stop (y0, r_range, h):
 
     return (np.array(r_values), np.array(y_values))
 
+def TOV_solver(y0, r_range, h):
+    """
+    Using a 4th Runge Kutta method, it solves the TOV for a 2 perfect fluid star.
+    It guives the mass and preassure values for both fluids in all of the stars radius.
+
+    Parameters
+    ----------
+    y0 : tuple
+        Starting conditions for our variables: (m_0, p_A_c, P_B_c)
+    r_range : tuple
+        Range of integratio: (r_0, r_max)
+    h : float
+        Step size of integration.
+
+    Returns
+    -------
+    r_values : array
+        Array containing the different values of r.
+    m_values : array
+        Array containing the different values of m(r).
+    p_A_values : array
+        Array containing the different values of P_A(r)..
+    p_B_values : array
+        Array containing the different values of P_B(r)..
+
+    """
+    
+    r_values, y_values = RK4O_with_stop(y0, r_range, h)
+    
+    m_values = y_values[:, 0]
+    p_A_values = y_values[:, 1]
+    p_B_values = y_values[:, 2]
+
+    return (r_values, m_values, p_A_values, p_B_values)
+
+###############################################################################
+# Main
+###############################################################################
+
+r, m, p_A, p_B = TOV_solver((0, 1e-4, 1e-4), (1e-6, 20), 0.001)
+
+plt.figure(figsize=(9.71, 6))
+colors = sns.color_palette("Set1", 5) # Generate a color palette
+
+plt.plot(r, p_A*1e4, label = r'$p_A(r) \cdot 10^4$', color = colors[0], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
+plt.plot(r, p_B*1e4, label = r'$p_B(r) \cdot 10^4$', color = colors[1], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
+plt.plot(r, m, label = r'$m(r)$', color = colors[2], linewidth = 2, linestyle = '-.') # , marker = "",  mfc='k', mec = 'k', ms = 6
+
+
+# Set the axis to logarithmic scale
+#plt.xscale('log')
+#plt.yscale('log')
+
+# Add labels and title
+plt.xlabel(r'r $\left[km\right]$', fontsize=15, loc='center', fontweight='bold')
+plt.ylabel(r'p $\left[M_{\odot}/km^3\right]$ ; m $\left[M_{\odot}\right]$', fontsize=15, loc='center', fontweight='bold')
+plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
+plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
+
+# Set limits
+#plt.xlim(3,13)
+#plt.ylim(0, 1.4)
+
+# Add grid
+plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+
+# Configure ticks for all four sides
+plt.tick_params(axis='both', which='major', direction='in', length=10, width=1.5, labelsize=12, top=True, right=True)
+plt.tick_params(axis='both', which='minor', direction='in', length=6, width=1.2, labelsize=10, top=True, right=True)
+plt.minorticks_on()
+
+# Customize tick spacing for more frequent ticks on x-axis
+#plt.gca().set_xticks(np.arange(3, 13.01, 1))  # Major x ticks 
+#plt.gca().set_yticks(np.arange(0, 1.41, 0.2))  # Major y ticks 
+
+# Set thicker axes
+plt.gca().spines['top'].set_linewidth(1.5)
+plt.gca().spines['right'].set_linewidth(1.5)
+plt.gca().spines['bottom'].set_linewidth(1.5)
+plt.gca().spines['left'].set_linewidth(1.5)
+
+# Add a legend
+plt.legend(fontsize=15, frameon=False) #  loc='upper right',
+
+# Save the plot as a PDF
+plt.savefig("2_fluid_TOV.pdf", format="pdf", bbox_inches="tight")
+
+# Show the plot
+plt.tight_layout()
+plt.show()

@@ -151,13 +151,13 @@ def M_R_curve (pc_range, r_range, h, n):
     return np.array(R_values), np.array(M_values)
 
 # Using the functions
-r, m, p = TOV_solver([0,1e-5], (1e-6,100), 0.0005)
+r, m, p = TOV_solver([0,1e-5], (1e-6,100), 0.001)
 print("The star has mass:", m[-1], "and radius:", r[-1])
 
 # Create the plot
 plt.figure(figsize=(9.71, 6)) # The image follows the golden ratio
 colors = sns.color_palette("Set1", 5) # Generate a color palette
-plt.plot(r, p, label = r'$p(r)$', color = colors[0], linewidth = 2, linestyle = '-', marker = '', mfc='k', mec = 'k', ms = 6)
+plt.plot(r, p, label = r'B', color = colors[0], linewidth = 2, linestyle = '-', marker = '', mfc='k', mec = 'k', ms = 6)
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
