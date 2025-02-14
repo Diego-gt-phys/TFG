@@ -241,7 +241,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-#plt.savefig("2_fluid_TOV.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("2_fluid_TOV.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()

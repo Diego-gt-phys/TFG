@@ -197,34 +197,42 @@ def TOV_solver(y0, r_range, h):
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values)
 
 ###############################################################################
-# Main
+# Simulation
 ###############################################################################
 
-r, m, p_A, p_B, m_A, m_B = TOV_solver((0, 0.9e-4, 1.4e-4, 0, 0), (1e-6, 20), 0.001)
+p_c = 0.95e-4
+alpha = 0.2
+y0 = (0, p_c, alpha*p_c, 0, 0)
+
+r, m, p_A, p_B, m_A, m_B = TOV_solver(y0, (1e-6, 50), 1e-3)
+
+print("M=", m[-1])
+print("R=", r[-1])
+
+###############################################################################
+# Plot
+###############################################################################
 
 plt.figure(figsize=(9.71, 6))
-colors = sns.color_palette("Set1", 5) # Generate a color palette
-
-plt.plot(r, p_A*1e4, label = r'$p_A(r) \cdot 10^4$', color = colors[0], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
-plt.plot(r, p_B*1e4, label = r'$p_B(r) \cdot 10^4$', color = colors[1], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
-plt.plot(r, m, label = r'$m(r)$', color = colors[2], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
-plt.plot(r, m_A, label = r'$m_A(r)$', color = colors[4], linewidth = 2, linestyle = '-.') # , marker = "",  mfc='k', mec = 'k', ms = 6
-plt.plot(r, m_B, label = r'$m_B(r)$', color = colors[3], linewidth = 2, linestyle = '-.') # , marker = "",  mfc='k', mec = 'k', ms = 6
+plt.plot(r, p_A * 1e4, label = r'$p_A(r) \cdot 10^4$', color = 'r', linewidth = 1.5)
+plt.plot(r, p_B * 1e4, label = r'$p_B(r) \cdot 10^4$', color = 'b', linewidth = 1.5)
+plt.plot(r, m*0.8, label = r'$0.8 \cdot m(r)$', color = 'g', linewidth = 1.5, linestyle = '-')
+plt.plot(r, m_A*0.8, label = r'$0.8 \cdot m_A(r)$', color = 'r', linewidth = 1, linestyle = '-.')
+plt.plot(r, m_B*0.8, label = r'$0.8 \cdot m_B(r)$', color = 'b', linewidth = 1, linestyle = '-.')
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(r'Hidrostatic solution to a 2 fluid star', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'r $\left[km\right]$', fontsize=15, loc='center', fontweight='bold')
 plt.ylabel(r'$\mathbf{p}\cdot10^4$ $\left[M_{\odot}/km^3\right]$ ; m $\left[M_{\odot}\right]$', fontsize=15, loc='center', fontweight='bold')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(0,8)
-plt.ylim(0, 1.4)
+plt.xlim(0, 8)
+plt.ylim(0, 1)
 
 # Add grid
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -235,8 +243,8 @@ plt.tick_params(axis='both', which='minor', direction='in', length=5, width=1.2,
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(0.5, 8.1, 0.5))  # Major x ticks 
-plt.gca().set_yticks(np.arange(0, 1.41, 0.1))  # Major y ticks 
+plt.gca().set_xticks(np.arange(0, 8.1, 1))  # Major x ticks 
+plt.gca().set_yticks(np.arange(0, 1.1, 0.1))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
@@ -245,11 +253,9 @@ plt.gca().spines['bottom'].set_linewidth(1.5)
 plt.gca().spines['left'].set_linewidth(1.5)
 
 # Add a legend
-plt.legend(fontsize=15, frameon=False) #  loc='upper right',
+plt.legend(fontsize=15, frameon=False, ncol = 2, loc = 'upper right') #  loc='upper right',
 
 # Save the plot as a PDF
 plt.savefig("2_fluid_TOV.pdf", format="pdf", bbox_inches="tight")
 
-# Show the plot
-plt.tight_layout()
 plt.show()
