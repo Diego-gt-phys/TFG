@@ -143,13 +143,13 @@ def RK4O_with_stop (y0, r_range, h):
         y_next = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6
 
         # Stopping conditions: p<p_c*1e-10
-        if y_next[1] < y0[1]*1e-10 and y_next[2] < y0[2]*1e-10: # If both pressures drop to 0 then the star stops there.
+        if y_next[1] <= y0[1]*1e-10 and y_next[2] <= y0[2]*1e-10: # If both pressures drop to 0 then the star stops there.
             break
         
-        elif y_next[1] < y0[1]*1e-10:  # If fluid A's pressure drops to 0, keep it that way
+        elif y_next[1] <= y0[1]*1e-10:  # If fluid A's pressure drops to 0, keep it that way
             y_next[1] = 0
             
-        elif y_next[2] < y0[2]*1e-10:  # If fluid B's pressure drops to 0, keep it that way
+        elif y_next[2] <= y0[2]*1e-10:  # If fluid B's pressure drops to 0, keep it that way
             y_next[2] = 0
 
         r += h
@@ -224,8 +224,8 @@ plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-#plt.xlim(0,8)
-#plt.ylim(0, 1.4)
+plt.xlim(0,8)
+plt.ylim(0, 1.4)
 
 # Add grid
 plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -236,8 +236,8 @@ plt.tick_params(axis='both', which='minor', direction='in', length=5, width=1.2,
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-#plt.gca().set_xticks(np.arange(0.5, 8.1, 0.5))  # Major x ticks 
-#plt.gca().set_yticks(np.arange(0, 1.41, 0.1))  # Major y ticks 
+plt.gca().set_xticks(np.arange(0.5, 8.1, 0.5))  # Major x ticks 
+plt.gca().set_yticks(np.arange(0, 1.41, 0.1))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
