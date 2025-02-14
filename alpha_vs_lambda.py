@@ -199,42 +199,53 @@ def TOV_solver(y0, r_range, h):
 ###############################################################################
 # Simulation
 ###############################################################################
+"""
 
-p_c = 1e-4
-alpha = 1
-y0 = (0, p_c, alpha*p_c, 0, 0)
+p_c = 1e-4 # Central pressure of fluid A
 
-r, m, p_A, p_B, m_A, m_B = TOV_solver(y0, (1e-6, 50), 1e-3)
+# Values of alpha.
+a_values = np.arange(0, 1.6, 0.1)
+data = {"alpha": a_values}
 
-print("M =", m[-1])
-print("R =", r[-1])
-print("lambda =", m_B[-1] / m[-1])
+# Values of lambda.
+l_values = []
+for a in a_values:
+    r, m, p_A, p_B, m_A, m_B = TOV_solver((0, p_c, a*p_c, 0, 0), (1e-6, 20), 1e-3)
+    l = m_B[-1] / m[-1]
+    l_values.append(l)
+    
+data[f"lambda ({p_c})"] = np.array(l_values)
 
+# Save the data
+df = pd.DataFrame(data)
+df.to_csv("data_avl.csv", index=False)
+
+"""
 ###############################################################################
 # Plot
 ###############################################################################
-"""
+#"""
+df = pd.read_csv("data_avl.csv")
+
 plt.figure(figsize=(9.71, 6))
-plt.plot(r, p_A * 1e4, label = r'$p_A(r) \cdot 10^4$', color = 'r', linewidth = 1.5)
-plt.plot(r, p_B * 1e4, label = r'$p_B(r) \cdot 10^4$', color = 'b', linewidth = 1.5)
-plt.plot(r, m*0.8, label = r'$0.8 \cdot m(r)$', color = 'g', linewidth = 1.5, linestyle = '-')
-plt.plot(r, m_A*0.8, label = r'$0.8 \cdot m_A(r)$', color = 'r', linewidth = 1, linestyle = '-.')
-plt.plot(r, m_B*0.8, label = r'$0.8 \cdot m_B(r)$', color = 'b', linewidth = 1, linestyle = '-.')
+colors = sns.color_palette("Set1", 5)
+
+plt.plot(df["alpha"], df["lambda (0.0001)"], label = fr'$p_c = {0.0001}$', color = colors[0], linewidth = 1.5, linestyle = '', marker = 'o', mfc=colors[0], mec = colors[0], ms = 5)
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(r'TOV solution for: $\alpha = 0.2$', loc='left', fontsize=15, fontweight='bold')
-plt.xlabel(r'r $\left[km\right]$', fontsize=15, loc='center')
-plt.ylabel(r'p $\left[M_{\odot}/km^3\right]$ & m $\left[M_{\odot}\right]$', fontsize=15, loc='center')
-plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
-plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
+plt.title(r'', loc='left', fontsize=15, fontweight='bold')
+plt.xlabel(r'$\alpha$', fontsize=15, loc='center')
+plt.ylabel(r'$\lambda$', fontsize=15, loc='center')
+#plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
+#plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(0, 8)
-plt.ylim(0, 1)
+#plt.xlim(0, 8)
+#plt.ylim(0, 1)
 
 # Add grid
 #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -245,8 +256,8 @@ plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, l
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(0.5, 8.1, 0.5))  # Major x ticks 
-plt.gca().set_yticks(np.arange(0, 1.1, 0.1))  # Major y ticks 
+#plt.gca().set_xticks(np.arange(0.5, 8.1, 0.5))  # Major x ticks 
+#plt.gca().set_yticks(np.arange(0, 1.1, 0.1))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
@@ -255,10 +266,11 @@ plt.gca().spines['bottom'].set_linewidth(1.5)
 plt.gca().spines['left'].set_linewidth(1.5)
 
 # Add a legend
-plt.legend(fontsize=15, frameon=False, ncol = 2, loc = 'upper right') #  loc='upper right',
+plt.legend(fontsize=15, frameon=False, ncol = 2, loc = 'upper left') #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig("2_fluid_TOV.pdf", format="pdf", bbox_inches="tight")
+#plt.savefig("a_v_l.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
-"""
+#"""
+
