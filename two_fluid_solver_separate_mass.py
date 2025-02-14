@@ -225,8 +225,9 @@ plt.plot(r, m_B*0.8, label = r'$0.8 \cdot m_B(r)$', color = 'b', linewidth = 1, 
 #plt.yscale('log')
 
 # Add labels and title
-plt.xlabel(r'r $\left[km\right]$', fontsize=15, loc='center', fontweight='bold')
-plt.ylabel(r'$\mathbf{p}\cdot10^4$ $\left[M_{\odot}/km^3\right]$ ; m $\left[M_{\odot}\right]$', fontsize=15, loc='center', fontweight='bold')
+plt.title(r'TOV solution for: $\alpha = 0.2$', loc='left', fontsize=15, fontweight='bold')
+plt.xlabel(r'r $\left[km\right]$', fontsize=15, loc='center')
+plt.ylabel(r'p $\left[M_{\odot}/km^3\right]$ & m $\left[M_{\odot}\right]$', fontsize=15, loc='center')
 plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
@@ -235,15 +236,15 @@ plt.xlim(0, 8)
 plt.ylim(0, 1)
 
 # Add grid
-plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+#plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
 
 # Configure ticks for all four sides
-plt.tick_params(axis='both', which='major', direction='in', length=9, width=1.5, labelsize=12, top=True, right=True)
-plt.tick_params(axis='both', which='minor', direction='in', length=5, width=1.2, labelsize=10, top=True, right=True)
+plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(0, 8.1, 1))  # Major x ticks 
+plt.gca().set_xticks(np.arange(0.5, 8.1, 0.5))  # Major x ticks 
 plt.gca().set_yticks(np.arange(0, 1.1, 0.1))  # Major y ticks 
 
 # Set thicker axes
