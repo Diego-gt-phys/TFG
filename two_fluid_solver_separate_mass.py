@@ -85,11 +85,15 @@ def system_of_ODE (r, y):
 
     """
     
-    m, p_A, p_B = y
+    m, p_A, p_B, m_A, m_B = y
     rho_A = eos_A(p_A)
     rho_B = eos_B(p_B)
     
     dm_dr = 4 * np.pi * (rho_A + rho_B) * r**2
+    
+    dmA_dr = 4 * np.pi * (rho_A) * r**2
+    
+    dmB_dr = 4 * np.pi * (rho_B) * r**2
     
     dphi_dr = (G * m + 4 * np.pi * G * r**3 * (p_A + p_B)) / (r * (r - 2 * G * m))
     
@@ -97,7 +101,7 @@ def system_of_ODE (r, y):
     
     dpB_dr = -(rho_B + p_B) * dphi_dr
     
-    return (dm_dr, dpA_dr, dpB_dr)
+    return (dm_dr, dpA_dr, dpB_dr, dmA_dr, dmB_dr)
 
 def RK4O_with_stop (y0, r_range, h):
     """
@@ -107,7 +111,7 @@ def RK4O_with_stop (y0, r_range, h):
     Parameters
     ----------
     y0 : tuple
-        Starting conditions for our variables: (m_0, p_A_c, P_B_c)
+        Starting conditions for our variables: (m_0, p_A_c, P_B_c, m_A_0, m_B_0)
     r_range : tuple
         Range of integratio: (r_0, r_max)
     h : float
@@ -163,7 +167,7 @@ def TOV_solver(y0, r_range, h):
     Parameters
     ----------
     y0 : tuple
-        Starting conditions for our variables: (m_0, p_A_c, P_B_c)
+        Starting conditions for our variables: (m_0, p_A_c, P_B_c, m_A_0, m_B_0)
     r_range : tuple
         Range of integratio: (r_0, r_max)
     h : float
@@ -176,9 +180,9 @@ def TOV_solver(y0, r_range, h):
     m_values : array
         Array containing the different values of m(r).
     p_A_values : array
-        Array containing the different values of P_A(r)..
+        Array containing the different values of P_A(r).
     p_B_values : array
-        Array containing the different values of P_B(r)..
+        Array containing the different values of P_B(r).
 
     """
     
@@ -187,22 +191,26 @@ def TOV_solver(y0, r_range, h):
     m_values = y_values[:, 0]
     p_A_values = y_values[:, 1]
     p_B_values = y_values[:, 2]
+    m_A_values = y_values[:, 3]
+    m_B_values = y_values[:, 4]
 
-    return (r_values, m_values, p_A_values, p_B_values)
+    return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values)
 
 ###############################################################################
 # Main
 ###############################################################################
 
-r, m, p_A, p_B = TOV_solver((0, 0.9e-4, 1.4e-4), (1e-6, 20), 0.001)
+r, m, p_A, p_B, m_A, m_B = TOV_solver((0, 0.9e-4, 1.4e-4, 0, 0), (1e-6, 20), 0.001)
 
 plt.figure(figsize=(9.71, 6))
-colors = sns.color_palette("Set1", 5) # Generate a color palette
+colors = sns.color_palette("Set1", 6) # Generate a color palette
 
 plt.plot(r, p_A*1e4, label = r'$p_A(r) \cdot 10^4$', color = colors[0], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
 plt.plot(r, p_B*1e4, label = r'$p_B(r) \cdot 10^4$', color = colors[1], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
 plt.plot(r, m, label = r'$m(r)$', color = colors[2], linewidth = 2, linestyle = '-') # , marker = "",  mfc='k', mec = 'k', ms = 6
-
+plt.plot(r, m_A, label = r'$m_A(r)$', color = colors[3], linewidth = 2, linestyle = '-.') # , marker = "",  mfc='k', mec = 'k', ms = 6
+plt.plot(r, m_B, label = r'$m_B(r)$', color = colors[4], linewidth = 2, linestyle = '-.') # , marker = "",  mfc='k', mec = 'k', ms = 6
+plt.plot(r, m_A + m_B, label = r'$m_A + m_B$', color = colors[5], linewidth = 1, linestyle = '-.') # , marker = "",  mfc='k', mec = 'k', ms = 6
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
@@ -241,7 +249,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False) #  loc='upper right',
 
 # Save the plot as a PDF
-#plt.savefig("2_fluid_TOV.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("2_fluid_TOV.pdf", format="pdf", bbox_inches="tight")
 
 # Show the plot
 plt.tight_layout()
