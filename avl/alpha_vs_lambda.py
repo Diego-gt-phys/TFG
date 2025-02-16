@@ -230,7 +230,7 @@ print(df)
 #"""
 df = pd.read_csv("data_avl.csv")
 
-plt.style.use ('dark_background') # to save use 'defalult'
+plt.style.use ('default') # To save use 'defalult'. If you have a headacke use 'dark_background'
 plt.figure(figsize=(10, 5))
 colors = sns.color_palette("Set1", 5)
 
