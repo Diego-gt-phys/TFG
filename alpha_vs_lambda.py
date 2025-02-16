@@ -201,54 +201,61 @@ def TOV_solver(y0, r_range, h):
 ###############################################################################
 """
 
-p_c = 1e-4 # Central pressure of fluid A
+pc_values = [5e-5, 1e-4, 5e-4, 1e-3] # List of pc values to plot. pc is the central preassure of fluid A
 
 # Values of alpha.
-a_values = np.arange(0, 1.6, 0.1)
+a_values = np.arange(0, 2.1, 0.1)
 data = {"alpha": a_values}
 
 # Values of lambda.
-l_values = []
-for a in a_values:
-    r, m, p_A, p_B, m_A, m_B = TOV_solver((0, p_c, a*p_c, 0, 0), (1e-6, 20), 1e-3)
-    l = m_B[-1] / m[-1]
-    l_values.append(l)
-    
-data[f"lambda ({p_c})"] = np.array(l_values)
+
+for p_c in pc_values:
+    l_values = []
+    for a in a_values:
+        r, m, p_A, p_B, m_A, m_B = TOV_solver((0, p_c, a*p_c, 0, 0), (1e-6, 20), 1e-3)
+        l = m_B[-1] / m[-1]
+        l_values.append(l)
+        
+    data[f"lambda_{p_c}"] = np.array(l_values)
 
 # Save the data
 df = pd.DataFrame(data)
 df.to_csv("data_avl.csv", index=False)
+print(df)
 
-"""
+#"""
 ###############################################################################
 # Plot
 ###############################################################################
 #"""
 df = pd.read_csv("data_avl.csv")
 
-plt.figure(figsize=(9.71, 6))
+plt.style.use ('dark_background') # to save use 'defalult'
+plt.figure(figsize=(10, 5))
 colors = sns.color_palette("Set1", 5)
 
-plt.plot(df["alpha"], df["lambda (0.0001)"], label = fr'$p_c = {0.0001}$', color = colors[0], linewidth = 1.5, linestyle = '', marker = 'o', mfc=colors[0], mec = colors[0], ms = 5)
+i = 0
+for column in df.columns[1:]:
+    plt.plot(df["alpha"], df[column], label = fr'$p_c = {column.split("_")[1]}$', color = colors[i], linewidth = 1.5, linestyle = '', marker = 'o', mfc=colors[i], mec = colors[i], ms = 5)
+    i += 1
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(r'', loc='left', fontsize=15, fontweight='bold')
+plt.title(r'$\lambda (\alpha)$ para el modelo de test', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'$\alpha$', fontsize=15, loc='center')
 plt.ylabel(r'$\lambda$', fontsize=15, loc='center')
 #plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
 #plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-#plt.xlim(0, 8)
-#plt.ylim(0, 1)
+plt.xlim(-0.03, 2.03)
+plt.ylim(-0.03, 1.03)
 
 # Add grid
-#plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
 
 # Configure ticks for all four sides
 plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
@@ -256,8 +263,10 @@ plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, l
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-#plt.gca().set_xticks(np.arange(0.5, 8.1, 0.5))  # Major x ticks 
-#plt.gca().set_yticks(np.arange(0, 1.1, 0.1))  # Major y ticks 
+plt.gca().set_xticks(np.arange(0, 2.1, 0.1))  # Major x ticks 
+plt.gca().set_yticks(np.arange(0, 1.1, 0.1))  # Major y ticks
+plt.gca().set_xticks(np.arange(0, 2, 0.02), minor = True)  # Minor x ticks 
+plt.gca().set_yticks(np.arange(0, 1, 0.02), minor = True)  # Minor y ticks
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
@@ -269,8 +278,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False, ncol = 2, loc = 'upper left') #  loc='upper right',
 
 # Save the plot as a PDF
-#plt.savefig("a_v_l.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("toy_avl.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
 #"""
-
