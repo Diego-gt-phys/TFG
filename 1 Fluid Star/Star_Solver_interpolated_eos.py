@@ -235,8 +235,6 @@ data = pd.read_excel("soft.xlsx")
 rho_data = data['Density'].values
 p_data = data['Pressure'].values
 
-
-
 # Find the solution for the TOV equation.
 r,m,p = TOV_solver([0,1.6191e-5], (1e-6,20), 0.001)
 ###############################################################################

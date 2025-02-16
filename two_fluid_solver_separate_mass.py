@@ -82,7 +82,6 @@ def system_of_ODE (r, y):
         rate of change of the pressure of fluid A.
     dpB_dr : float
         rate of change of the preassure of fluid B.
-
     """
     
     m, p_A, p_B, m_A, m_B = y
@@ -169,7 +168,7 @@ def TOV_solver(y0, r_range, h):
     y0 : tuple
         Starting conditions for our variables: (m_0, p_A_c, P_B_c, m_A_0, m_B_0)
     r_range : tuple
-        Range of integratio: (r_0, r_max)
+        Range of integration: (r_0, r_max)
     h : float
         Step size of integration.
 
@@ -183,7 +182,6 @@ def TOV_solver(y0, r_range, h):
         Array containing the different values of P_A(r).
     p_B_values : array
         Array containing the different values of P_B(r).
-
     """
     
     r_values, y_values = RK4O_with_stop(y0, r_range, h)
@@ -196,12 +194,64 @@ def TOV_solver(y0, r_range, h):
 
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values)
 
+def MR_curve(pc_range, alpha, r_range, h, n):
+    """
+    Creates the mass radius curve of a family of 2-fluid stars by solving the TOV equations.
+    The different masses are calculating by changing the central pressure of fluid A and mantaining the alpha value of fluid B. 
+
+    Parameters
+    ----------
+    pc_range : tuple
+        Range of central pressures to integrate: (pc_start, pc_end)
+    alpha : float
+        Relationship between the central pressure of fluid B and fluid A: pc_B = alpha * pc_A
+    r_range : tuple
+        Range of radius integration: (r_0, r_max)
+    h : float
+        integration step.
+    n : int
+        Number of datapoints of the curve.
+
+    Returns
+    -------
+    R_values : array
+        Array containig the radius of the stars.
+    M_values : array
+        Array containing the total masses of the stars.
+    MA_values : array
+        Array containing the mass of fluid A of the stars.
+    MB_values : array
+        Array containing the mass of fluid B of the stars.
+    """
+    pc_start, pc_end = pc_range
+    pc_list = np.geomspace(pc_start, pc_end, n) 
+    R_values = []
+    M_values = []
+    MA_values = []
+    MB_values = []
+    
+    for pc in pc_list:
+        r_i, m_i, p_A, p_B, m_a, m_b = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
+        
+        R_i = r_i[-1]
+        M_i = m_i[-1]
+        MA_i = m_a[-1]
+        MB_i = m_b[-1]
+        
+        R_values.append(R_i)
+        M_values.append(M_i)
+        MA_values.append(MA_i)
+        MB_values.append(MB_i)
+
+    
+    return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
+
 ###############################################################################
 # Simulation
 ###############################################################################
 
 p_c = 1e-4
-alpha = 1
+alpha = 0
 y0 = (0, p_c, alpha*p_c, 0, 0)
 
 r, m, p_A, p_B, m_A, m_B = TOV_solver(y0, (1e-6, 50), 1e-3)
@@ -213,7 +263,8 @@ print("lambda =", m_B[-1] / m[-1])
 ###############################################################################
 # Plot
 ###############################################################################
-"""
+
+plt.style.use ('dark_background')
 plt.figure(figsize=(9.71, 6))
 plt.plot(r, p_A * 1e4, label = r'$p_A(r) \cdot 10^4$', color = 'r', linewidth = 1.5)
 plt.plot(r, p_B * 1e4, label = r'$p_B(r) \cdot 10^4$', color = 'b', linewidth = 1.5)
@@ -226,15 +277,15 @@ plt.plot(r, m_B*0.8, label = r'$0.8 \cdot m_B(r)$', color = 'b', linewidth = 1, 
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(r'TOV solution for: $\alpha = 0.2$', loc='left', fontsize=15, fontweight='bold')
+plt.title(r'TOV solution for: $\alpha = 0$', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'r $\left[km\right]$', fontsize=15, loc='center')
 plt.ylabel(r'p $\left[M_{\odot}/km^3\right]$ & m $\left[M_{\odot}\right]$', fontsize=15, loc='center')
-plt.axhline(0, color='black', linewidth=1.0, linestyle='--')  # x-axis
-plt.axvline(0, color='black', linewidth=1.0, linestyle='--')  # y-axis
+plt.axhline(0, color='w', linewidth=1.0, linestyle='--')  # x-axis
+plt.axvline(0, color='w', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(0, 8)
-plt.ylim(0, 1)
+#plt.xlim(0, 8)
+#plt.ylim(0, 1)
 
 # Add grid
 #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -245,8 +296,8 @@ plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, l
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(0.5, 8.1, 0.5))  # Major x ticks 
-plt.gca().set_yticks(np.arange(0, 1.1, 0.1))  # Major y ticks 
+#plt.gca().set_xticks(np.arange(0.5, 8.1, 0.5))  # Major x ticks 
+#plt.gca().set_yticks(np.arange(0, 1.1, 0.1))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
@@ -258,7 +309,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=15, frameon=False, ncol = 2, loc = 'upper right') #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig("2_fluid_TOV.pdf", format="pdf", bbox_inches="tight")
+#plt.savefig("2_fluid_TOV.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
-"""
+
