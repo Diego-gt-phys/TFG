@@ -250,36 +250,34 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Simulation
 ###############################################################################
 
-p_c = 1e-4
-alpha = 0
-y0 = (0, p_c, alpha*p_c, 0, 0)
+# [1.00000000e-06 2.78255940e-06 7.74263683e-06 2.15443469e-05 5.99484250e-05 1.66810054e-04 4.64158883e-04 1.29154967e-03 3.59381366e-03 1.00000000e-02]
 
-r, m, p_A, p_B, m_A, m_B = TOV_solver(y0, (1e-6, 50), 1e-3)
+pc = 1e-6
 
-print("M =", m[-1])
-print("R =", r[-1])
-print("lambda =", m_B[-1] / m[-1])
+r, m, p_A, p_B, m_A, m_B = TOV_solver((0, pc, 0.2*pc, 0, 0), (1e-6, 50), 1e-3)
 
 ###############################################################################
 # Plot
 ###############################################################################
 
-plt.style.use ('dark_background')
+plt.style.use ('dark_background') # dark_background
 plt.figure(figsize=(9.71, 6))
-plt.plot(r, p_A * 1e4, label = r'$p_A(r) \cdot 10^4$', color = 'r', linewidth = 1.5)
-plt.plot(r, p_B * 1e4, label = r'$p_B(r) \cdot 10^4$', color = 'b', linewidth = 1.5)
-plt.plot(r, m*0.8, label = r'$0.8 \cdot m(r)$', color = 'g', linewidth = 1.5, linestyle = '-')
-plt.plot(r, m_A*0.8, label = r'$0.8 \cdot m_A(r)$', color = 'r', linewidth = 1, linestyle = '-.')
-plt.plot(r, m_B*0.8, label = r'$0.8 \cdot m_B(r)$', color = 'b', linewidth = 1, linestyle = '-.')
+colors = sns.color_palette("Set1", 5)
+plt.plot(r, p_A*1e6, label = r'$p_A(r) \cdot 10^6$', color = colors[0], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+plt.plot(r, p_B*1e6, label = r'$p_B(r) \cdot 10^6$', color = colors[1], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+plt.plot(r, m*3, label = r'$3 \cdot m(r)$', color = colors[2], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+plt.plot(r, m_A*3, label = r'$3 \cdot m_A(r)$', color = colors[0], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+plt.plot(r, m_B*3, label = r'$3 \cdot m_B(r)$', color = colors[1], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(r'TOV solution for: $\alpha = 0$', loc='left', fontsize=15, fontweight='bold')
+#plt.title(r'MR curve for: $\alpha = 0.2$', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'r $\left[km\right]$', fontsize=15, loc='center')
-plt.ylabel(r'p $\left[M_{\odot}/km^3\right]$ & m $\left[M_{\odot}\right]$', fontsize=15, loc='center')
+plt.ylabel(r'p $\left[M_{\odot}/km^3\right]$', fontsize=15, loc='center')
 plt.axhline(0, color='w', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='w', linewidth=1.0, linestyle='--')  # y-axis
 
@@ -306,10 +304,10 @@ plt.gca().spines['bottom'].set_linewidth(1.5)
 plt.gca().spines['left'].set_linewidth(1.5)
 
 # Add a legend
-plt.legend(fontsize=15, frameon=False, ncol = 2, loc = 'upper right') #  loc='upper right',
+plt.legend(fontsize=15, frameon=False, ncol = 1) #  loc='upper right',
 
 # Save the plot as a PDF
-#plt.savefig("2_fluid_TOV.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("TOV.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
 
