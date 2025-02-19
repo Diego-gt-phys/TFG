@@ -24,25 +24,27 @@ G = 1.4765679173556 # G in units of km / solar masses
 # Define the functions
 ###############################################################################
 
-def eos_A (p_A): # The A star has constant density.
+def eos_A (p_A): # The fluid A is the Neutron matter
     """
-    Constant density EOS for the star A.
-    
-    Parameters:
-        p_A (float): Pressure of the fluid A.
-    
-    Returns:
-        float: Density of the fluid A (rho) at preassure p_A.
+    Guiven the arrays p_data and rho_data which contain the information for the equation of state, this funtion interpolates the value of rho for a guiven  p. 
+
+    Parameters
+    ----------
+    p_A : float
+        Preassure of fluid A at which we want to evaluate the eos.
+
+    Returns
+    -------
+    rho : float
+        Density associated to the preassure guiven.
+
     """
-    
-    if p_A <= 0:
-        return 0  # Avoid invalid values
-    
-    rho = 4.775e-4
+    interp_func = interp1d(p_data, rho_data, kind='linear', fill_value='extrapolate')
+    rho = interp_func(p_A)
     
     return rho
 
-def eos_B (p_B): # The B star follows a polytropic EOS p=10*rho^(5/3).
+def eos_B (p_B): # The fluid B is the dark matter.
     """
     Polytropic EOS for the star B.
     
@@ -250,7 +252,13 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Simulation
 ###############################################################################
 
-r, m, p_A, p_B, m_A, m_B = TOV_solver((0, 1e-4, 0.1*1e-4, 0, 0), (1e-6, 20), 1e-3)
+# Read the data
+data = pd.read_excel("eos_soft.xlsx")
+rho_data = data['Density'].values
+p_data = data['Pressure'].values
+
+pc = 1.6e-5
+r, m, p_A, p_B, m_A, m_B = TOV_solver((0, pc, 0*pc, 0, 0), (1e-6, 20), 1e-3)
 
 ###############################################################################
 # Plot
@@ -259,11 +267,11 @@ r, m, p_A, p_B, m_A, m_B = TOV_solver((0, 1e-4, 0.1*1e-4, 0, 0), (1e-6, 20), 1e-
 #plt.style.use ('default') # dark_background
 plt.figure(figsize=(9.71, 6))
 colors = sns.color_palette("Set1", 5)
-plt.plot(r, p_A*1e4, label = r'$p_A(r) \cdot 10^4$', color = colors[0], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-plt.plot(r, m_A, label = r'$m_A(r)$', color = colors[0], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-plt.plot(r, p_B*1e4, label = r'$p_B(r) \cdot 10^4$', color = colors[1], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-plt.plot(r, m_B, label = r'$m_B(r)$', color = colors[1], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-plt.plot(r, m, label = r'$m(r)$', color = colors[2], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+plt.plot(r, p_A, label = r'$p_A(r) \cdot 10^4$', color = colors[0], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+#plt.plot(r, m_A, label = r'$m_A(r)$', color = colors[0], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+#plt.plot(r, p_B, label = r'$p_B(r) \cdot 10^4$', color = colors[1], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+#plt.plot(r, m_B, label = r'$m_B(r)$', color = colors[1], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+#plt.plot(r, m, label = r'$m(r)$', color = colors[2], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
@@ -273,12 +281,12 @@ plt.plot(r, m, label = r'$m(r)$', color = colors[2], linewidth = 1.5, linestyle 
 plt.title(r'TOV solution for: $\alpha = 0.1$', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
 plt.ylabel(r'$p$ $\left[M_{\odot}/km^3\right]$', fontsize=15, loc='center')
-plt.axhline(0, color='w', linewidth=1.0, linestyle='--')  # x-axis
-plt.axvline(0, color='w', linewidth=1.0, linestyle='--')  # y-axis
+plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
+plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(0, 8.23)
-plt.ylim(0, 1.17)
+#plt.xlim(0, 8.23)
+#plt.ylim(0, 1.17)
 
 # Add grid
 #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -289,8 +297,8 @@ plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, l
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(0.5, 8.23, 0.5))  # Major x ticks 
-plt.gca().set_yticks(np.arange(0, 1.17, 0.1))  # Major y ticks 
+#plt.gca().set_xticks(np.arange(0.5, 8.23, 0.5))  # Major x ticks 
+#plt.gca().set_yticks(np.arange(0, 1.17, 0.1))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)
@@ -304,5 +312,6 @@ plt.legend(fontsize=15, frameon=False, ncol = 3) #  loc='upper right',
 # Save the plot as a PDF
 #plt.savefig("black_TOV_toy.pdf", format="pdf", bbox_inches="tight")
 
+plt.tight_layout()
 plt.show()
 
