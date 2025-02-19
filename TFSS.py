@@ -252,7 +252,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 ###############################################################################
 
 # Read the data
-eos = "stiff"
+eos = "soft"
 data = pd.read_excel(f"eos_{eos}.xlsx")
 rho_data = data['Density'].values
 p_data = data['Pressure'].values
@@ -270,11 +270,11 @@ print(f"R({alpha}) =", r[-1])
 #plt.style.use ('default') # dark_background
 plt.figure(figsize=(9.71, 6))
 colors = sns.color_palette("Set1", 5)
-plt.plot(r, p_A*1e5, label = r'$p_{stiff}(r) \cdot 10^5$', color = colors[2], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-plt.plot(r, m_A*5/4, label = r'$m_{stiff}(r) \cdot \frac{5}{4}$', color = colors[2], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+plt.plot(r, p_A*1e5, label = r'$p_{middle}(r) \cdot 10^5$', color = colors[0], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+plt.plot(r, m_A*10/3, label = r'$m_{middle}(r) \cdot \frac{10}{3}$', color = colors[0], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 plt.plot(r, p_B*1e5, label = r'$p_{DM}(r) \cdot 10^5$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-plt.plot(r, m_B*5/4, label = r'$m_{DM}(r)\cdot \frac{5}{4}$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-plt.plot(r, m*5/4, label = r'$m(r)\cdot \frac{5}{4}$', color = 'k', linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+plt.plot(r, m_B*10/3, label = r'$m_{DM}(r)\cdot \frac{10}{3}$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+plt.plot(r, m*10/3, label = r'$m(r)\cdot \frac{10}{3}$', color = 'k', linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
 # Set the axis to logarithmic scale
 #plt.xscale('log')
@@ -288,7 +288,7 @@ plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(0, 12.8)
+plt.xlim(0, 10)
 plt.ylim(0, 1.6)
 
 # Add grid
@@ -300,7 +300,7 @@ plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, l
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(0, 12.8, 1))  # Major x ticks 
+plt.gca().set_xticks(np.arange(0, 10, 1))  # Major x ticks 
 plt.gca().set_yticks(np.arange(0, 1.61, 0.2))  # Major y ticks 
 
 # Set thicker axes
@@ -310,7 +310,7 @@ plt.gca().spines['bottom'].set_linewidth(1.5)
 plt.gca().spines['left'].set_linewidth(1.5)
 
 # Add a legend
-plt.legend(fontsize=15, frameon=False, ncol = 3) #  loc='upper right',
+plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
 
 # Save the plot as a PDF
 plt.savefig(f"TOV_{eos}_0.1.pdf", format="pdf", bbox_inches="tight")
