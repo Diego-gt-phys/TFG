@@ -19,7 +19,6 @@ from scipy.interpolate import interp1d
 
 # Physical parameters (solar mass = 198847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
-PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
 
 ###############################################################################
 # Define the functions
@@ -231,7 +230,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
     M_values = []
     MA_values = []
     MB_values = []
-    
+    cont = 0
     for pc in pc_list:
         r_i, m_i, p_A, p_B, m_a, m_b = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
         
@@ -244,111 +243,75 @@ def MR_curve(pc_range, alpha, r_range, h, n):
         M_values.append(M_i)
         MA_values.append(MA_i)
         MB_values.append(MB_i)
-
+        
+        cont += 1
+        print(cont)
+        
     
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
 
 ###############################################################################
-# Define the parameters
+# Simulation
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.1, 5e-6)
+# Read the data
+eos = "soft"
+data = pd.read_excel(f"eos_{eos}.xlsx")
+rho_data = data['Density'].values
+p_data = data['Pressure'].values
+
+alpha = 0
+R, M, M_A, M_B = MR_curve((2.785e-6, 5.975e-4), alpha, (1e-6, 20), 1e-3, 20)
 
 ###############################################################################
-# Create the data
+# Plot
 ###############################################################################
-if CHOICE == 0:
-    eos_data = pd.read_excel(f"eos_{EOS}.xlsx")
-    rho_data = eos_data['Density'].values
-    p_data = eos_data['Pressure'].values
-    data = {}
 
-    if TYPE == "TOV":
-        # Calculate
-        r, m, p_A, p_B, m_A, m_B = TOV_solver((0, PC, ALPHA*PC, 0, 0), (1e-6, 20), 1e-3)
-        # Insert in dict
-        data["r"] = r
-        data["m"] = m
-        data["p_A"] = p_A
-        data["p_B"] = p_B
-        data["m_A"] = m_A
-        data["m_B"] = m_B
-        # Save the data
-        df = pd.DataFrame(data)
-        df.to_csv(f"{TYPE}_{EOS}_{ALPHA}_{PC}.csv", index=False)
-        print("Data saved:")
-        print(df)
-    else:
-        print("Work In Progress (paciendia coño)")
-        
-###############################################################################
-# Plot the data
-###############################################################################
-elif CHOICE == 1:
-    
-    if TYPE == "TOV":
-        # Read the data
-        df = pd.read_csv(f"{TYPE}_{EOS}_{ALPHA}_{PC}.csv")
-        r = df["r"]
-        p_A = df["p_A"]
-        p_B = df["p_B"]
-        m = df["m"]
-        m_A = df["m_A"]
-        m_B = df["m_B"]
-        
-        # Scale factors
-        p_scale = 1e6
-        m_scale = 15
-        
-        # Configure the plot
-        plt.figure(figsize=(9.71, 6))
-        colors = sns.color_palette("Set1", 10)
-        
-        # Plot the data
-        plt.plot(r, p_A*p_scale, label = r'$p_{soft}(r)$', color = colors[0], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m_A*m_scale, label = r'$m_{soft}(r)$', color = colors[0], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, p_B*p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+#plt.style.use ('default') # dark_background
+plt.figure(figsize=(9.71, 6))
+colors = sns.color_palette("Set1", 5)
 
-        # Set the axis to logarithmic scale
-        #plt.xscale('log')
-        #plt.yscale('log')
-        
-        # Add labels and title
-        plt.title(rf'TOV for the {EOS} eos and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
-        plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
-        plt.ylabel(r'$p$ $\left[ M_{\odot}/km^3 \cdot 10^6 \right]$ & $m$ $\left[ M_{\odot} \cdot 15\right]$', fontsize=15, loc='center')
-        plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
-        plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
-        
-        # Set limits
-        plt.xlim(0, 14)
-        plt.ylim(0, 5)
+plt.plot(R, M, label = r'$soft$', color = colors[0], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5) # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
-        # Add grid
-        #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+# Set the axis to logarithmic scale
+#plt.xscale('log')
+#plt.yscale('log')
 
-        # Configure ticks for all four sides
-        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
-        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
-        plt.minorticks_on()
+# Add labels and title
+plt.title(rf'MR for the {eos} eos and $\alpha = {alpha}$', loc='left', fontsize=15, fontweight='bold')
+plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
+plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
+plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
+plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
 
-        # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(0, 14.1, 1))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 5.1, 0.5))  # Major y ticks 
+# Set limits
+plt.xlim(8, 17)
+plt.ylim(0, 3.5)
 
-        # Set thicker axes
-        plt.gca().spines['top'].set_linewidth(1.5)
-        plt.gca().spines['right'].set_linewidth(1.5)
-        plt.gca().spines['bottom'].set_linewidth(1.5)
-        plt.gca().spines['left'].set_linewidth(1.5)
+# Add grid
+#plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
 
-        # Add a legend
-        plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
+# Configure ticks for all four sides
+plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+plt.minorticks_on()
 
-        # Save the plot as a PDF
-        plt.savefig(f"{TYPE}_{EOS}_{ALPHA}_{PC}.pdf", format="pdf", bbox_inches="tight")
+# Customize tick spacing for more frequent ticks on x-axis
+#plt.gca().set_xticks(np.arange(0, 10, 1))  # Major x ticks 
+#plt.gca().set_yticks(np.arange(0, 1.61, 0.2))  # Major y ticks 
 
-        plt.tight_layout()
-        plt.show()
+# Set thicker axes
+plt.gca().spines['top'].set_linewidth(1.5)
+plt.gca().spines['right'].set_linewidth(1.5)
+plt.gca().spines['bottom'].set_linewidth(1.5)
+plt.gca().spines['left'].set_linewidth(1.5)
+
+# Add a legend
+plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
+
+# Save the plot as a PDF
+#plt.savefig(f"TOV_{eos}_{alpha}_maxr.pdf", format="pdf", bbox_inches="tight")
+
+plt.tight_layout()
+plt.show()
+
