@@ -231,7 +231,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
     M_values = []
     MA_values = []
     MB_values = []
-    
+    cont = 0
     for pc in pc_list:
         r_i, m_i, p_A, p_B, m_a, m_b = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
         
@@ -244,7 +244,9 @@ def MR_curve(pc_range, alpha, r_range, h, n):
         M_values.append(M_i)
         MA_values.append(MA_i)
         MB_values.append(MB_i)
-
+        
+        cont += 1
+        print(cont)
     
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
 
@@ -252,7 +254,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.1, 5e-6)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "MR", "stiff", 0, 4.8e-6)
 
 ###############################################################################
 # Create the data
@@ -278,9 +280,20 @@ if CHOICE == 0:
         df.to_csv(f"{TYPE}_{EOS}_{ALPHA}_{PC}.csv", index=False)
         print("Data saved:")
         print(df)
-    else:
-        print("Work In Progress (paciendia coño)")
         
+    elif TYPE == "MR":
+        pc_range = PCS[f"{EOS}"]
+        # Calculate
+        R, M, M_A, M_B = MR_curve(pc_range, ALPHA, (1e-6, 20), 1e-3, 20)
+        # Insert data
+        data["R"] = R
+        data["M"] = M
+        data["M_A"] = M_A
+        data["M_B"] = M_B
+        df = pd.DataFrame(data)
+        df.to_csv(f"{TYPE}_{EOS}_{ALPHA}.csv", index=False)
+        print("Data saved:")
+        print(df)
 ###############################################################################
 # Plot the data
 ###############################################################################
@@ -316,14 +329,14 @@ elif CHOICE == 1:
         #plt.yscale('log')
         
         # Add labels and title
-        plt.title(rf'TOV for the {EOS} eos and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
+        plt.title(rf'TOV solution for the {EOS} eos and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
         plt.ylabel(r'$p$ $\left[ M_{\odot}/km^3 \cdot 10^6 \right]$ & $m$ $\left[ M_{\odot} \cdot 15\right]$', fontsize=15, loc='center')
         plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        plt.xlim(0, 14)
+        plt.xlim(0, 14.22)
         plt.ylim(0, 5)
 
         # Add grid
@@ -352,3 +365,55 @@ elif CHOICE == 1:
 
         plt.tight_layout()
         plt.show()
+        
+    elif TYPE == "MR":
+        # Read the data
+        df = pd.read_csv(f"{TYPE}_{EOS}_{ALPHA}.csv")
+        R = df["R"]
+        M = df["M"]
+        M_A = df["M_A"]
+        M_B = df["M_B"]
+        
+        # Configure the plot
+        plt.figure(figsize=(9.71, 6))
+        colors = sns.color_palette("Set1", 10)
+        
+        # Plot the data
+        plt.plot(R, M, label = r'$M_{stiff}$', color = colors[2], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5) # , marker = "*",  mfc='w', mec = 'w', ms = 5
+
+        # Add labels and title
+        plt.title(rf'MR curve for the {EOS} eos and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
+        plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
+        plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
+        
+        # Set limits
+        plt.xlim(8, 17)
+        plt.ylim(0, 3.5)
+        
+        # Add grid
+        plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+
+        # Configure ticks for all four sides
+        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+        plt.minorticks_on()
+
+        # Customize tick spacing for more frequent ticks on x-axis
+        plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
+        plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
+
+        # Set thicker axes
+        plt.gca().spines['top'].set_linewidth(1.5)
+        plt.gca().spines['right'].set_linewidth(1.5)
+        plt.gca().spines['bottom'].set_linewidth(1.5)
+        plt.gca().spines['left'].set_linewidth(1.5)
+
+        # Add a legend
+        plt.legend(fontsize=12, frameon=False, ncol = 1) #  loc='upper right',
+
+        # Save the plot as a PDF
+        plt.savefig(f"{TYPE}_{EOS}_{ALPHA}.pdf", format="pdf", bbox_inches="tight")
+
+        plt.tight_layout()
+        plt.show()
+        
