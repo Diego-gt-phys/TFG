@@ -17,6 +17,14 @@ from scipy.interpolate import interp1d
 ALPHA = 0
 
 # Read the data
+df_soft_0 = pd.read_csv(f"MR_soft_{ALPHA}.csv")
+df_middle_0 = pd.read_csv(f"MR_middle_{ALPHA}.csv")
+df_stiff_0 = pd.read_csv(f"MR_stiff_{ALPHA}.csv")
+
+# Alpha parameter
+ALPHA = 0.1
+
+# Read the data
 df_soft = pd.read_csv(f"MR_soft_{ALPHA}.csv")
 df_middle = pd.read_csv(f"MR_middle_{ALPHA}.csv")
 df_stiff = pd.read_csv(f"MR_stiff_{ALPHA}.csv")
@@ -26,12 +34,17 @@ plt.figure(figsize=(9.71, 6))
 colors = sns.color_palette("Set1", 10)
 
 # Plot the data
-plt.plot(df_soft["R"], df_soft["M"], label = r'$M_{soft}$', color = colors[0], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_middle["R"], df_middle["M"], label = r'$M_{middle}$', color = colors[1], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_stiff["R"], df_stiff["M"], label = r'$M_{stiff}$', color = colors[2], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_soft_0["R"], df_soft_0["M"], label = r'soft $(0)$', color = colors[0], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_soft["R"], df_soft["M"], label = r'soft $(0.1)$', color = colors[0], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
+
+plt.plot(df_middle_0["R"], df_middle_0["M"], label = r'middle $(0)$', color = colors[1], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_middle["R"], df_middle["M"], label = r'middle $(0.1)$', color = colors[1], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
+
+plt.plot(df_stiff_0["R"], df_stiff_0["M"], label = r'stiff $(0)$', color = colors[2], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_stiff["R"], df_stiff["M"], label = r'stiff $(0.1)$', color = colors[2], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
 
 # Add labels and title
-plt.title(rf'MR curves for $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
+plt.title(rf'MR curves for $\alpha = (0, 0.1)$', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
 plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
 
@@ -40,7 +53,7 @@ plt.xlim(8, 17)
 plt.ylim(0, 3.5)
 
 # Add grid
-plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+#plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
 
 # Configure ticks for all four sides
 plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
@@ -61,7 +74,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=12, frameon=False, ncol = 1) #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig(f"MR_all_EOS_{ALPHA}.pdf", format="pdf", bbox_inches="tight")
+plt.savefig(f"MR_all_EOS_multy_alpha.pdf", format="pdf", bbox_inches="tight")
 
 plt.tight_layout()
 plt.show()

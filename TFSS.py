@@ -254,7 +254,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "MR", "stiff", 0, 4.8e-6)
+CHOICE, TYPE, EOS, ALPHA, PC = (0, "MR", "stiff", 0.1, 5e-6)
 
 ###############################################################################
 # Create the data
