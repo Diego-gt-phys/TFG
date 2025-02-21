@@ -44,7 +44,7 @@ plt.plot(df_stiff_0["R"], df_stiff_0["M"], label = r'stiff $(0)$', color = color
 plt.plot(df_stiff["R"], df_stiff["M"], label = r'stiff $(0.1)$', color = colors[2], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
 
 # Add labels and title
-plt.title(rf'MR curves for $\alpha = (0, 0.1)$', loc='left', fontsize=15, fontweight='bold')
+plt.title(r'MR curves for $\alpha = (0, 0.1)$', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
 plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
 
