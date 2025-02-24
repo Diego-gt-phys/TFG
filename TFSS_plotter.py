@@ -54,6 +54,11 @@ plt.plot(df_stiff_0["R"], df_stiff_0["M"], label = r'stiff $(.0)$', color = colo
 plt.plot(df_stiff_0_05["R"], df_stiff_0_05["M"], label = r'stiff $(.05)$', color = colors[2], linewidth = 1.5, linestyle = '-.', marker = "*",  mfc='k', mec = 'k', ms = 5)
 plt.plot(df_stiff_1["R"], df_stiff_1["M"], label = r'stiff $(.1)$', color = colors[2], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
 
+G = 1.4765679173556
+M = np.linspace(1.5, 3.5)
+R = 2.9 * G * M
+plt.plot(R, M, color = 'k', linestyle = '-.')
+
 # Add labels and title
 plt.title(r'MR curves for $\alpha = (0, 0.05, 0.1)$', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
