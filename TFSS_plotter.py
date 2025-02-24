@@ -22,29 +22,40 @@ df_middle_0 = pd.read_csv(f"MR_middle_{ALPHA}.csv")
 df_stiff_0 = pd.read_csv(f"MR_stiff_{ALPHA}.csv")
 
 # Alpha parameter
+ALPHA = 0.05
+
+# Read the data
+df_soft_0_05 = pd.read_csv(f"MR_soft_{ALPHA}.csv")
+df_middle_0_05 = pd.read_csv(f"MR_middle_{ALPHA}.csv")
+df_stiff_0_05 = pd.read_csv(f"MR_stiff_{ALPHA}.csv")
+
+# Alpha parameter
 ALPHA = 0.1
 
 # Read the data
-df_soft = pd.read_csv(f"MR_soft_{ALPHA}.csv")
-df_middle = pd.read_csv(f"MR_middle_{ALPHA}.csv")
-df_stiff = pd.read_csv(f"MR_stiff_{ALPHA}.csv")
+df_soft_1 = pd.read_csv(f"MR_soft_{ALPHA}.csv")
+df_middle_1 = pd.read_csv(f"MR_middle_{ALPHA}.csv")
+df_stiff_1 = pd.read_csv(f"MR_stiff_{ALPHA}.csv")
 
 # Configure the plot
 plt.figure(figsize=(9.71, 6))
 colors = sns.color_palette("Set1", 10)
 
 # Plot the data
-plt.plot(df_soft_0["R"], df_soft_0["M"], label = r'soft $(0)$', color = colors[0], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_soft["R"], df_soft["M"], label = r'soft $(0.1)$', color = colors[0], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_soft_0["R"], df_soft_0["M"], label = r'soft $(.0)$', color = colors[0], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_soft_0_05["R"], df_soft_0_05["M"], label = r'soft $(.05)$', color = colors[0], linewidth = 1.5, linestyle = '-.', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_soft_1["R"], df_soft_1["M"], label = r'soft $(.1)$', color = colors[0], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
 
-plt.plot(df_middle_0["R"], df_middle_0["M"], label = r'middle $(0)$', color = colors[1], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_middle["R"], df_middle["M"], label = r'middle $(0.1)$', color = colors[1], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_middle_0["R"], df_middle_0["M"], label = r'middle $(.0)$', color = colors[1], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_middle_0_05["R"], df_middle_0_05["M"], label = r'middle $(.05)$', color = colors[1], linewidth = 1.5, linestyle = '-.', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_middle_1["R"], df_middle_1["M"], label = r'middle $(.1)$', color = colors[1], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
 
-plt.plot(df_stiff_0["R"], df_stiff_0["M"], label = r'stiff $(0)$', color = colors[2], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_stiff["R"], df_stiff["M"], label = r'stiff $(0.1)$', color = colors[2], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_stiff_0["R"], df_stiff_0["M"], label = r'stiff $(.0)$', color = colors[2], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_stiff_0_05["R"], df_stiff_0_05["M"], label = r'stiff $(.05)$', color = colors[2], linewidth = 1.5, linestyle = '-.', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_stiff_1["R"], df_stiff_1["M"], label = r'stiff $(.1)$', color = colors[2], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
 
 # Add labels and title
-plt.title(r'MR curves for $\alpha = (0, 0.1)$', loc='left', fontsize=15, fontweight='bold')
+plt.title(r'MR curves for $\alpha = (0, 0.05, 0.1)$', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
 plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
 
@@ -71,7 +82,7 @@ plt.gca().spines['bottom'].set_linewidth(1.5)
 plt.gca().spines['left'].set_linewidth(1.5)
 
 # Add a legend
-plt.legend(fontsize=12, frameon=False, ncol = 1) #  loc='upper right',
+plt.legend(fontsize=12, frameon=False, ncol = 1, loc = 'upper right') #  loc='upper right',
 
 # Save the plot as a PDF
 plt.savefig(f"MR_all_EOS_multy_alpha.pdf", format="pdf", bbox_inches="tight")
