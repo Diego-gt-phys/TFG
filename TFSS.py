@@ -125,7 +125,9 @@ def RK4O_with_stop (y0, r_range, h):
         
     y_values : array
         Array containig the solutions for the vector y: (m_values, p_A_values, P_B_values).
-
+        
+    R_A : float
+        Value of the radius of the star of fluid A
     """
     
     r_start, r_end = r_range
@@ -134,6 +136,8 @@ def RK4O_with_stop (y0, r_range, h):
     
     r = r_start
     y = np.array(y0)
+    
+    R_A = 0
 
     while r <= r_end:
         k1 = h * np.array(system_of_ODE(r, y))
@@ -147,7 +151,11 @@ def RK4O_with_stop (y0, r_range, h):
         if y_next[1] <= y0[1]*1e-10 and y_next[2] <= y0[2]*1e-10: # If both pressures drop to 0 then the star stops there.
             break
         
-        elif y_next[1] <= y0[1]*1e-10:  # If fluid A's pressure drops to 0, keep it that way
+        elif y_next[1] <= y0[1]*1e-10 and R_A == 0:  # If fluid A's pressure drops to 0, keep it that way
+            y_next[1] = 0
+            R_A = r
+            
+        elif y_next[1] <= y0[1]*1e-10 and R_A != 0:  # If fluid A's pressure drops to 0, keep it that way
             y_next[1] = 0
             
         elif y_next[2] <= y0[2]*1e-10:  # If fluid B's pressure drops to 0, keep it that way
@@ -157,8 +165,11 @@ def RK4O_with_stop (y0, r_range, h):
         r_values.append(r)
         y_values.append(y_next)
         y = y_next
-
-    return (np.array(r_values), np.array(y_values))
+        
+    if R_A == 0:
+        R_A = r_values[-1]
+        
+    return (np.array(r_values), np.array(y_values), R_A)
 
 def TOV_solver(y0, r_range, h):
     """
@@ -184,9 +195,11 @@ def TOV_solver(y0, r_range, h):
         Array containing the different values of P_A(r).
     p_B_values : array
         Array containing the different values of P_B(r).
+    R_A : float
+        Value of the radius of the star of fluid A
     """
     
-    r_values, y_values = RK4O_with_stop(y0, r_range, h)
+    r_values, y_values, R_A = RK4O_with_stop(y0, r_range, h)
     
     m_values = y_values[:, 0]
     p_A_values = y_values[:, 1]
@@ -194,7 +207,7 @@ def TOV_solver(y0, r_range, h):
     m_A_values = y_values[:, 3]
     m_B_values = y_values[:, 4]
 
-    return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values)
+    return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values, R_A)
 
 def MR_curve(pc_range, alpha, r_range, h, n):
     """
@@ -233,9 +246,9 @@ def MR_curve(pc_range, alpha, r_range, h, n):
     MB_values = []
     cont = 0
     for pc in pc_list:
-        r_i, m_i, p_A, p_B, m_a, m_b = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
+        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
         
-        R_i = r_i[-1]
+        R_i = R_A
         M_i = m_i[-1]
         MA_i = m_a[-1]
         MB_i = m_b[-1]
@@ -254,7 +267,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.1, 5.975e-4)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "MR", "soft", 0.1, 1e-4)
 
 ###############################################################################
 # Create the data
@@ -267,7 +280,7 @@ if CHOICE == 0:
 
     if TYPE == "TOV":
         # Calculate
-        r, m, p_A, p_B, m_A, m_B = TOV_solver((0, PC, ALPHA*PC, 0, 0), (1e-6, 20), 1e-3)
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, PC, ALPHA*PC, 0, 0), (1e-6, 20), 1e-3)
         # Insert in dict
         data["r"] = r
         data["m"] = m
@@ -275,6 +288,7 @@ if CHOICE == 0:
         data["p_B"] = p_B
         data["m_A"] = m_A
         data["m_B"] = m_B
+        data["R_A"] = R_A
         # Save the data
         df = pd.DataFrame(data)
         df.to_csv(f"{TYPE}_{EOS}_{ALPHA}_{PC}.csv", index=False)
@@ -336,8 +350,8 @@ elif CHOICE == 1:
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        plt.xlim(0, 11)
-        plt.ylim(0, 6)
+        #plt.xlim(0, 11)
+        #plt.ylim(0, 6)
 
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -348,8 +362,8 @@ elif CHOICE == 1:
         plt.minorticks_on()
 
         # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(0, 11.1, 1))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 6.1, 1))  # Major y ticks 
+        #plt.gca().set_xticks(np.arange(0, 11.1, 1))  # Major x ticks 
+        #plt.gca().set_yticks(np.arange(0, 6.1, 1))  # Major y ticks 
 
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
