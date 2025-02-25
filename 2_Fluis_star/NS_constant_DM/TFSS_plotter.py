@@ -42,17 +42,17 @@ plt.figure(figsize=(9.71, 6))
 colors = sns.color_palette("Set1", 10)
 
 # Plot the data
-plt.plot(df_soft_0["R"], df_soft_0["M"], label = r'soft $(.0)$', color = colors[0], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_soft_0_05["R"], df_soft_0_05["M"], label = r'soft $(.05)$', color = colors[0], linewidth = 1.5, linestyle = '-.', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_soft_1["R"], df_soft_1["M"], label = r'soft $(.1)$', color = colors[0], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_soft_0["R"], df_soft_0["M"], label = r'soft $(0)$', color = colors[0], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_soft_0_05["R"], df_soft_0_05["M"], label = r'soft $(0.05)$', color = colors[0], linewidth = 1.5, linestyle = '-.', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_soft_1["R"], df_soft_1["M"], label = r'soft $(0.1)$', color = colors[0], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
 
-plt.plot(df_middle_0["R"], df_middle_0["M"], label = r'middle $(.0)$', color = colors[1], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_middle_0_05["R"], df_middle_0_05["M"], label = r'middle $(.05)$', color = colors[1], linewidth = 1.5, linestyle = '-.', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_middle_1["R"], df_middle_1["M"], label = r'middle $(.1)$', color = colors[1], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_middle_0["R"], df_middle_0["M"], label = r'mid $(0)$', color = colors[1], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_middle_0_05["R"], df_middle_0_05["M"], label = r'mid $(0.05)$', color = colors[1], linewidth = 1.5, linestyle = '-.', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_middle_1["R"], df_middle_1["M"], label = r'mid $(0.1)$', color = colors[1], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
 
-plt.plot(df_stiff_0["R"], df_stiff_0["M"], label = r'stiff $(.0)$', color = colors[2], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_stiff_0_05["R"], df_stiff_0_05["M"], label = r'stiff $(.05)$', color = colors[2], linewidth = 1.5, linestyle = '-.', marker = "*",  mfc='k', mec = 'k', ms = 5)
-plt.plot(df_stiff_1["R"], df_stiff_1["M"], label = r'stiff $(.1)$', color = colors[2], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_stiff_0["R"], df_stiff_0["M"], label = r'stiff $(0)$', color = colors[2], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_stiff_0_05["R"], df_stiff_0_05["M"], label = r'stiff $(0.05)$', color = colors[2], linewidth = 1.5, linestyle = '-.', marker = "*",  mfc='k', mec = 'k', ms = 5)
+plt.plot(df_stiff_1["R"], df_stiff_1["M"], label = r'stiff $(0.1)$', color = colors[2], linewidth = 1.5, linestyle = '--', marker = "*",  mfc='k', mec = 'k', ms = 5)
 
 G = 1.4765679173556
 M = np.linspace(1.5, 3.5)
@@ -90,7 +90,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=12, frameon=False, ncol = 1, loc = 'upper right') #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig(f"MR_all_EOS_multy_alpha.pdf", format="pdf", bbox_inches="tight")
+#plt.savefig(f"MR_all_EOS_multy_alpha.pdf", format="pdf", bbox_inches="tight")
 
 plt.tight_layout()
 plt.show()
