@@ -65,7 +65,7 @@ def eos_B (p_B): # The fluid B is the dark matter.
     if p_B <= 0:
         return 0  # Avoid invalid values
         
-    rho = (p_B / 10) ** (3 / 5)
+    rho = (p_B / 0.5) ** (3 / 5)
     return rho
 
 def system_of_ODE (r, y):
@@ -270,7 +270,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.5, 1e-4)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 5, 1e-4)
 
 ###############################################################################
 # Create the data
@@ -353,8 +353,8 @@ elif CHOICE == 1:
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        #plt.xlim(0, 11)
-        #plt.ylim(0, 6)
+        #plt.xlim(0, 10.12)
+        #plt.ylim(0, 1)
 
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -365,8 +365,8 @@ elif CHOICE == 1:
         plt.minorticks_on()
 
         # Customize tick spacing for more frequent ticks on x-axis
-        #plt.gca().set_xticks(np.arange(0, 11.1, 1))  # Major x ticks 
-        #plt.gca().set_yticks(np.arange(0, 6.1, 1))  # Major y ticks 
+        #plt.gca().set_xticks(np.arange(0, 10.2, 1))  # Major x ticks 
+        #plt.gca().set_yticks(np.arange(0, 1.01, 0.1))  # Major y ticks 
 
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
