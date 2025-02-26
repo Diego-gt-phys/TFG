@@ -65,7 +65,7 @@ def eos_B (p_B): # The fluid B is the dark matter.
     if p_B <= 0:
         return 0  # Avoid invalid values
         
-    rho = 4.775e-5
+    rho = (p_B / 10) ** (3 / 5)
     return rho
 
 def system_of_ODE (r, y):
@@ -270,7 +270,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.1, 1e-4)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.5, 1e-4)
 
 ###############################################################################
 # Create the data
@@ -339,7 +339,7 @@ elif CHOICE == 1:
         plt.plot(r, m_A*m_scale, label = r'$m_{soft}(r)$', color = colors[0], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, p_B*p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'w', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
         # Set the axis to logarithmic scale
         #plt.xscale('log')
@@ -349,8 +349,8 @@ elif CHOICE == 1:
         plt.title(rf'TOV solution for the {EOS} eos and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
         plt.ylabel(r'$p$ $\left[ M_{\odot}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
-        plt.axhline(0, color='w', linewidth=1.0, linestyle='--')  # x-axis
-        plt.axvline(0, color='w', linewidth=1.0, linestyle='--')  # y-axis
+        plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
+        plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
         #plt.xlim(0, 11)
