@@ -65,7 +65,7 @@ def eos_B (p_B): # The fluid B is the dark matter.
     if p_B <= 0:
         return 0  # Avoid invalid values
         
-    rho = (p_B / 0.5) ** (3 / 5)
+    rho = (p_B / 50) ** (3 / 5)
     return rho
 
 def system_of_ODE (r, y):
@@ -270,7 +270,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 5, 1e-4)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.05, 1e-4)
 
 ###############################################################################
 # Create the data
@@ -283,7 +283,7 @@ if CHOICE == 0:
 
     if TYPE == "TOV":
         # Calculate
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, PC, ALPHA*PC, 0, 0), (1e-6, 20), 1e-3)
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, PC, ALPHA*PC, 0, 0), (1e-6, 40), 1e-3)
         # Insert in dict
         data["r"] = r
         data["m"] = m
@@ -301,7 +301,7 @@ if CHOICE == 0:
     elif TYPE == "MR":
         pc_range = PCS[f"{EOS}"]
         # Calculate
-        R, M, M_A, M_B = MR_curve(pc_range, ALPHA, (1e-6, 20), 1e-3, 20)
+        R, M, M_A, M_B = MR_curve(pc_range, ALPHA, (1e-6, 40), 1e-3, 20)
         # Insert data
         data["R"] = R
         data["M"] = M
