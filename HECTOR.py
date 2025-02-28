@@ -157,6 +157,7 @@ def RK4O_with_stop (y0, r_range, h):
         elif y_next[1] <= y0[1]*1e-10 and R_A == 0:  # If fluid A's pressure drops to 0, keep it that way
             y_next[1] = 0
             R_A = r
+            print("The star has a Halo of Dark Matter")
             
         elif y_next[1] <= y0[1]*1e-10 and R_A != 0:  # If fluid A's pressure drops to 0, keep it that way
             y_next[1] = 0
@@ -171,6 +172,7 @@ def RK4O_with_stop (y0, r_range, h):
         
     if R_A == 0:
         R_A = r_values[-1]
+        print("The star has a Nucleus of Dark Matter")
         
     return (np.array(r_values), np.array(y_values), R_A)
 
@@ -270,7 +272,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.05, 1e-4)
+CHOICE, TYPE, EOS, ALPHA, PC = (0, "TOV", "soft", 0.05, 1e-4)
 
 ###############################################################################
 # Create the data
@@ -295,8 +297,7 @@ if CHOICE == 0:
         # Save the data
         df = pd.DataFrame(data)
         df.to_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{PC}.csv", index=False)
-        print("Data saved:")
-        print(df)
+        print("Data saved.")
         
     elif TYPE == "MR":
         pc_range = PCS[f"{EOS}"]
@@ -309,8 +310,7 @@ if CHOICE == 0:
         data["M_B"] = M_B
         df = pd.DataFrame(data)
         df.to_csv(f"data_{TYPE}_{EOS}_{ALPHA}.csv", index=False)
-        print("Data saved:")
-        print(df)
+        print("Data saved.")
 ###############################################################################
 # Plot the data
 ###############################################################################
