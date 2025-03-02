@@ -65,7 +65,7 @@ def eos_B (p_B): # The fluid B is the dark matter.
     if p_B <= 0:
         return 0  # Avoid invalid values
         
-    rho = (p_B / 50) ** (3 / 5)
+    rho = (p_B / 500) ** (3 / 5)
     return rho
 
 def system_of_ODE (r, y):
@@ -272,7 +272,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (0, "TOV", "soft", 0.05, 1e-4)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.035, 5e-4)
 
 ###############################################################################
 # Create the data
@@ -337,7 +337,7 @@ elif CHOICE == 1:
         # Plot the data
         plt.plot(r, p_A*p_scale, label = r'$p_{soft}(r)$', color = colors[0], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_A*m_scale, label = r'$m_{soft}(r)$', color = colors[0], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, p_B*p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, p_B*10*p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
@@ -353,8 +353,8 @@ elif CHOICE == 1:
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        #plt.xlim(0, 10.12)
-        #plt.ylim(0, 1)
+        #plt.xlim(0, 14)
+        #plt.ylim(0, 2.2)
 
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -375,7 +375,7 @@ elif CHOICE == 1:
         plt.gca().spines['left'].set_linewidth(1.5)
 
         # Add a legend
-        plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
+        plt.legend(fontsize=12, frameon=False, ncol = 3, loc = 'upper right') #  loc='upper right',
 
         # Save the plot as a PDF
         plt.savefig(f"fig_{TYPE}_{EOS}_{ALPHA}_{PC}.pdf", format="pdf", bbox_inches="tight")
