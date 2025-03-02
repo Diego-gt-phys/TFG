@@ -65,7 +65,7 @@ def eos_B (p_B): # The fluid B is the dark matter.
     if p_B <= 0:
         return 0  # Avoid invalid values
         
-    rho = (p_B / 500) ** (3 / 5)
+    rho = (p_B / 500) ** (3 / 5) # 1e23
     return rho
 
 def system_of_ODE (r, y):
@@ -337,7 +337,7 @@ elif CHOICE == 1:
         # Plot the data
         plt.plot(r, p_A*p_scale, label = r'$p_{soft}(r)$', color = colors[0], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_A*m_scale, label = r'$m_{soft}(r)$', color = colors[0], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, p_B*10*p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, p_B*p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
