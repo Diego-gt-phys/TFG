@@ -2,7 +2,7 @@
 """
 Created on Tue Feb 25 21:59:52 2025
 
-DANSITI
+DANSITY
 
 Solves the TOV equation for Dark matter (fluid B) Admixed Neutron Star (fluis A)
 
@@ -272,7 +272,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.1, 3e-6)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "stiff", 0, 3e-6)
 
 ###############################################################################
 # Create the data
@@ -353,8 +353,8 @@ elif CHOICE == 1:
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        plt.xlim(0, 22.16)
-        plt.ylim(0, 0.3)
+        #plt.xlim(0, 22.16)
+        #plt.ylim(0, 0.3)
 
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -365,8 +365,8 @@ elif CHOICE == 1:
         plt.minorticks_on()
 
         # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(0, 22.16, 2))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 0.301, 0.05))  # Major y ticks 
+        #plt.gca().set_xticks(np.arange(0, 22.16, 2))  # Major x ticks 
+        #plt.gca().set_yticks(np.arange(0, 0.301, 0.05))  # Major y ticks 
 
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
