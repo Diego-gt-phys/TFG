@@ -272,7 +272,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "MR", "middle", 0.05, 3e-4)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.1, 3e-6)
 
 ###############################################################################
 # Create the data
@@ -327,7 +327,7 @@ elif CHOICE == 1:
         m_B = df["m_B"]
         
         # Scale factors
-        p_scale = 1e4
+        p_scale = 1e5
         m_scale = 1
         
         # Configure the plot
@@ -335,11 +335,11 @@ elif CHOICE == 1:
         colors = sns.color_palette("Set1", 10)
         
         # Plot the data
-        plt.plot(r, p_A*p_scale, label = r'$p_{soft}(r) \cdot 10^4$', color = colors[0], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, p_A*p_scale, label = r'$p_{soft}(r) \cdot 10^5$', color = colors[0], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_A*m_scale, label = r'$m_{soft}(r)$', color = colors[0], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, p_B*p_scale, label = r'$p_{DM}(r) \cdot 10^4$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, p_B*p_scale, label = r'$p_{DM}(r) \cdot 10^5$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m*m_scale, label = r'$m(r) / 3$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
         # Set the axis to logarithmic scale
         #plt.xscale('log')
@@ -348,13 +348,13 @@ elif CHOICE == 1:
         # Add labels and title
         plt.title(rf'TOV solution for the {EOS} eos and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
-        plt.ylabel(r'$p\cdot 10^4$ $\left[ M_{\odot}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
+        plt.ylabel(r'$p\cdot 10^5$ $\left[ M_{\odot}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
         plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        plt.xlim(0, 10.02)
-        plt.ylim(0, 3)
+        plt.xlim(0, 22.16)
+        plt.ylim(0, 0.3)
 
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -365,8 +365,8 @@ elif CHOICE == 1:
         plt.minorticks_on()
 
         # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(0, 10.56, 1))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 3.01, 0.5))  # Major y ticks 
+        plt.gca().set_xticks(np.arange(0, 22.16, 2))  # Major x ticks 
+        plt.gca().set_yticks(np.arange(0, 0.301, 0.05))  # Major y ticks 
 
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)

@@ -4,7 +4,7 @@ Created on Sun Mar  2 22:27:20 2025
 
 Plots the three MR curves for the diferent eos
 
-@author: Usuario
+@author: Diego García Tejada
 """
 
 import numpy as np
