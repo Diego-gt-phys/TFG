@@ -50,7 +50,7 @@ for EOS in EsOS:
 #plt.yscale('log')
 
 # Add labels and title
-plt.title(rf'TOV solution for all equations of state at $pc = {pc}$', loc='left', fontsize=15, fontweight='bold')
+plt.title(rf'TOV solution for all equations of state at $p_c = {pc}$', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
 plt.ylabel(r'$p\cdot 10^5$ $\left[ M_{\odot}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
 plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
@@ -82,7 +82,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=12, frameon=False, ncol = 3, loc = 'upper right') #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig(f"Fig_eos_{pc}.pdf", format="pdf", bbox_inches="tight")
+plt.savefig(f"FIG_eos_{pc}.pdf", format="pdf", bbox_inches="tight")
 
 plt.tight_layout()
 plt.show()

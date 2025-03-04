@@ -86,7 +86,7 @@ plt.gca().spines['left'].set_linewidth(1.5)
 plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
 
 # Save the plot as a PDF
-plt.savefig(f"Fig_alpha_{pc}.pdf", format="pdf", bbox_inches="tight")
+plt.savefig(f"FIG_alpha_{pc}.pdf", format="pdf", bbox_inches="tight")
 
 plt.tight_layout()
 plt.show()
