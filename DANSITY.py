@@ -65,7 +65,7 @@ def eos_B (p_B): # The fluid B is the dark matter.
     if p_B <= 0:
         return 0  # Avoid invalid values
         
-    rho = (p_B / 35) ** (3 / 5) # 1e23
+    rho = (p_B / 200) ** (3 / 5) # 35
     return rho
 
 def system_of_ODE (r, y):
@@ -272,7 +272,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "stiff", 0, 3e-6)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "stiff", 0.07, 3e-5)
 
 ###############################################################################
 # Create the data
