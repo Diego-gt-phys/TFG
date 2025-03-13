@@ -23,6 +23,7 @@ from scipy.interpolate import interp1d
 # Physical parameters (solar mass = 198847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
+K = 35
 
 ###############################################################################
 # Define the functions
@@ -65,7 +66,7 @@ def eos_B (p_B): # The fluid B is the dark matter.
     if p_B <= 0:
         return 0  # Avoid invalid values
         
-    rho = (p_B / 200) ** (3 / 5) # 35
+    rho = (p_B / K) ** (3 / 5) # 35
     return rho
 
 def system_of_ODE (r, y):
@@ -272,7 +273,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "stiff", 0.07, 3e-5)
+CHOICE, TYPE, EOS, ALPHA, PC = (0, "TOV", "soft", 0, 4e-5)
 
 ###############################################################################
 # Create the data
@@ -296,7 +297,7 @@ if CHOICE == 0:
         data["R_A"] = R_A
         # Save the data
         df = pd.DataFrame(data)
-        df.to_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{PC}.csv", index=False)
+        df.to_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{PC}_{K}.csv", index=False)
         print("Data saved.")
         
     elif TYPE == "MR":
@@ -309,7 +310,7 @@ if CHOICE == 0:
         data["M_A"] = M_A
         data["M_B"] = M_B
         df = pd.DataFrame(data)
-        df.to_csv(f"data_{TYPE}_{EOS}_{ALPHA}.csv", index=False)
+        df.to_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{K}.csv", index=False)
         print("Data saved.")
 ###############################################################################
 # Plot the data
@@ -318,7 +319,7 @@ elif CHOICE == 1:
     
     if TYPE == "TOV":
         # Read the data
-        df = pd.read_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{PC}.csv")
+        df = pd.read_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{PC}_{K}.csv")
         r = df["r"]
         p_A = df["p_A"]
         p_B = df["p_B"]
@@ -333,10 +334,16 @@ elif CHOICE == 1:
         # Configure the plot
         plt.figure(figsize=(9.71, 6))
         colors = sns.color_palette("Set1", 10)
+        if EOS == "soft": 
+            i=0 # If the eos is soft make it red
+        elif EOS == 'middle':
+            i=1 # If the eos is middle make it blue
+        elif EOS == 'stiff':
+            i=2 # If the eos is stiff make it green
         
         # Plot the data
-        plt.plot(r, p_A*p_scale, label = r'$p_{soft}(r) \cdot 10^5$', color = colors[0], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m_A*m_scale, label = r'$m_{soft}(r)$', color = colors[0], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, p_A*p_scale, label = r'$p_{soft}(r) \cdot 10^5$', color = colors[i], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, m_A*m_scale, label = r'$m_{soft}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, p_B*p_scale, label = r'$p_{DM}(r) \cdot 10^5$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
@@ -346,7 +353,7 @@ elif CHOICE == 1:
         #plt.yscale('log')
         
         # Add labels and title
-        plt.title(rf'TOV solution for the {EOS} eos and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
+        plt.title(rf'TOV solution for the {EOS} eos, $K={K}$, and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
         plt.ylabel(r'$p\cdot 10^5$ $\left[ M_{\odot}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
         plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
@@ -385,7 +392,7 @@ elif CHOICE == 1:
         
     elif TYPE == "MR":
         # Read the data
-        df = pd.read_csv(f"data_{TYPE}_{EOS}_{ALPHA}.csv")
+        df = pd.read_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{K}.csv")
         R = df["R"]
         M = df["M"]
         M_A = df["M_A"]
@@ -402,7 +409,7 @@ elif CHOICE == 1:
         
 
         # Add labels and title
-        plt.title(rf'MR curve for the {EOS} eos and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
+        plt.title(rf'MR curve for the {EOS} eos, $K={K}$, and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
         plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
         
