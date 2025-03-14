@@ -67,7 +67,7 @@ plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(0, 11.54)
+plt.xlim(0, 12)
 plt.ylim(0, 8)
 
 # Add grid
@@ -79,7 +79,7 @@ plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, l
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(0, 11.54, 1))  # Major x ticks 
+plt.gca().set_xticks(np.arange(0, 12.1, 1))  # Major x ticks 
 plt.gca().set_yticks(np.arange(0, 8.1, 1))  # Major y ticks 
 
 # Set thicker axes
