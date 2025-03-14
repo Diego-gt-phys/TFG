@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 # Read the data
 ###############################################################################
 
-pc_range = (1e-5, 2e-5, 3e-5, 4e-5, 5e-5)
+pc_range = (1e-5, 2e-5, 3e-5, 4e-5, 5e-5, 6e-5, 7e-5, 8e-5)
 TYPE, EOS, ALPHA, K = ("TOV", "soft", 0, 35)
 data = {}
 
@@ -48,6 +48,8 @@ for pc in pc_range:
     plt.plot(data[pc]["r"], data[pc]["p_A"]*p_scale, label = rf'p_c = {pc}', color = colors[i], linewidth = 1.5, linestyle = '-')
     plt.plot(data[pc]["r"], data[pc]["m"]*m_scale, label = rf'$m_{{{pc}}}$', color = colors[i], linewidth = 1.5, linestyle = '-.')
     i+=1
+    if i==5: # Can't see yellow
+        i+=1
 
 ###############################################################################
 # Configure the plot
@@ -65,8 +67,8 @@ plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
 plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
 
 # Set limits
-plt.xlim(0, 12)
-plt.ylim(0, 5)
+plt.xlim(0, 11.54)
+plt.ylim(0, 8)
 
 # Add grid
 #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -77,8 +79,8 @@ plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, l
 plt.minorticks_on()
 
 # Customize tick spacing for more frequent ticks on x-axis
-plt.gca().set_xticks(np.arange(0, 12.1, 1))  # Major x ticks 
-plt.gca().set_yticks(np.arange(0, 5.1, 0.5))  # Major y ticks 
+plt.gca().set_xticks(np.arange(0, 11.54, 1))  # Major x ticks 
+plt.gca().set_yticks(np.arange(0, 8.1, 1))  # Major y ticks 
 
 # Set thicker axes
 plt.gca().spines['top'].set_linewidth(1.5)

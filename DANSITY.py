@@ -273,7 +273,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (0, "TOV", "soft", 0, 4e-5)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0, 1e-5)
 
 ###############################################################################
 # Create the data
@@ -329,7 +329,7 @@ elif CHOICE == 1:
         
         # Scale factors
         p_scale = 1e5
-        m_scale = 1
+        m_scale = 2
         
         # Configure the plot
         plt.figure(figsize=(9.71, 6))
