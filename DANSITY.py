@@ -273,7 +273,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0, 3e-5)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.2, 1e-5)
 
 ###############################################################################
 # Create the data
