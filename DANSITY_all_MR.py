@@ -47,7 +47,7 @@ for EOS in EsOS:
 ###############################################################################
 
 # Add labels and title
-plt.title(r'MR curves for $\alpha = (0, 0.05, 0.1)$', loc='left', fontsize=15, fontweight='bold')
+plt.title(r'MR curves for $\alpha = (0, 0.015)$', loc='left', fontsize=15, fontweight='bold')
 plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
 plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
 
