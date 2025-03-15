@@ -17,13 +17,13 @@ from scipy.interpolate import interp1d
 # Read the data
 ###############################################################################
 
-alphas = (0, 0.05, 0.1)
+alphas = (0, 0.015)
 EsOS = ("soft", "middle", "stiff")
 data = {}
 
 for alpha in alphas:
     for EOS in EsOS:
-        df = pd.read_csv(f"data_MR_{EOS}_{alpha}.csv")
+        df = pd.read_csv(f"data_MR_{EOS}_{alpha}_100.csv")
         data[f"{EOS}_{alpha}"] = df
 
 ###############################################################################

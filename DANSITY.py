@@ -23,7 +23,7 @@ from scipy.interpolate import interp1d
 # Physical parameters (solar mass = 198847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
-K = 35
+K = 100
 
 ###############################################################################
 # Define the functions
@@ -273,7 +273,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.2, 1e-5)
+CHOICE, TYPE, EOS, ALPHA, PC = (0, "MR", "stiff", 0, 3e-6)
 
 ###############################################################################
 # Create the data
@@ -344,7 +344,7 @@ elif CHOICE == 1:
         # Plot the data
         plt.plot(r, p_A*p_scale, label = r'$p_{soft}(r) \cdot 10^5$', color = colors[i], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_A*m_scale, label = r'$m_{soft}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, p_B*p_scale, label = r'$p_{DM}(r) \cdot 10^5$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, p_B*(1/ALPHA)*p_scale, label = r'$p_{DM}(r) \cdot 10^5$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
