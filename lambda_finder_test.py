@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb 25 21:59:52 2025
+Created on Sun Mar 16 15:15:49 2025
 
-DANSITY
+Solves the TOV equation for Dark matter (fluid B) Admixed Neutron Star (fluis A).
 
-Solves the TOV equation for Dark matter (fluid B) Admixed Neutron Star (fluis A)
+This version instead of working with the alpha parameter for determinig the central pressure of te dark matter it will work with a lambda parameter.
+
+This lambda parameter is calculated by M_B/M.
 
 @author: Diego García Tejada
 """
-
 
 ###############################################################################
 # Imports and units
@@ -18,7 +19,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d # Needed for interpolation of EoS
+import scipy.optimize as opt # Needed to find the values od lambda
 
 # Physical parameters (solar mass = 198847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
@@ -270,177 +272,46 @@ def MR_curve(pc_range, alpha, r_range, h, n):
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
 
 ###############################################################################
-# Define the parameters
+# TEST
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.03111074854850406, 3e-5)
+# Read the data of soft_EoS
+eos_data = pd.read_excel("eos_soft.xlsx")
+rho_data = eos_data['Density'].values
+p_data = eos_data['Pressure'].values
 
-###############################################################################
-# Create the data
-###############################################################################
-if CHOICE == 0:
-    eos_data = pd.read_excel(f"eos_{EOS}.xlsx")
-    rho_data = eos_data['Density'].values
-    p_data = eos_data['Pressure'].values
-    data = {}
 
-    if TYPE == "TOV":
-        # Calculate
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, PC, ALPHA*PC, 0, 0), (1e-6, 50), 1e-3)
-        # Insert in dict
-        data["r"] = r
-        data["m"] = m
-        data["p_A"] = p_A
-        data["p_B"] = p_B
-        data["m_A"] = m_A
-        data["m_B"] = m_B
-        data["R_A"] = R_A
-        # Save the data
-        df = pd.DataFrame(data)
-        df.to_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{PC}_{K}.csv", index=False)
-        print("Data saved.")
+
+def find_lambda (pc, l_target, a_guess):
+    def f(alpha):
+        """
+        Auxiliary function used to calculate the difference of lambda to a guiven lambda_target, as a function of alpha.
+        The rest of the parameters (pc) are set as guiven values.
+
+        Parameters
+        ----------
+        alpha : float
+            pc_B/p_A.
+
+        Returns
+        -------
+        float
+            differnce betwen lambda (M_B/M) and the target lambda.
+
+        """
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3)
+        l = m_B[-1]/m[-1]
+        return l-l_target
+    result = opt.root_scalar(f, x0=a_guess, method='secant', x1=a_guess*1.1)
+    if result.converged:
+        return result.root
+    else:
+        raise ValueError("Root-finding did not converge")
         
-    elif TYPE == "MR":
-        pc_range = PCS[f"{EOS}"]
-        # Calculate
-        R, M, M_A, M_B = MR_curve(pc_range, ALPHA, (1e-6, 50), 1e-3, 20)
-        # Insert data
-        data["R"] = R
-        data["M"] = M
-        data["M_A"] = M_A
-        data["M_B"] = M_B
-        df = pd.DataFrame(data)
-        df.to_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{K}.csv", index=False)
-        print("Data saved.")
-###############################################################################
-# Plot the data
-###############################################################################
-elif CHOICE == 1:
-    
-    if TYPE == "TOV":
-        # Read the data
-        df = pd.read_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{PC}_{K}.csv")
-        r = df["r"]
-        p_A = df["p_A"]
-        p_B = df["p_B"]
-        m = df["m"]
-        m_A = df["m_A"]
-        m_B = df["m_B"]
-        
-        # Scale factors
-        p_scale = 1e5
-        m_scale = 2
-        
-        # Configure the plot
-        plt.figure(figsize=(9.71, 6))
-        colors = sns.color_palette("Set1", 10)
-        if EOS == "soft": 
-            i=0 # If the eos is soft make it red
-        elif EOS == 'middle':
-            i=1 # If the eos is middle make it blue
-        elif EOS == 'stiff':
-            i=2 # If the eos is stiff make it green
-        
-        # Plot the data
-        plt.plot(r, p_A*p_scale, label = r'$p_{soft}(r) \cdot 10^5$', color = colors[i], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m_A*m_scale, label = r'$m_{soft}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, p_B*(1/ALPHA)*p_scale, label = r'$p_{DM}(r) \cdot 10^5$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+pc = 3e-5
+l_target = 0.04
+a_guess = 0.03
 
-        # Set the axis to logarithmic scale
-        #plt.xscale('log')
-        #plt.yscale('log')
-        
-        # Add labels and title
-        plt.title(rf'TOV solution for the {EOS} eos, $K={K}$, and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
-        plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
-        plt.ylabel(r'$p\cdot 10^5$ $\left[ M_{\odot}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
-        plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
-        plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
-        
-        # Set limits
-        #plt.xlim(0, 22.16)
-        #plt.ylim(0, 0.3)
+alpha = find_lambda(pc, l_target, a_guess)
 
-        # Add grid
-        #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
-
-        # Configure ticks for all four sides
-        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
-        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
-        plt.minorticks_on()
-
-        # Customize tick spacing for more frequent ticks on x-axis
-        #plt.gca().set_xticks(np.arange(0, 22.16, 2))  # Major x ticks 
-        #plt.gca().set_yticks(np.arange(0, 0.301, 0.05))  # Major y ticks 
-
-        # Set thicker axes
-        plt.gca().spines['top'].set_linewidth(1.5)
-        plt.gca().spines['right'].set_linewidth(1.5)
-        plt.gca().spines['bottom'].set_linewidth(1.5)
-        plt.gca().spines['left'].set_linewidth(1.5)
-
-        # Add a legend
-        plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
-
-        # Save the plot as a PDF
-        plt.savefig(f"fig_{TYPE}_{EOS}_{ALPHA}_{PC}.pdf", format="pdf", bbox_inches="tight")
-
-        plt.tight_layout()
-        plt.show()
-        
-    elif TYPE == "MR":
-        # Read the data
-        df = pd.read_csv(f"data_{TYPE}_{EOS}_{ALPHA}_{K}.csv")
-        R = df["R"]
-        M = df["M"]
-        M_A = df["M_A"]
-        M_B = df["M_B"]
-        
-        # Configure the plot
-        plt.figure(figsize=(9.71, 6))
-        colors = sns.color_palette("Set1", 10)
-        
-        # Plot the data
-        plt.plot(R, M, label = r'$M(R)$', color = colors[0], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5) # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(R, M_A, label = r'$M_{NS}(R)$', color = colors[1], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5) # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(R, M_B, label = r'$M_{DM}(R)$', color = colors[2], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5) # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        
-
-        # Add labels and title
-        plt.title(rf'MR curve for the {EOS} eos, $K={K}$, and $\alpha = {ALPHA}$', loc='left', fontsize=15, fontweight='bold')
-        plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
-        plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
-        
-        # Set limits
-        plt.xlim(8, 17)
-        plt.ylim(0, 3.5)
-        
-        # Add grid
-        plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
-
-        # Configure ticks for all four sides
-        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
-        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
-        plt.minorticks_on()
-
-        # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
-
-        # Set thicker axes
-        plt.gca().spines['top'].set_linewidth(1.5)
-        plt.gca().spines['right'].set_linewidth(1.5)
-        plt.gca().spines['bottom'].set_linewidth(1.5)
-        plt.gca().spines['left'].set_linewidth(1.5)
-
-        # Add a legend
-        plt.legend(fontsize=12, frameon=False, ncol = 1) #  loc='upper right',
-
-        # Save the plot as a PDF
-        plt.savefig(f"fig_{TYPE}_{EOS}_{ALPHA}.pdf", format="pdf", bbox_inches="tight")
-
-        plt.tight_layout()
-        plt.show()
-        
+print(f"El valor de alpha para lamba={l_target} es: {alpha}")
