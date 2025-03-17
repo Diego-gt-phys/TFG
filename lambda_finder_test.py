@@ -309,7 +309,7 @@ def find_lambda (pc, l_target, a_guess):
         raise ValueError("Root-finding did not converge")
         
 pc = 3e-5
-l_target = 0.03
+l_target = 0.1
 a_guess = 0.03
 
 alpha = find_lambda(pc, l_target, a_guess)
