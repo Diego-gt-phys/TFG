@@ -342,8 +342,8 @@ elif CHOICE == 1:
             i=2 # If the eos is stiff make it green
         
         # Plot the data
-        plt.plot(r, p_A*p_scale, label = r'$p_{soft}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m_A*m_scale, label = r'$m_{soft}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, p_A*p_scale, label = rf'$p_{{{EOS}}}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, m_A*m_scale, label = rf'$m_{{{EOS}}}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, p_B*(1/ALPHA)*p_scale, label = r'$p_{DM}(r)\cdot\alpha^{{-1}}$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_B*m_scale*(1/0.03), label = r'$m_{DM}(r)\cdot\lambda^{{-1}}$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
@@ -355,7 +355,7 @@ elif CHOICE == 1:
         # Add labels and title
         plt.title(rf'TOV solution for the {EOS} eos, $K={K}$, and $\lambda = 0.03$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
-        plt.ylabel(r'$p\cdot 10^5$ $\left[ M_{\odot}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
+        plt.ylabel(r'$p\cdot 10^5$ $\left[ M_{\odot}/km^3\right]$ & $m\cdot 2$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
         plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
