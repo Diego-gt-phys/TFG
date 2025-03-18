@@ -66,7 +66,7 @@ def eos_B (p_B): # The fluid B is the dark matter.
     if p_B <= 0:
         return 0  # Avoid invalid values
         
-    rho = (p_B / K) ** (3 / 5) # 35
+    rho = (p_B / K) ** (3 / 5)
     return rho
 
 def system_of_ODE (r, y):
