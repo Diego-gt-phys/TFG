@@ -22,10 +22,10 @@ import pandas as pd
 from scipy.interpolate import interp1d # Needed for interpolation of EoS
 import scipy.optimize as opt # Needed to find the values od lambda
 
-# Physical parameters (solar mass = 198847e30 kg)
+# Physical parameters (solar mass = 1.98847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
-K = 100
+K = 10
 
 ###############################################################################
 # Define the functions
@@ -309,8 +309,8 @@ def find_lambda (pc, l_target, a_guess):
         raise ValueError("Root-finding did not converge")
         
 pc = 3e-5
-l_target = 0.1
-a_guess = 0.03
+l_target = 0.05
+a_guess = 0.1
 
 alpha = find_lambda(pc, l_target, a_guess)
 

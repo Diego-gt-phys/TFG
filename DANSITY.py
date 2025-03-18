@@ -23,7 +23,7 @@ from scipy.interpolate import interp1d
 # Physical parameters (solar mass = 198847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
-K = 100
+K = 10
 
 ###############################################################################
 # Define the functions
@@ -273,7 +273,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.02, 3e-5)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.09291564808982507, 3e-5)
 
 ###############################################################################
 # Create the data
@@ -344,7 +344,7 @@ elif CHOICE == 1:
         # Plot the data
         plt.plot(r, p_A*p_scale, label = rf'$p_{{{EOS}}}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_A*m_scale, label = rf'$m_{{{EOS}}}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, p_B*p_scale*(1/ALPHA), label = r'$p_{DM}(r)\cdot\alpha^{{-1}}$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, p_B*p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
@@ -353,15 +353,15 @@ elif CHOICE == 1:
         #plt.yscale('log')
         
         # Add labels and title
-        plt.title(rf'TOV solution for the {EOS} eos, $K={K}$', loc='left', fontsize=15, fontweight='bold')
+        plt.title(rf'TOV solution for the {EOS} eos and $\lambda = 0.05$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
         plt.ylabel(r'$p\cdot 10^5$ $\left[ M_{\odot}/km^3\right]$ & $m\cdot 2$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
         plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        #plt.xlim(0, 12.641)
-        #plt.ylim(0, 3)
+        plt.xlim(0, 9.43)
+        plt.ylim(0, 3)
 
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -372,8 +372,8 @@ elif CHOICE == 1:
         plt.minorticks_on()
 
         # Customize tick spacing for more frequent ticks on x-axis
-        #plt.gca().set_xticks(np.arange(0, 12.641, 1))  # Major x ticks 
-        #plt.gca().set_yticks(np.arange(0, 3.01, 0.5))  # Major y ticks 
+        plt.gca().set_xticks(np.arange(0, 9.43, 1))  # Major x ticks 
+        plt.gca().set_yticks(np.arange(0, 3.01, 0.5))  # Major y ticks 
 
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
@@ -385,7 +385,7 @@ elif CHOICE == 1:
         plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
 
         # Save the plot as a PDF
-        plt.savefig(f"TOV_fig/fig_{TYPE}_{EOS}_{ALPHA}_{PC}_scaled.pdf", format="pdf", bbox_inches="tight")
+        plt.savefig(f"fig_{TYPE}_{EOS}_{ALPHA}_{PC}.pdf", format="pdf", bbox_inches="tight")
 
         plt.tight_layout()
         plt.show()
@@ -443,4 +443,5 @@ elif CHOICE == 1:
 
         plt.tight_layout()
         plt.show()
-        
+
+
