@@ -318,7 +318,7 @@ def get_inputs():
     if mode != "DEBUG":
         while True:
             try:
-                data_type = int(input("What type of data?\n1: TOV of fluid A\n2: TOV of fluid B\n3: TOV of both fluids\n4: MR curves\nEnter choice (1-4): "))
+                data_type = int(input("What type of data?\n1: Solve the TOV equation for a NS\n2: Solve the TOV equation for a DM star\n3: Solve the TOV equation for a DANS\n4: MR curves\nEnter choice (1-4): "))
                 if data_type not in [1, 2, 3, 4]:
                     raise ValueError("Invalid choice. Enter a number between 1 and 4.")
                 break
@@ -376,9 +376,9 @@ def get_inputs():
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, c_p = get_inputs()
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs()
 
-print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, c_p)
+print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 
 ###############################################################################
 # Create the data
@@ -386,10 +386,20 @@ print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, c_p)
 if mode == 0:
     
     if d_type == 1: # Slve the TOV for fluid A
-        eos_data = pd.read_excel(f"eos_{eos_c}.xlsx")
+        eos_data = pd.read_excel(f"data_eos/eos_{eos_c}.xlsx")
         rho_data = eos_data['Density'].values
         p_data = eos_data['Pressure'].values
         data = {}
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0,p_c,0,0,0), (1e-6, 100), 1e-3)
+        data["r"] = r
+        data["m"] = m
+        data["p_A"] = p_A
+        data["p_B"] = p_B
+        data["m_A"] = m_A
+        data["m_B"] = m_B
+        data["R_A"] = R_A
+        
+        
 
 
 
