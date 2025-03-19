@@ -60,7 +60,7 @@ def eos_A (p_A): # BM
     
     return rho
 
-def eos_B (p_B): # DM.
+def eos_B (p_B): # DM
     """
     Polytropic EOS for the star B. The polytropic constant and exponent are defined in the unit sections. 
     
@@ -280,77 +280,117 @@ def MR_curve(pc_range, alpha, r_range, h, n):
         print(cont)
     
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
+
+def get_inputs():
+    """
+    Prompts the user for input parameters to configure the DANTE solver.
+    
+    Raises
+    ------
+    ValueError
+        If the user provides an invalid input that does not match the expected options.
+    
+    Returns
+    -------
+    mode : int or str
+        0 for calculating data, 1 for plotting data, or "DEBUG" mode.
+    data_type : int
+        1 for TOV of fluid A, 2 for TOV of fluid B, 3 for both fluids, 4 for MR curves.
+    eos_choice : str
+        'soft', 'mid', or 'stiff' for the equation of state.
+    param_choice : str or None
+        'a' for Alpha, 'l' for Lambda, or None if not applicable.
+    param_value : float or None
+        The value of the chosen DM parameter or None if not applicable.
+    central_pressure : float or None
+        The central pressure value or None if not applicable.
+    """
+    while True:
+        try:
+            mode = int(input("What do you want to do? Calculate new data (0) or plot existing data (1): "))
+            if mode not in [0, 1]:
+                mode = "DEBUG"
+            break
+        except ValueError:
+            mode = "DEBUG"
+            break
+    
+    if mode != "DEBUG":
+        while True:
+            try:
+                data_type = int(input("What type of data?\n1: TOV of fluid A\n2: TOV of fluid B\n3: TOV of both fluids\n4: MR curves\nEnter choice (1-4): "))
+                if data_type not in [1, 2, 3, 4]:
+                    raise ValueError("Invalid choice. Enter a number between 1 and 4.")
+                break
+            except ValueError as e:
+                print(e)
+        
+        if data_type != 2:
+            while True:
+                try:
+                    eos_choice = int(input("What EoS do you want to use?\n1: Soft\n2: Middle\n3: Stiff\nEnter choice (1-3): "))
+                    eos_options = {1: 'soft', 2: 'mid', 3: 'stiff'}
+                    if eos_choice not in eos_options:
+                        raise ValueError("Invalid choice. Enter 1 for Soft, 2 for Mid, or 3 for Stiff.")
+                    eos_choice = eos_options[eos_choice]
+                    break
+                except ValueError as e:
+                    print(e)
+        else:
+            eos_choice = None
+        
+        if data_type in [3, 4]:
+            while True:
+                try:
+                    param_choice = input("What parameter of DM do you want? Alpha (a) or Lambda (l): ").strip().lower()
+                    if param_choice not in ['a', 'l']:
+                        raise ValueError("Invalid choice. Enter 'a' for Alpha or 'l' for Lambda.")
+                    param_value = float(input(f"Enter the value of {param_choice.upper()}: "))
+                    break
+                except ValueError as e:
+                    print(e)
+        else:
+            param_choice, param_value = None, None
+        
+        if data_type != 4:
+            while True:
+                try:
+                    central_pressure = float(input("What is the central pressure of the fluid? "))
+                    if central_pressure <= 0:
+                        raise ValueError("Central pressure must be a positive number.")
+                    break
+                except ValueError as e:
+                    print(e)
+        else:
+            central_pressure = None
+                
+    else:
+        print("Using DEBUG data...")
+        mode, data_type, eos_choice, param_choice, param_value, central_pressure = (1, 3, 'soft', 'a', 0.09, 3e-5)
+        
+    return mode, data_type, eos_choice, param_choice, param_value, central_pressure
+
 ###############################################################################
 # Define the parameters
 ###############################################################################
 
-#CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.09292, 3e-5)
-
-# Ask the user what he wants to do
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-while True:
-    try:
-        mode = int(input("What do you want to do? Calculate new data (0) or plot existing data (1): "))
-        if mode not in [0, 1]:
-            mode = "DEBUG"
-        break
-    except ValueError:
-        mode = "DEBUG"
-        break
+mode, d_type, eos_c, param_c, param_val, c_p = get_inputs()
 
-if mode != "DEBUG":
-    while True:
-        try:
-            data_type = int(input("What type of data?\n1: TOV of fluid A\n2: TOV of fluid B\n3: TOV of both fluids\n4: MR curves\nEnter choice (1-4): "))
-            if data_type not in [1, 2, 3, 4]:
-                raise ValueError("Invalid choice. Enter a number between 1 and 4.")
-            break
-        except ValueError as e:
-            print(e)
-            
-    while True:
-        try:
-            eos_choice = int(input("What EoS do you want to use?\n1: Soft\n2: Middle\n3: Stiff\nEnter choice (1-3): "))
-            eos_options = {1: 'soft', 2: 'mid', 3: 'stiff'}
-            if eos_choice not in eos_options:
-                raise ValueError("Invalid choice. Enter 1 for Soft, 2 for Mid, or 3 for Stiff.")
-            eos_choice = eos_options[eos_choice]
-            break
-        except ValueError as e:
-            print(e)
-    
-    if data_type in [3, 4]:
-        while True:
-            try:
-                param_choice = input("What parameter of DM do you want? Alpha (a) or Lambda (l): ").strip().lower()
-                if param_choice not in ['a', 'l']:
-                    raise ValueError("Invalid choice. Enter 'a' for Alpha or 'l' for Lambda.")
-                param_value = float(input(f"Enter the value of {param_choice.upper()}: "))
-                break
-            except ValueError as e:
-                print(e)
-    else:
-        param_choice, param_value = None, None
-    
-    if data_type != 4:
-        while True:
-            try:
-                central_pressure = float(input("What is the central pressure of the fluid? "))
-                if central_pressure <= 0:
-                    raise ValueError("Central pressure must be a positive number.")
-                break
-            except ValueError as e:
-                print(e)
-    else:
-        central_pressure = None
-            
-else:
-    print("Using DEBUG data...")
-    mode, data_type, eos_choice, param_choice, param_value, central_pressure = (1, 3, 'soft', 'a', 0.09, 3e-5)
-    
-print("\nUser Inputs:", mode, data_type, eos_choice, param_choice, param_value, central_pressure)
+print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, c_p)
 
 ###############################################################################
 # Create the data
 ###############################################################################
+if mode == 0:
+    
+    if d_type == 1: # Slve the TOV for fluid A
+        eos_data = pd.read_excel(f"eos_{eos_c}.xlsx")
+        rho_data = eos_data['Density'].values
+        p_data = eos_data['Pressure'].values
+        data = {}
+
+
+
+
