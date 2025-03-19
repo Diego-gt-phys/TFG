@@ -366,7 +366,7 @@ def get_inputs():
                 
     else:
         print("Using DEBUG data")
-        mode, data_type, eos_choice, param_choice, param_value, central_pressure = (0, 1, 'soft', None, None, 3e-5)
+        mode, data_type, eos_choice, param_choice, param_value, central_pressure = (1, 1, 'stiff', None, None, 3e-5)
         
     return mode, data_type, eos_choice, param_choice, param_value, central_pressure
 
@@ -383,10 +383,11 @@ print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 ###############################################################################
 # Create the data
 ###############################################################################
+
 if mode == 0:
     
-    if d_type == 1: # Solve the TOV for fluid A
-        eos_data = pd.read_excel(f"data_eos/eos_{eos_c}.xlsx")
+    if d_type == 1: # Solution to the TOV for fluid A
+        eos_data = pd.read_excel(f"data_eos\eos_{eos_c}.xlsx")
         rho_data = eos_data['Density'].values
         p_data = eos_data['Pressure'].values
         data = {}
@@ -399,9 +400,77 @@ if mode == 0:
         data["m_B"] = m_B
         data["R_A"] = R_A
         df = pd.DataFrame(data)
-        df.to_csv(f"data/{d_type}_{eos_c}_{p_c}", index=False)
+        df.to_csv(f"data\{d_type}_{eos_c}_{p_c}.csv", index=False)
         print("Data saved")
 
+###############################################################################
+# Plot the data
+###############################################################################
 
+if mode == 1:
+    
+    if d_type == 1: # Solution to the TOV for fluid A
+        df = pd.read_csv(f"data\{d_type}_{eos_c}_{p_c}.csv")
+        r = df["r"]
+        m = df["m"]
+        p = df["p_A"]
+        
+        # Scale factors
+        p_scale = 1e5
+        m_scale = 1
+        
+        # Configure the plot
+        plt.figure(figsize=(9.71, 6))
+        colors = sns.color_palette("Set1", 10)
+        if eos_c == "soft": 
+            i=0 # If the eos is soft make it red
+        elif eos_c == 'middle':
+            i=1 # If the eos is middle make it blue
+        elif eos_c == 'stiff':
+            i=2 # If the eos is stiff make it green
+        
+        # Plot the data    
+        plt.plot(r, p*p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, m*m_scale, label = rf'$m_{{{eos_c}}}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
-
+        # Set the axis to logarithmic scale
+        #plt.xscale('log')
+        #plt.yscale('log')
+        
+        # Add labels and title
+        plt.title(rf'TOV solution for the {eos_c} eos.', loc='left', fontsize=15, fontweight='bold')
+        plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+        plt.ylabel(r'$p\cdot 10^5$ $\left[ M_{\odot}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
+        plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
+        plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
+        
+        # Set limits
+        #plt.xlim(0, 13.852)
+        #plt.ylim(0, 3)
+        
+        # Add grid
+        #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+        
+        # Configure ticks for all four sides
+        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+        plt.minorticks_on()
+        
+        # Customize tick spacing for more frequent ticks on x-axis
+        #plt.gca().set_xticks(np.arange(0, 13.852, 1))  # Major x ticks 
+        #plt.gca().set_yticks(np.arange(0, 3.01, 0.5))  # Major y ticks 
+        
+        # Set thicker axes
+        plt.gca().spines['top'].set_linewidth(1.5)
+        plt.gca().spines['right'].set_linewidth(1.5)
+        plt.gca().spines['bottom'].set_linewidth(1.5)
+        plt.gca().spines['left'].set_linewidth(1.5)
+        
+        # Add a legend
+        plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
+        
+        # Save the plot as a PDF
+        plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{p_c}.pdf", format="pdf", bbox_inches="tight")
+        
+        plt.tight_layout()
+        plt.show()
