@@ -227,6 +227,59 @@ def TOV_solver(y0, r_range, h):
 
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values, R_A)
 
+def MR_curve(pc_range, alpha, r_range, h, n):
+    """
+    Creates the mass radius curve of a family of 2-fluid stars by solving the TOV equations.
+    The different masses are calculating by changing the central pressure of fluid A and mantaining the alpha value of fluid B. 
+
+    Parameters
+    ----------
+    pc_range : tuple
+        Range of central pressures to integrate: (pc_start, pc_end)
+    alpha : float
+        Relationship between the central pressure of fluid B and fluid A: pc_B = alpha * pc_A
+    r_range : tuple
+        Range of radius integration: (r_0, r_max)
+    h : float
+        integration step.
+    n : int
+        Number of datapoints of the curve.
+
+    Returns
+    -------
+    R_values : array
+        Array containig the radius of the stars.
+    M_values : array
+        Array containing the total masses of the stars.
+    MA_values : array
+        Array containing the mass of fluid A of the stars.
+    MB_values : array
+        Array containing the mass of fluid B of the stars.
+    """
+    pc_start, pc_end = pc_range
+    pc_list = np.geomspace(pc_start, pc_end, n) 
+    R_values = []
+    M_values = []
+    MA_values = []
+    MB_values = []
+    cont = 0
+    for pc in pc_list:
+        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
+        
+        R_i = R_A
+        M_i = m_i[-1]
+        MA_i = m_a[-1]
+        MB_i = m_b[-1]
+        
+        R_values.append(R_i)
+        M_values.append(M_i)
+        MA_values.append(MA_i)
+        MB_values.append(MB_i)
+        
+        cont += 1
+        print(cont)
+    
+    return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
 ###############################################################################
 # Define the parameters
 ###############################################################################
@@ -258,7 +311,7 @@ if mode != "DEBUG":
             
     while True:
         try:
-            eos_choice = int(input("What EoS do you want to use?\n1: Soft\n2: Mid\n3: Stiff\nEnter choice (1-3): "))
+            eos_choice = int(input("What EoS do you want to use?\n1: Soft\n2: Middle\n3: Stiff\nEnter choice (1-3): "))
             eos_options = {1: 'soft', 2: 'mid', 3: 'stiff'}
             if eos_choice not in eos_options:
                 raise ValueError("Invalid choice. Enter 1 for Soft, 2 for Mid, or 3 for Stiff.")
@@ -297,7 +350,6 @@ else:
     mode, data_type, eos_choice, param_choice, param_value, central_pressure = (1, 3, 'soft', 'a', 0.09, 3e-5)
     
 print("\nUser Inputs:", mode, data_type, eos_choice, param_choice, param_value, central_pressure)
-
 
 ###############################################################################
 # Create the data
