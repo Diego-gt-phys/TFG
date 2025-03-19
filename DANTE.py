@@ -170,7 +170,7 @@ def RK4O_with_stop (y0, r_range, h):
         elif y_next[1] <= y0[1]*1e-10 and R_A == 0:  # If fluid A's pressure drops to 0, keep it that way
             y_next[1] = 0
             R_A = r
-            print("The star has a Halo of Dark Matter")
+            print("The star has a Halo of Dark Matter") #DEBUG
             
         elif y_next[1] <= y0[1]*1e-10 and R_A != 0:  # If fluid A's pressure drops to 0, keep it that way
             y_next[1] = 0
@@ -185,7 +185,7 @@ def RK4O_with_stop (y0, r_range, h):
         
     if R_A == 0:
         R_A = r_values[-1]
-        print("The star has a core of Dark Matter")
+        print("The star has a core of Dark Matter") #DEBUG
         
     return (np.array(r_values), np.array(y_values), R_A)
 
@@ -365,8 +365,8 @@ def get_inputs():
             central_pressure = None
                 
     else:
-        print("Using DEBUG data...")
-        mode, data_type, eos_choice, param_choice, param_value, central_pressure = (1, 3, 'soft', 'a', 0.09, 3e-5)
+        print("Using DEBUG data")
+        mode, data_type, eos_choice, param_choice, param_value, central_pressure = (0, 1, 'soft', None, None, 3e-5)
         
     return mode, data_type, eos_choice, param_choice, param_value, central_pressure
 
@@ -385,7 +385,7 @@ print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 ###############################################################################
 if mode == 0:
     
-    if d_type == 1: # Slve the TOV for fluid A
+    if d_type == 1: # Solve the TOV for fluid A
         eos_data = pd.read_excel(f"data_eos/eos_{eos_c}.xlsx")
         rho_data = eos_data['Density'].values
         p_data = eos_data['Pressure'].values
@@ -398,8 +398,9 @@ if mode == 0:
         data["m_A"] = m_A
         data["m_B"] = m_B
         data["R_A"] = R_A
-        
-        
+        df = pd.DataFrame(data)
+        df.to_csv(f"data/{d_type}_{eos_c}_{p_c}", index=False)
+        print("Data saved")
 
 
 
