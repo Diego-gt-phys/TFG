@@ -29,9 +29,11 @@ import scipy.optimize as opt # Needed to find the values od lambda
 
 # Physical parameters (solar mass = 1.98847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
+
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
-Gamma = 5/3
-K = 8.016548581726 # Polytropic constant for m = 1GeV, it has units of (km)^2/(solar mass)^(2/3)
+DM_mass = 1 # Mass of dark matter particle in GeV
+Gamma = 5/3 # Polytropic coeficient for a degenetare (T=0) IFG
+K = ((DM_mass)**(-8/3))*8.0165485819726 # Polytropic constant for a degenetare (T=0) IFG
 
 ###############################################################################
 # Define the functions
@@ -256,6 +258,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
     MB_values : array
         Array containing the mass of fluid B of the stars.
     """
+    
     pc_start, pc_end = pc_range
     pc_list = np.geomspace(pc_start, pc_end, n) 
     R_values = []
@@ -263,6 +266,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
     MA_values = []
     MB_values = []
     cont = 0
+    
     for pc in pc_list:
         r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
         
@@ -281,15 +285,20 @@ def MR_curve(pc_range, alpha, r_range, h, n):
     
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
 
-def get_inputs():
+def get_inputs(mode_DB, data_type_DB, eos_choice_DB, param_choice_DB, param_value_DB, central_pressure_DB):
     """
     Prompts the user for input parameters to configure the DANTE solver.
-    
+
+    Parameters
+    ----------
+    Same deffinition as the returns.
+    This parameters are used as configuration data for the DEBUG mode.
+
     Raises
     ------
     ValueError
         If the user provides an invalid input that does not match the expected options.
-    
+
     Returns
     -------
     mode : int or str
@@ -303,7 +312,6 @@ def get_inputs():
     param_value : float or None
         The value of the chosen DM parameter or None if not applicable.
     central_pressure : float or None
-        The central pressure value or None if not applicable.
     """
     while True:
         try:
@@ -366,17 +374,65 @@ def get_inputs():
                 
     else:
         print("Using DEBUG data")
-        mode, data_type, eos_choice, param_choice, param_value, central_pressure = (1, 1, 'stiff', None, None, 3e-5)
+        mode, data_type, eos_choice, param_choice, param_value, central_pressure = (mode_DB, data_type_DB, eos_choice_DB, param_choice_DB, param_value_DB, central_pressure_DB)
         
     return mode, data_type, eos_choice, param_choice, param_value, central_pressure
 
+def save_TOV_data_1f (d_type, eos_c, p_c):
+    """
+    Solves the TOV equation for 1 fluid and saves the data as a .csv file.
+    It has the choice to solve both a NS of a DM star.
+    It saves the data in a folder called data. This folder must be in the same repository as this code.
+
+    Parameters
+    ----------
+    d_type : int
+        if d_type == 1, then we are solving a neutron star.
+        if d_type == 2, then we are solving a dark matter star.
+    eos_c : str
+        Equation of State of the neutron star. The options are 'soft', 'middle', 'stiff'.
+        Due to how the code is structure, for a dark matter star, this EoS must be specified but it has no impact.
+    p_c : float
+        Pressure at r=0 of the fluid.
+
+    Returns
+    -------
+    df : Pandas DataFrame
+        DF containing all the data of the solved model.
+
+    """
+    data = {}
+    
+    if d_type == 1: # Solution to the TOV for fluid A
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0,p_c,0,0,0), (1e-6, 100), 1e-3)
+    
+    elif d_type == 2: # Solution to the TOV for fluid B
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0,0,p_c,0,0), (1e-6, 100), 1e-3)
+    
+    data["r"] = r
+    data["m"] = m
+    data["p_A"] = p_A
+    data["p_B"] = p_B
+    data["m_A"] = m_A
+    data["m_B"] = m_B
+    data["R_A"] = R_A
+    df = pd.DataFrame(data)
+    
+    if d_type == 1:
+        df.to_csv(f"data\{d_type}_{eos_c}_{p_c}.csv", index=False)
+        
+    elif d_type == 2:
+        df.to_csv(f"data\{d_type}_{p_c}_{DM_mass}.csv", index=False)
+    
+    return df
+    
 ###############################################################################
 # Define the parameters
 ###############################################################################
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs()
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 2, None, None, None, 1e-7)
 
 print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 
@@ -386,21 +442,16 @@ print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 
 if mode == 0:
     
-    if d_type == 1: # Solution to the TOV for fluid A
+    if d_type in [1,2]: # Solution to the TOV for 1 fluid
+        
+        if d_type == 2:
+            eos_c = 'soft'
+        
         eos_data = pd.read_excel(f"data_eos\eos_{eos_c}.xlsx")
         rho_data = eos_data['Density'].values
         p_data = eos_data['Pressure'].values
-        data = {}
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0,p_c,0,0,0), (1e-6, 100), 1e-3)
-        data["r"] = r
-        data["m"] = m
-        data["p_A"] = p_A
-        data["p_B"] = p_B
-        data["m_A"] = m_A
-        data["m_B"] = m_B
-        data["R_A"] = R_A
-        df = pd.DataFrame(data)
-        df.to_csv(f"data\{d_type}_{eos_c}_{p_c}.csv", index=False)
+        df = save_TOV_data_1f(d_type, eos_c, p_c)
+        print(df)
         print("Data saved")
 
 ###############################################################################
@@ -409,29 +460,40 @@ if mode == 0:
 
 if mode == 1:
     
-    if d_type == 1: # Solution to the TOV for fluid A
-        df = pd.read_csv(f"data\{d_type}_{eos_c}_{p_c}.csv")
-        r = df["r"]
-        m = df["m"]
-        p = df["p_A"]
-        
+    if d_type in [1,2]: # Solution to the TOV for 1 fluid
+    
+        if d_type == 1:
+            df = pd.read_csv(f"data\{d_type}_{eos_c}_{p_c}.csv")
+            r = df["r"]
+            m = df["m"]
+            p = df["p_A"]
+            
+        elif d_type == 2:
+            df= pd.read_csv(f"data\{d_type}_{p_c}_{DM_mass}.csv")
+            r = df["r"]
+            m = df["m"]
+            p = df["p_B"]
+            eos_c = "DM"
+            
         # Scale factors
-        p_scale = 1e5
+        p_scale = 7
         m_scale = 1
         
         # Configure the plot
         plt.figure(figsize=(9.71, 6))
         colors = sns.color_palette("Set1", 10)
         if eos_c == "soft": 
-            i=0 # If the eos is soft make it red
+            c=0 # If the eos is soft make it red
         elif eos_c == 'middle':
-            i=1 # If the eos is middle make it blue
+            c=1 # If the eos is middle make it blue
         elif eos_c == 'stiff':
-            i=2 # If the eos is stiff make it green
+            c=2 # If the eos is stiff make it green
+        elif eos_c == "DM":
+            c=3
         
         # Plot the data    
-        plt.plot(r, p*p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m*m_scale, label = rf'$m_{{{eos_c}}}(r)$', color = colors[i], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, p*10**p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, m*m_scale, label = rf'$m_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
 
         # Set the axis to logarithmic scale
         #plt.xscale('log')
@@ -440,7 +502,7 @@ if mode == 1:
         # Add labels and title
         plt.title(rf'TOV solution for the {eos_c} eos.', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
-        plt.ylabel(r'$p\cdot 10^5$ $\left[ M_{\odot}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
+        plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
         plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
@@ -470,7 +532,11 @@ if mode == 1:
         plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
         
         # Save the plot as a PDF
-        plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{p_c}.pdf", format="pdf", bbox_inches="tight")
+        if d_type == 1:
+            plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{p_c}.pdf", format="pdf", bbox_inches="tight")
+            
+        elif d_type == 2:
+            plt.savefig(f"preliminary_figures\{d_type}_{p_c}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
         
         plt.tight_layout()
         plt.show()
