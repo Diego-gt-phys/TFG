@@ -303,7 +303,7 @@ def get_inputs(mode_DB, data_type_DB, eos_choice_DB, param_choice_DB, param_valu
         0 for calculating data, 1 for plotting data, or "DEBUG" mode.
     data_type : int
         1 for TOV of fluid A, 2 for TOV of fluid B, 3 for both fluids, 4 for MR curves.
-    eos_choice : str
+    eos_choice : str or None
         'soft', 'mid', or 'stiff' for the equation of state.
     param_choice : str or None
         'a' for Alpha, 'l' for Lambda, or None if not applicable.
@@ -424,7 +424,47 @@ def save_TOV_data_1f (d_type, eos_c, p_c):
     
     return df
     
-
+def save_TOV_data_2f (eos_c, param_c, param_val, p_c):
+    """
+    Solves the TOV equation for 2 fluid star and saves the data as a .csv file.
+    The amount of DM is controlled by the parameter choice: alpha or lambda.
+        
+    Parameters
+    ----------
+    eos_c : str
+        Equation of State of the neutron star. The options are 'soft', 'middle', 'stiff'.
+    param_c : str
+        Choice of paremeter. The options are alpha(a) or lambda(l).
+    param_val : float
+        Value of previuslychosen paremeter.
+    p_c : float
+        Value of central pressure of fluid A.
+    
+    Returns
+    -------
+    df : Pandas DataFrame
+        DF containing all the data of the solved model.
+    """
+    data = {}
+    if param_c == "a": # Usamos parámetro alpha
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0,p_c, param_val*p_c,0,0), (1e-6, 100), 1e-3)
+        
+    elif param_c == "c":
+        print("Work In Pogress")
+    
+    data["r"] = r
+    data["m"] = m
+    data["p_A"] = p_A
+    data["p_B"] = p_B
+    data["m_A"] = m_A
+    data["m_B"] = m_B
+    data["R_A"] = R_A
+    df = pd.DataFrame(data)
+        
+    if param_c == "a":
+        df.to_csv(f"data\{d_type}_{eos_c}_{param_c}_{param_val}_{p_c}_{DM_mass}.csv", index=False)
+    
+    return df
 
 ###############################################################################
 # Define the parameters
@@ -432,7 +472,7 @@ def save_TOV_data_1f (d_type, eos_c, p_c):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 2, None, None, None, 1e-7)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'soft', 'a', 0.1, 3e-5)
 
 print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 
@@ -452,7 +492,17 @@ if mode == 0:
         p_data = eos_data['Pressure'].values
         df = save_TOV_data_1f(d_type, eos_c, p_c)
         print(df)
-        print("Data saved")
+        print("\nData Saved.")
+        
+    if d_type == 3:
+        
+        eos_data = pd.read_excel(f"data_eos\eos_{eos_c}.xlsx")
+        rho_data = eos_data['Density'].values
+        p_data = eos_data['Pressure'].values              
+        df = save_TOV_data_2f(eos_c, param_c, param_val, p_c)
+        print(df)
+        print("\nData Saved.")
+                        
 
 ###############################################################################
 # Plot the data
@@ -461,7 +511,8 @@ if mode == 0:
 if mode == 1:
     
     if d_type in [1,2]: # Solution to the TOV for 1 fluid
-    
+            
+        #Read the data
         if d_type == 1:
             df = pd.read_csv(f"data\{d_type}_{eos_c}_{p_c}.csv")
             r = df["r"]
@@ -476,7 +527,7 @@ if mode == 1:
             eos_c = "DM"
             
         # Scale factors
-        p_scale = 5
+        p_scale = 7
         m_scale = 1
         
         # Configure the plot
@@ -494,7 +545,7 @@ if mode == 1:
         # Plot the data    
         plt.plot(r, p*10**p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m*m_scale, label = rf'$m_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-
+        
         # Set the axis to logarithmic scale
         #plt.xscale('log')
         #plt.yscale('log')
@@ -507,8 +558,8 @@ if mode == 1:
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        #plt.xlim(0, 13.852)
-        #plt.ylim(0, 3)
+        plt.xlim(0, 23.15)
+        plt.ylim(0, 1)
         
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -519,8 +570,90 @@ if mode == 1:
         plt.minorticks_on()
         
         # Customize tick spacing for more frequent ticks on x-axis
-        #plt.gca().set_xticks(np.arange(0, 13.852, 1))  # Major x ticks 
-        #plt.gca().set_yticks(np.arange(0, 3.01, 0.5))  # Major y ticks 
+        plt.gca().set_xticks(np.arange(0, 23.15, 2))  # Major x ticks 
+        plt.gca().set_yticks(np.arange(0, 1, 0.1))  # Major y ticks 
+        
+        # Set thicker axes
+        plt.gca().spines['top'].set_linewidth(1.5)
+        plt.gca().spines['right'].set_linewidth(1.5)
+        plt.gca().spines['bottom'].set_linewidth(1.5)
+        plt.gca().spines['left'].set_linewidth(1.5)
+        
+        # Add a legend
+        plt.legend(fontsize=12, frameon=False, ncol = 1) #  loc='upper right',
+        
+        # Save the plot as a PDF
+        if d_type == 1:
+            plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{p_c}.pdf", format="pdf", bbox_inches="tight")
+            
+        elif d_type == 2:
+            plt.savefig(f"preliminary_figures\{d_type}_{p_c}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
+        
+        plt.tight_layout()
+        plt.show()
+    
+    if d_type == 3: # Solution to the TOV for 2 fluid
+        
+        # Read the data
+        df = pd.read_csv(f"data\{d_type}_{eos_c}_{param_c}_{param_val}_{p_c}_{DM_mass}.csv")
+        
+        r = df["r"]
+        p_A = df["p_A"]
+        p_B = df["p_B"]
+        m = df["m"]
+        m_A = df["m_A"]
+        m_B = df["m_B"]
+        
+        # Scale factors
+        p_scale = 5
+        m_scale = 1
+        
+        # Configure the plot
+        plt.figure(figsize=(9.71, 6))
+        colors = sns.color_palette("Set1", 10)
+        if eos_c == "soft": 
+            c=0 
+        elif eos_c == 'middle':
+            c=1 
+        elif eos_c == 'stiff':
+            c=2
+        
+        # Plot the data
+        plt.plot(r, p_A*10**p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, m_A*m_scale, label = rf'$m_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, p_B*10**p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        
+        # Set the axis to logarithmic scale
+        #plt.xscale('log')
+        #plt.yscale('log')
+        
+        # Add labels and title
+        if param_c == 'a':
+            plt.title(rf'TOV solution for a DANS. The BM obeys the {eos_c} and $\alpha = {param_val}$.', loc='left', fontsize=15, fontweight='bold')
+        elif param_c == 'l':
+            plt.title(rf'TOV solution for a DANS. The BM obeys the {eos_c} and $\lambda = {param_val}$.', loc='left', fontsize=15, fontweight='bold')
+        plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+        plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
+        plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
+        plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
+        
+        # Set limits
+        #plt.xlim(0, 23.15)
+        #plt.ylim(0, 1)
+        
+        # Add grid
+        #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
+        
+        # Configure ticks for all four sides
+        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+        plt.minorticks_on()
+        
+        # Customize tick spacing for more frequent ticks on x-axis
+        #plt.gca().set_xticks(np.arange(0, 23.15, 2))  # Major x ticks 
+        #plt.gca().set_yticks(np.arange(0, 1, 0.1))  # Major y ticks 
         
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
@@ -532,11 +665,8 @@ if mode == 1:
         plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
         
         # Save the plot as a PDF
-        if d_type == 1:
-            plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{p_c}.pdf", format="pdf", bbox_inches="tight")
-            
-        elif d_type == 2:
-            plt.savefig(f"preliminary_figures\{d_type}_{p_c}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
-        
+        plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{param_c}_{param_val}_{p_c}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
+
         plt.tight_layout()
         plt.show()
+        
