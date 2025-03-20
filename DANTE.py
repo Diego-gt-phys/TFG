@@ -224,6 +224,8 @@ def TOV_solver(y0, r_range, h):
     p_B_values = y_values[:, 2]
     m_A_values = y_values[:, 3]
     m_B_values = y_values[:, 4]
+    
+    print("TOV solved")
 
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values, R_A)
 
@@ -497,8 +499,11 @@ def save_TOV_data_2f (eos_c, param_c, param_val, p_c):
     if param_c == "a": # Usamos parámetro alpha
         r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0,p_c, param_val*p_c,0,0), (1e-6, 100), 1e-3)
         
-    elif param_c == "c":
-        print("Work In Pogress")
+    elif param_c == "l":
+        # Find the alpha_target
+        alpha = find_lambda(p_c, param_val)
+        print(f"\nValue of alpha found: {alpha}")
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0,p_c, alpha*p_c,0,0), (1e-6, 100), 1e-3)
     
     data["r"] = r
     data["m"] = m
@@ -509,8 +514,7 @@ def save_TOV_data_2f (eos_c, param_c, param_val, p_c):
     data["R_A"] = R_A
     df = pd.DataFrame(data)
         
-    if param_c == "a":
-        df.to_csv(f"data\{d_type}_{eos_c}_{param_c}_{param_val}_{p_c}_{DM_mass}.csv", index=False)
+    df.to_csv(f"data\{d_type}_{eos_c}_{param_c}_{param_val}_{p_c}_{DM_mass}.csv", index=False)
     
     return df
 
@@ -520,9 +524,10 @@ def save_TOV_data_2f (eos_c, param_c, param_val, p_c):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'soft', 'a', 0.0966348624122434, 1e-5)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'soft', 'l', 0.1, 1e-5)
 
 print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
+print("")
 
 ###############################################################################
 # Create the data
