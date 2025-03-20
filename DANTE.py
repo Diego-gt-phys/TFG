@@ -283,6 +283,54 @@ def MR_curve(pc_range, alpha, r_range, h, n):
     
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
 
+def find_lambda (pc, l_target):
+    """
+    Finds the alpha parameter for which lambda becomes lambda_target by using the secant method for finding the roots of a function.
+
+    Parameters
+    ----------
+    pc : float
+        Value of central pressure of fluid A.
+    l_target : float
+        Target value of lambda.
+
+    Raises
+    ------
+    ValueError
+        Raises an error when the root finding algorithm does not converge.
+
+    Returns
+    -------
+    TYPE
+        Value of alpha for which lambda satisfies the target condition.
+
+    """
+    def f(alpha):
+        """
+        Auxiliary function used to calculate the difference of lambda to a guiven lambda_target, as a function of alpha.
+        The rest of the parameters (pc) are set as guiven values.
+
+        Parameters
+        ----------
+        alpha : float
+            pc_B/p_A.
+
+        Returns
+        -------
+        float
+            differnce betwen lambda (M_B/M) and the target lambda.
+
+        """
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3)
+        l = m_B[-1]/m[-1]
+        return l-l_target
+    a_guess = l_target
+    result = opt.root_scalar(f, x0=a_guess, method='secant', x1=a_guess*1.1)
+    if result.converged:
+        return result.root
+    else:
+        raise ValueError("Root-finding did not converge")
+
 def get_inputs(mode_DB, data_type_DB, eos_choice_DB, param_choice_DB, param_value_DB, central_pressure_DB):
     """
     Prompts the user for input parameters to configure the DANTE solver.
@@ -472,7 +520,7 @@ def save_TOV_data_2f (eos_c, param_c, param_val, p_c):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'soft', 'a', 0.1, 3e-5)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'soft', 'a', 0.0966348624122434, 1e-5)
 
 print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 
@@ -656,7 +704,7 @@ if mode == 1:
         
         # Save the plot as a PDF
         plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{param_c}_{param_val}_{p_c}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
-
+        
         plt.tight_layout()
         plt.show()
         

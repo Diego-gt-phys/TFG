@@ -282,7 +282,28 @@ p_data = eos_data['Pressure'].values
 
 
 
-def find_lambda (pc, l_target, a_guess):
+def find_lambda (pc, l_target):
+    """
+    Finds the alpha parameter for which lambda becomes lambda_target by using the secant method for finding the roots of a function.
+
+    Parameters
+    ----------
+    pc : float
+        Value of central pressure of fluid A.
+    l_target : float
+        Target value of lambda.
+
+    Raises
+    ------
+    ValueError
+        Raises an error when the root finding algorithm does not converge.
+
+    Returns
+    -------
+    TYPE
+        Value of alpha for which lambda satisfies the target condition.
+
+    """
     def f(alpha):
         """
         Auxiliary function used to calculate the difference of lambda to a guiven lambda_target, as a function of alpha.
@@ -302,16 +323,17 @@ def find_lambda (pc, l_target, a_guess):
         r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3)
         l = m_B[-1]/m[-1]
         return l-l_target
+    a_guess = l_target
     result = opt.root_scalar(f, x0=a_guess, method='secant', x1=a_guess*1.1)
     if result.converged:
         return result.root
     else:
         raise ValueError("Root-finding did not converge")
         
-pc = 3e-5
-l_target = 0.01
-a_guess = 0.1
+pc = 1e-5
+l_target = 0.05
+#a_guess = 0.01
 
-alpha = find_lambda(pc, l_target, a_guess)
+alpha = find_lambda(pc, l_target)
 
 print(f"El valor de alpha para lamba={l_target} es: {alpha}")
