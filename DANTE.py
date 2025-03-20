@@ -598,7 +598,10 @@ if mode == 1:
         #plt.yscale('log')
         
         # Add labels and title
-        plt.title(rf'TOV solution for the {eos_c} eos.', loc='left', fontsize=15, fontweight='bold')
+        if d_type == 1:
+            plt.title(rf'TOV solution for the {eos_c} eos.', loc='left', fontsize=15, fontweight='bold')
+        elif d_type == 2:
+            plt.title(rf'TOV solution for a {eos_c} star with: $m_{{\chi}}={DM_mass} [GeV]$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
         plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
         plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
@@ -674,17 +677,17 @@ if mode == 1:
         
         # Add labels and title
         if param_c == 'a':
-            plt.title(rf'TOV solution for a DANS. The BM obeys the {eos_c} and $\alpha = {param_val}$.', loc='left', fontsize=15, fontweight='bold')
+            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\alpha = {param_val},$ $m_{{\chi}}=1[GeV]$', loc='left', fontsize=15, fontweight='bold')
         elif param_c == 'l':
-            plt.title(rf'TOV solution for a DANS. The BM obeys the {eos_c} and $\lambda = {param_val}$.', loc='left', fontsize=15, fontweight='bold')
+            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\lambda = {param_val},$ $m_{{\chi}}=1[GeV]$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
         plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
         plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        #plt.xlim(0, 23.15)
-        #plt.ylim(0, 1)
+        plt.xlim(0, 11.12)
+        plt.ylim(0, 1)
         
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -695,8 +698,8 @@ if mode == 1:
         plt.minorticks_on()
         
         # Customize tick spacing for more frequent ticks on x-axis
-        #plt.gca().set_xticks(np.arange(0, 23.15, 2))  # Major x ticks 
-        #plt.gca().set_yticks(np.arange(0, 1, 0.1))  # Major y ticks 
+        plt.gca().set_xticks(np.arange(0, 11.12, 1))  # Major x ticks 
+        plt.gca().set_yticks(np.arange(0, 1, 0.1))  # Major y ticks 
         
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
