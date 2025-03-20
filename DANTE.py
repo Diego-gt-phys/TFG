@@ -172,7 +172,6 @@ def RK4O_with_stop (y0, r_range, h):
         elif y_next[1] <= y0[1]*1e-10 and R_A == 0:  # If fluid A's pressure drops to 0, keep it that way
             y_next[1] = 0
             R_A = r
-            print("The star has a Halo of Dark Matter") #DEBUG
             
         elif y_next[1] <= y0[1]*1e-10 and R_A != 0:  # If fluid A's pressure drops to 0, keep it that way
             y_next[1] = 0
@@ -187,7 +186,6 @@ def RK4O_with_stop (y0, r_range, h):
         
     if R_A == 0:
         R_A = r_values[-1]
-        print("The star has a core of Dark Matter") #DEBUG
         
     return (np.array(r_values), np.array(y_values), R_A)
 
@@ -426,6 +424,8 @@ def save_TOV_data_1f (d_type, eos_c, p_c):
     
     return df
     
+
+
 ###############################################################################
 # Define the parameters
 ###############################################################################
