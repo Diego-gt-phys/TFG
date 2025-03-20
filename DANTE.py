@@ -533,14 +533,8 @@ if mode == 1:
         # Configure the plot
         plt.figure(figsize=(9.71, 6))
         colors = sns.color_palette("Set1", 10)
-        if eos_c == "soft": 
-            c=0 # If the eos is soft make it red
-        elif eos_c == 'middle':
-            c=1 # If the eos is middle make it blue
-        elif eos_c == 'stiff':
-            c=2 # If the eos is stiff make it green
-        elif eos_c == "DM":
-            c=3
+        eos_colors = {"soft": 0, "middle": 1, "stiff": 2, "DM": 3}
+        c = eos_colors[eos_c]
         
         # Plot the data    
         plt.plot(r, p*10**p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
@@ -611,12 +605,8 @@ if mode == 1:
         # Configure the plot
         plt.figure(figsize=(9.71, 6))
         colors = sns.color_palette("Set1", 10)
-        if eos_c == "soft": 
-            c=0 
-        elif eos_c == 'middle':
-            c=1 
-        elif eos_c == 'stiff':
-            c=2
+        eos_colors = {"soft": 0, "middle": 1, "stiff": 2}
+        c = eos_colors[eos_c]
         
         # Plot the data
         plt.plot(r, p_A*10**p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
