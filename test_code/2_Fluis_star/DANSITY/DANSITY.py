@@ -23,7 +23,7 @@ from scipy.interpolate import interp1d
 # Physical parameters (solar mass = 198847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
-K = 10
+K = 8.0165485819726
 
 ###############################################################################
 # Define the functions
@@ -273,7 +273,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 # Define the parameters
 ###############################################################################
 
-CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.09291564808982507, 3e-5)
+CHOICE, TYPE, EOS, ALPHA, PC = (1, "TOV", "soft", 0.024761006983534364, 3e-5)
 
 ###############################################################################
 # Create the data
@@ -360,7 +360,7 @@ elif CHOICE == 1:
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        plt.xlim(0, 9.43)
+        plt.xlim(0, 9.633)
         plt.ylim(0, 3)
 
         # Add grid
@@ -372,7 +372,7 @@ elif CHOICE == 1:
         plt.minorticks_on()
 
         # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(0, 9.43, 1))  # Major x ticks 
+        plt.gca().set_xticks(np.arange(0, 9.633, 1))  # Major x ticks 
         plt.gca().set_yticks(np.arange(0, 3.01, 0.5))  # Major y ticks 
 
         # Set thicker axes

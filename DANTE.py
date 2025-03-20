@@ -476,7 +476,7 @@ if mode == 1:
             eos_c = "DM"
             
         # Scale factors
-        p_scale = 7
+        p_scale = 5
         m_scale = 1
         
         # Configure the plot

@@ -25,7 +25,7 @@ import scipy.optimize as opt # Needed to find the values od lambda
 # Physical parameters (solar mass = 1.98847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
-K = 10
+K = 8.0165485819726
 
 ###############################################################################
 # Define the functions
@@ -309,7 +309,7 @@ def find_lambda (pc, l_target, a_guess):
         raise ValueError("Root-finding did not converge")
         
 pc = 3e-5
-l_target = 0.05
+l_target = 0.01
 a_guess = 0.1
 
 alpha = find_lambda(pc, l_target, a_guess)
