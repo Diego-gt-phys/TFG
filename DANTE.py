@@ -544,6 +544,8 @@ def save_MR_data (eos_c, param_c, param_val):
     
     if param_c == 'a':
         R, M, M_A, M_B = MR_curve(pc_range, param_val, (1e-6, 100), 1e-3, 20)
+    elif param_c == 'l':
+        R, M, M_A, M_B = MR_curve_lambda(pc_range, param_val, (1e-6, 100), 1e-3, 20)
         
     data["R"] = R
     data["M"] = M
@@ -554,6 +556,62 @@ def save_MR_data (eos_c, param_c, param_val):
     
     return df
 
+def MR_curve_lambda (pc_range, l, r_range, h, n):
+    """
+    Creates the mass radius curve of a family of 2-fluid stars by solving the TOV equations.
+    The amount of matter B inside the star is fixed for every point by the value of l
+    
+    Parameters
+    ----------
+    pc_range : tuple
+        Range of central pressures to integrate: (pc_start, pc_end)
+    l : float
+        Fraction of the total mass of B inside the star: l = M_B/M
+    r_range : tuple
+        Range of radius integration: (r_0, r_max)
+    h : float
+        integration step.
+    n : int
+        Number of datapoints of the curve.
+        
+    Returns
+    -------
+    R_values : array
+        Array containig the radius of the stars.
+    M_values : array
+        Array containing the total masses of the stars.
+    MA_values : array
+        Array containing the mass of fluid A of the stars.
+    MB_values : array
+        Array containing the mass of fluid B of the stars.
+    """
+    pc_start, pc_end = pc_range
+    pc_list = np.geomspace(pc_start, pc_end, n) 
+    R_values = []
+    M_values = []
+    MA_values = []
+    MB_values = []
+    cont = 0
+    
+    for pc in pc_list:
+        alpha = find_lambda(pc, l)
+        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
+        
+        R_i = R_A
+        M_i = m_i[-1]
+        MA_i = m_a[-1]
+        MB_i = m_b[-1]
+        
+        R_values.append(R_i)
+        M_values.append(M_i)
+        MA_values.append(MA_i)
+        MB_values.append(MB_i)
+        
+        cont += 1
+        print(cont)
+    
+    return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
+    
 ###############################################################################
 # Define the parameters
 ###############################################################################
@@ -577,12 +635,14 @@ if mode == 0:
     eos_data = pd.read_excel(f"data_eos\eos_{eos_c}.xlsx")
     rho_data = eos_data['Density'].values
     p_data = eos_data['Pressure'].values
+    
     if d_type in [1,2]:
         df = save_TOV_data_1f(d_type, eos_c, p_c)
     elif d_type == 3:
         df = save_TOV_data_2f(eos_c, param_c, param_val, p_c)
     elif d_type == 4:
         df = save_MR_data(eos_c, param_c, param_val)
+    
     print(df)
     print("Data Saved.")               
 
@@ -766,9 +826,9 @@ if mode == 1:
         
         # Add labels and title
         if param_c == 'a':
-            plt.title(rf'MR curve for a DANS with the {eos_c} EoS and $\alpha = {param_val}$', loc='left', fontsize=15, fontweight='bold')
+            plt.title(rf'MR curve for a DANS with: $EoS={eos_c},$ $\alpha = {param_val},$ $m_{{\chi}}=1[GeV]$', loc='left', fontsize=15, fontweight='bold')
         elif param_c == 'l':
-            plt.title(rf'MR curve for a DANS with the {eos_c} EoS and $\lambda = {param_val}', loc='left', fontsize=15, fontweight='bold')
+            plt.title(rf'MR curve for a DANS with: $EoS={eos_c},$ $\lambda = {param_val},$ $m_{{\chi}}=1[GeV]$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
         plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
         
