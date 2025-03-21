@@ -385,7 +385,7 @@ def get_inputs(mode_DB, data_type_DB, eos_choice_DB, param_choice_DB, param_valu
             while True:
                 try:
                     eos_choice = int(input("What EoS do you want to use?\n1: Soft\n2: Middle\n3: Stiff\nEnter choice (1-3): "))
-                    eos_options = {1: 'soft', 2: 'mid', 3: 'stiff'}
+                    eos_options = {1: 'soft', 2: 'middle', 3: 'stiff'}
                     if eos_choice not in eos_options:
                         raise ValueError("Invalid choice. Enter 1 for Soft, 2 for Mid, or 3 for Stiff.")
                     eos_choice = eos_options[eos_choice]
@@ -524,7 +524,7 @@ def save_TOV_data_2f (eos_c, param_c, param_val, p_c):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'soft', 'l', 0.1, 1e-5)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'stiff', 'l', 0.05, 1e-5)
 
 print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 print("")
@@ -608,8 +608,8 @@ if mode == 1:
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        plt.xlim(0, 23.15)
-        plt.ylim(0, 1)
+        #plt.xlim(0, 23.15)
+        #plt.ylim(0, 1)
         
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -620,8 +620,8 @@ if mode == 1:
         plt.minorticks_on()
         
         # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(0, 23.15, 2))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 1, 0.1))  # Major y ticks 
+        #plt.gca().set_xticks(np.arange(0, 23.15, 2))  # Major x ticks 
+        #plt.gca().set_yticks(np.arange(0, 1, 0.1))  # Major y ticks 
         
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
@@ -686,7 +686,7 @@ if mode == 1:
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        plt.xlim(0, 11.12)
+        plt.xlim(0, 12.74)
         plt.ylim(0, 1)
         
         # Add grid
@@ -698,8 +698,8 @@ if mode == 1:
         plt.minorticks_on()
         
         # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(0, 11.12, 1))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 1, 0.1))  # Major y ticks 
+        plt.gca().set_xticks(np.arange(0, 12.74, 1))  # Major x ticks 
+        plt.gca().set_yticks(np.arange(0, 1.01, 0.1))  # Major y ticks 
         
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
