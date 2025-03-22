@@ -618,7 +618,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 4, 'middle', 'l', 0.8, None)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(0, 4, 'stiff', 'l', 0.02, None)
 
 print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 print("")
@@ -838,28 +838,28 @@ if mode == 1:
         
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
-
+        
         # Configure ticks for all four sides
         plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
         plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
         plt.minorticks_on()
-
+        
         # Customize tick spacing for more frequent ticks on x-axis
         plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
         plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
-
+        
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
         plt.gca().spines['right'].set_linewidth(1.5)
         plt.gca().spines['bottom'].set_linewidth(1.5)
         plt.gca().spines['left'].set_linewidth(1.5)
-
+        
         # Add a legend
         plt.legend(fontsize=12, frameon=False, ncol = 1) #  loc='upper right',
-
+        
         # Save the plot as a PDF
         plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{param_c}_{param_val}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
-
+        
         plt.tight_layout()
         plt.show()
         
