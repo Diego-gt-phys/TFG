@@ -31,7 +31,7 @@ import scipy.optimize as opt # Needed to find the values od lambda
 G = 1.4765679173556 # G in units of km / solar masses
 
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
-DM_mass = 1 # Mass of dark matter particle in GeV
+DM_mass = 0.5 # Mass of dark matter particle in GeV
 Gamma = 5/3 # Polytropic coeficient for a degenetare (T=0) IFG
 K = ((DM_mass)**(-8/3))*8.0165485819726 # Polytropic constant for a degenetare (T=0) IFG
 
@@ -618,7 +618,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(0, 4, 'stiff', 'l', 0.02, None)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, "soft", "l", 0.1, 1e-05)
 
 print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 print("")
@@ -744,8 +744,8 @@ if mode == 1:
         m_B = df["m_B"]
         
         # Scale factors
-        p_scale = 3
-        m_scale = 1
+        p_scale = 5
+        m_scale = 2
         
         # Configure the plot
         plt.figure(figsize=(9.71, 6))
@@ -756,7 +756,7 @@ if mode == 1:
         # Plot the data
         plt.plot(r, p_A*10**p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_A*m_scale, label = rf'$m_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, p_B*10**p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+        plt.plot(r, 5*p_B*10**p_scale, label = r'$5 \cdot p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
         
@@ -766,17 +766,20 @@ if mode == 1:
         
         # Add labels and title
         if param_c == 'a':
-            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\alpha = {param_val},$ $m_{{\chi}}=1[GeV]$', loc='left', fontsize=15, fontweight='bold')
+            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\alpha = {param_val},$ $m_{{\chi}}={DM_mass}[GeV]$', loc='left', fontsize=15, fontweight='bold')
         elif param_c == 'l':
-            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\lambda = {param_val},$ $m_{{\chi}}=1[GeV]$', loc='left', fontsize=15, fontweight='bold')
+            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\lambda = {param_val},$ $m_{{\chi}}={DM_mass}[GeV]$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
-        plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
+        if m_scale == 1:
+            plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
+        else:
+            plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & ' rf'$m \cdot {m_scale}$' r'$\left[ M_{\odot}\right]$', fontsize=15, loc='center')
         plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        #plt.xlim(0, 12.74)
-        #plt.ylim(0, 1)
+        plt.xlim(0, 17.69)
+        plt.ylim(0, 1)
         
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -787,8 +790,8 @@ if mode == 1:
         plt.minorticks_on()
         
         # Customize tick spacing for more frequent ticks on x-axis
-        #plt.gca().set_xticks(np.arange(0, 12.74, 1))  # Major x ticks 
-        #plt.gca().set_yticks(np.arange(0, 1.01, 0.1))  # Major y ticks 
+        #plt.gca().set_xticks(np.arange(0, 11.1, 1))  # Major x ticks 
+        #plt.gca().set_yticks(np.arange(0, 1.01, 0.2))  # Major y ticks 
         
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
