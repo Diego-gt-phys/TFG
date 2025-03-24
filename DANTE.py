@@ -31,7 +31,7 @@ import scipy.optimize as opt # Needed to find the values od lambda
 G = 1.4765679173556 # G in units of km / solar masses
 
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
-DM_mass = 1.5 # Mass of dark matter particle in GeV
+DM_mass = 1 # Mass of dark matter particle in GeV
 Gamma = 5/3 # Polytropic coeficient for a degenetare (T=0) IFG
 K = ((DM_mass)**(-8/3))*8.0165485819726 # Polytropic constant for a degenetare (T=0) IFG
 
@@ -618,7 +618,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, "soft", "l", 0.1, 1e-05)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, "middle", "l", 0.8, 3e-05)
 
 print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
 print("")

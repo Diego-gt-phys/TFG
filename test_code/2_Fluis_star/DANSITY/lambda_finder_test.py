@@ -276,7 +276,7 @@ def MR_curve(pc_range, alpha, r_range, h, n):
 ###############################################################################
 
 # Read the data of soft_EoS
-eos_data = pd.read_excel("eos_middle.xlsx")
+eos_data = pd.read_excel("eos_soft.xlsx")
 rho_data = eos_data['Density'].values
 p_data = eos_data['Pressure'].values
 
@@ -330,9 +330,9 @@ def find_lambda (pc, l_target):
     else:
         raise ValueError("Root-finding did not converge")
         
-pc = 3e-6
-l_target = 0.05
-#a_guess = 0.01
+pc = 1e-5
+l_target = 0.1
+#a_guess = 0.0
 
 alpha = find_lambda(pc, l_target)
 
