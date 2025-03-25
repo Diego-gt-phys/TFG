@@ -618,7 +618,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'soft', 'l', 0.1, 1e-04)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'middle', 'l', 0.05, 1e-05)
 
 print(f"\nUser Inputs: {mode}, {d_type}, '{eos_c}', '{param_c}', {param_val}, {p_c}")
 print("")
@@ -744,7 +744,7 @@ if mode == 1:
         m_B = df["m_B"]
         
         # Scale factors
-        p_scale = 4
+        p_scale = 5
         m_scale = 1
         
         # Configure the plot

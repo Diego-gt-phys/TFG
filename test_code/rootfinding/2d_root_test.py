@@ -17,10 +17,12 @@ import scipy.optimize as opt # Needed to find the values od lambda
 # Physical parameters (solar mass = 1.98847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
-K = 92.29
+DM_mass = 1 # Mass of dark matter particle in GeV
+Gamma = 5/3 # Polytropic coeficient for a degenetare (T=0) IFG
+K = ((DM_mass)**(-8/3))*8.0165485819726 # Polytropic constant for a degenetare (T=0) IFG
 
 ###############################################################################
-# Define the functions
+# Essental Functions
 ###############################################################################
 
 def eos_A (p_A): # The fluid A is the Neutron matter
@@ -213,31 +215,27 @@ def TOV_solver(y0, r_range, h):
 # TEST
 ###############################################################################
 
-def find_pc_alpha(pc_guess, lambda_target, M_target):
-    def equations(vars):
-        """
-        Defines the system of equations to be solved.
-        """
-        pc, alpha = vars  # Unpack variables (pc, alpha)
-        
-        # Solve TOV equations with the current guess of pc and alpha
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha * pc, 0, 0), (1e-6, 50), 1e-3)
-        
-        # Compute the values we need
-        lambda_ = m_B[-1] / m[-1]  # Fraction of mass for fluid 2
-        M = m[-1]                   # Total mass
-        
-        # Return the residuals (differences from target values)
-        return [lambda_ - lambda_target, M - M_target]
+def f(x):
+    p_c, alpha = x
+    r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, p_c, alpha*p_c, 0, 0), (1e-6, 100), 1e-3)
+    M = m[-1]
+    l = m_B[-1]/m[-1]
+    
+    return M-1, l-0.1
 
-    # Initial guesses for pc and alpha
-    alpha_guess = 0.1  # You may need to adjust this initial guess
+eos = "soft"
+eos_data = pd.read_excel(f"eos_{eos}.xlsx")
+rho_data = eos_data['Density'].values
+p_data = eos_data['Pressure'].values
 
-    # Solve the system
-    sol = opt.root(equations, [pc_guess, alpha_guess], method='broyden1')  # Broyden's method
+x0 = [1e-4, 0.1]
 
-    if sol.success:
-        return sol.x  # Returns (pc, alpha)
-    else:
-        raise ValueError(f"Root finding did not converge: {sol.message}")
-        
+res_M, res_l = f(x0)
+
+print("This guess gives the following residuals:")
+print(f"M:{res_M}")
+print(f"L:{res_l}")
+
+sol = opt.root(f, x0, method='hybr')
+
+
