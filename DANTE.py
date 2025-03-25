@@ -618,7 +618,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(0, 3, 'soft', 'l', 0.1, 1e-04)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'soft', 'l', 0.1, 1e-04)
 
 print(f"\nUser Inputs: {mode}, {d_type}, '{eos_c}', '{param_c}', {param_val}, {p_c}")
 print("")
@@ -744,8 +744,8 @@ if mode == 1:
         m_B = df["m_B"]
         
         # Scale factors
-        p_scale = 5
-        m_scale = 2
+        p_scale = 4
+        m_scale = 1
         
         # Configure the plot
         plt.figure(figsize=(9.71, 6))
@@ -778,8 +778,8 @@ if mode == 1:
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        #plt.xlim(0, 29.57)
-        #plt.ylim(0, 1)
+        plt.xlim(0, 9.365)
+        plt.ylim(0, 1.05)
         
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -790,8 +790,8 @@ if mode == 1:
         plt.minorticks_on()
         
         # Customize tick spacing for more frequent ticks on x-axis
-        #plt.gca().set_xticks(np.arange(2.5, 29.57, 2.5))  # Major x ticks 
-        #plt.gca().set_yticks(np.arange(0, 1.01, 0.2))  # Major y ticks 
+        plt.gca().set_xticks(np.arange(0, 9.4, 1))  # Major x ticks 
+        plt.gca().set_yticks(np.arange(0, 1.05, 0.2))  # Major y ticks 
         
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
