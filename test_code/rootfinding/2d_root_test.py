@@ -221,7 +221,7 @@ def f(x):
     M = m[-1]
     l = m_B[-1]/m[-1]
     
-    return M-1, l-0.1
+    return M-1, l-0.05
 
 eos = "soft"
 eos_data = pd.read_excel(f"eos_{eos}.xlsx")

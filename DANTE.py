@@ -618,7 +618,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'middle', 'l', 0.05, 1e-05)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'soft', 'a', 0.11970180169768445, 7.905105704757548e-05)
 
 print(f"\nUser Inputs: {mode}, {d_type}, '{eos_c}', '{param_c}', {param_val}, {p_c}")
 print("")
@@ -744,7 +744,7 @@ if mode == 1:
         m_B = df["m_B"]
         
         # Scale factors
-        p_scale = 5
+        p_scale = 4
         m_scale = 1
         
         # Configure the plot
@@ -766,7 +766,8 @@ if mode == 1:
         
         # Add labels and title
         if param_c == 'a':
-            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\alpha = {param_val},$ $m_{{\chi}}={DM_mass}[GeV]$', loc='left', fontsize=15, fontweight='bold')
+            param_val_round = round(param_val, 4)
+            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\alpha = {param_val_round},$ $m_{{\chi}}={DM_mass}[GeV]$', loc='left', fontsize=15, fontweight='bold')
         elif param_c == 'l':
             plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\lambda = {param_val},$ $m_{{\chi}}={DM_mass}[GeV]$', loc='left', fontsize=15, fontweight='bold')
         plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
@@ -778,8 +779,8 @@ if mode == 1:
         plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
         
         # Set limits
-        plt.xlim(0, 9.365)
-        plt.ylim(0, 1.05)
+        plt.xlim(0, 9.6)
+        plt.ylim(0, 1)
         
         # Add grid
         #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
@@ -790,8 +791,8 @@ if mode == 1:
         plt.minorticks_on()
         
         # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(0, 9.4, 1))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 1.05, 0.2))  # Major y ticks 
+        plt.gca().set_xticks(np.arange(0.5, 9.6, 0.5))  # Major x ticks 
+        plt.gca().set_yticks(np.arange(0, 1.01, 0.1))  # Major y ticks 
         
         # Set thicker axes
         plt.gca().spines['top'].set_linewidth(1.5)
@@ -800,7 +801,7 @@ if mode == 1:
         plt.gca().spines['left'].set_linewidth(1.5)
         
         # Add a legend
-        plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
+        plt.legend(fontsize=12, frameon=False, ncol = 3, loc='upper center') #  loc='upper right',
         
         # Save the plot as a PDF
         plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{param_c}_{param_val}_{p_c}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
