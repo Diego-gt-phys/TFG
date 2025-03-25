@@ -618,9 +618,9 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, "middle", "l", 0.8, 3e-05)
+mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(0, 3, 'soft', 'l', 0.1, 1e-04)
 
-print("\nUser Inputs:", mode, d_type, eos_c, param_c, param_val, p_c)
+print(f"\nUser Inputs: {mode}, {d_type}, '{eos_c}', '{param_c}', {param_val}, {p_c}")
 print("")
 
 ###############################################################################
