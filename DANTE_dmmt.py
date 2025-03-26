@@ -1,19 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Mar 18 20:47:04 2025
+Created on Wed Mar 26 11:41:06 2025
 
-DANTE: Dark-matter Admixed Neutron-sTar solvEr
+Auxiliary code to DANTE.py
+Used for carrying out the dark matter mass test (dmmt)
 
-DANTE is a numerical solver for the Tolman-Oppenheimer-Volkoff (TOV) equations 
-applied to a two-fluid star composed of baryonic matter (neutron star) and dark matter, 
-assuming only gravitational interaction between the fluids.
-
-Main Features:
-- Solves the TOV equation for a two-fluid system.
-- Computes Mass-Radius relations for Dark Matter Admixed Neutron Stars (DANS).
-- Analyzes the impact of dark matter on neutron star structure.
-
-author: Diego García Tejada
+@author: Diego García Tejada
 """
 
 ###############################################################################
@@ -672,255 +664,111 @@ def find_sc (M_target, l_target):
 # Define the parameters
 ###############################################################################
 
-print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
+"""
+Because this code is going to carry out the dmmt test, some parameters (d_type, p1_c, p2_c)
+are going to be fixed. Still I include them so when this is incorparated to DANTE.py
+the results can be cheked again.
+"""
 
-mode, d_type, eos_c, param_c, param_val, p_c = get_inputs(1, 3, 'soft', 'l', 0.69, 1e-05)
-
-print(f"\nUser Inputs: {mode}, {d_type}, '{eos_c}', '{param_c}', {param_val}, {p_c}")
-print("")
+mode = 1 # 0 : calculate / 1 : plot
+d_type = 3 # 3 : Solve 2 fluid
+eos_c = 'soft' # soft / middle / stiff
+#p1_c = 'M' # pc / M
+p1_v = 1
+#p2_c = 'l' # a / l
+p2_v = 0.1
 
 ###############################################################################
-# Create the data
+# Calculate the data
 ###############################################################################
 
 if mode == 0:
-    
-    if d_type == 2:
-        eos_c = 'soft'
-    
+    # Read the eos
     eos_data = pd.read_excel(f"data_eos\eos_{eos_c}.xlsx")
     rho_data = eos_data['Density'].values
     p_data = eos_data['Pressure'].values
+    # Find the starting conditions.
+    pc, alpha = find_sc(p1_v, p2_v)
+    # Calculate the data.
+    r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0,pc,alpha*pc,0,0), (1e-6, 100), 1e-3)
+    # Save the data.
+    data = {}
+    data['r'] = r
+    data['m'] = m
+    data['p_A'] = p_A
+    data['p_B'] = p_B
+    data['m_A'] = m_A
+    data['m_B'] = m_B
+    data['R_A'] = R_A
+    df = pd.DataFrame(data)
+    df.to_csv(f"data\dmmt_{p1_v}_{p2_v}_{DM_mass}.csv", index=False)
+    print('Data saved.')
     
-    if d_type in [1,2]:
-        df = save_TOV_data_1f(d_type, eos_c, p_c)
-    elif d_type == 3:
-        df = save_TOV_data_2f(eos_c, param_c, param_val, p_c)
-    elif d_type == 4:
-        df = save_MR_data(eos_c, param_c, param_val)
-    
-    print(df)
-    print("Data Saved.")               
-
 ###############################################################################
 # Plot the data
 ###############################################################################
 
 if mode == 1:
+    # Read the data.
+    df = pd.read_csv(f"data\dmmt_{p1_v}_{p2_v}_{DM_mass}.csv")
+    r = df["r"]
+    p_A = df["p_A"]
+    p_B = df["p_B"]
+    m = df["m"]
+    m_A = df["m_A"]
+    m_B = df["m_B"]
     
-    if d_type in [1,2]: # Solution to the TOV for 1 fluid
-            
-        #Read the data
-        if d_type == 1:
-            df = pd.read_csv(f"data\{d_type}_{eos_c}_{p_c}.csv")
-            r = df["r"]
-            m = df["m"]
-            p = df["p_A"]
-            
-        elif d_type == 2:
-            df= pd.read_csv(f"data\{d_type}_{p_c}_{DM_mass}.csv")
-            r = df["r"]
-            m = df["m"]
-            p = df["p_B"]
-            eos_c = "DM"
-            
-        # Scale factors
-        p_scale = 5
-        m_scale = 1
-        
-        # Configure the plot
-        plt.figure(figsize=(9.71, 6))
-        colors = sns.color_palette("Set1", 10)
-        eos_colors = {"soft": 0, "middle": 1, "stiff": 2, "DM": 3}
-        c = eos_colors[eos_c]
-        
-        # Plot the data    
-        plt.plot(r, p*10**p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m*m_scale, label = rf'$m_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        
-        # Set the axis to logarithmic scale
-        #plt.xscale('log')
-        #plt.yscale('log')
-        
-        # Add labels and title
-        if d_type == 1:
-            plt.title(rf'TOV solution for the {eos_c} eos.', loc='left', fontsize=15, fontweight='bold')
-        elif d_type == 2:
-            plt.title(rf'TOV solution for a {eos_c} star with: $m_{{\chi}}={DM_mass} [GeV]$', loc='left', fontsize=15, fontweight='bold')
-        plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+    # Scale factors
+    p_scale = 4
+    m_scale = 1
+    
+    # Configure the plot
+    plt.figure(figsize=(9.71, 6))
+    colors = sns.color_palette("Set1", 10)
+    eos_colors = {"soft": 0, "middle": 1, "stiff": 2}
+    c = eos_colors[eos_c]
+    
+    # Plot the data
+    plt.plot(r, p_A*10**p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+    plt.plot(r, m_A*m_scale, label = rf'$m_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+    plt.plot(r, p_B*10**p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+    plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+    plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+    
+    # Add labels and title
+    plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $M={p1_v}$' r'$\left[ M_{\odot}\right],$' rf'$m_{{\chi}}={DM_mass}$ $[GeV]$', loc='left', fontsize=15, fontweight='bold')
+    plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+    if m_scale == 1:
         plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
-        plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
-        plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
-        
-        # Set limits
-        #plt.xlim(0, 23.15)
-        #plt.ylim(0, 1)
-        
-        # Add grid
-        #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
-        
-        # Configure ticks for all four sides
-        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
-        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
-        plt.minorticks_on()
-        
-        # Customize tick spacing for more frequent ticks on x-axis
-        #plt.gca().set_xticks(np.arange(0, 23.15, 2))  # Major x ticks 
-        #plt.gca().set_yticks(np.arange(0, 1, 0.1))  # Major y ticks 
-        
-        # Set thicker axes
-        plt.gca().spines['top'].set_linewidth(1.5)
-        plt.gca().spines['right'].set_linewidth(1.5)
-        plt.gca().spines['bottom'].set_linewidth(1.5)
-        plt.gca().spines['left'].set_linewidth(1.5)
-        
-        # Add a legend
-        plt.legend(fontsize=12, frameon=False, ncol = 1) #  loc='upper right',
-        
-        # Save the plot as a PDF
-        if d_type == 1:
-            plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{p_c}.pdf", format="pdf", bbox_inches="tight")
-            
-        elif d_type == 2:
-            plt.savefig(f"preliminary_figures\{d_type}_{p_c}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
-        
-        plt.tight_layout()
-        plt.show()
+    else:
+        plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & ' rf'$m \cdot {m_scale}$' r'$\left[ M_{\odot}\right]$', fontsize=15, loc='center')
+    plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
+    plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
     
-    if d_type == 3: # Solution to the TOV for 2 fluid
+    # Set limits
+    #plt.xlim(0, 9.6)
+    #plt.ylim(0, 1)
         
-        # Read the data
-        df = pd.read_csv(f"data\{d_type}_{eos_c}_{param_c}_{param_val}_{p_c}_{DM_mass}.csv")
+    # Configure ticks for all four sides
+    plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+    plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+    plt.minorticks_on()
         
-        r = df["r"]
-        p_A = df["p_A"]
-        p_B = df["p_B"]
-        m = df["m"]
-        m_A = df["m_A"]
-        m_B = df["m_B"]
+    # Customize tick spacing for more frequent ticks on x-axis
+    #plt.gca().set_xticks(np.arange(0.5, 9.6, 0.5))  # Major x ticks 
+    #plt.gca().set_yticks(np.arange(0, 1.01, 0.1))  # Major y ticks 
         
-        # Scale factors
-        p_scale = 5
-        m_scale = 2
+    # Set thicker axes
+    plt.gca().spines['top'].set_linewidth(1.5)
+    plt.gca().spines['right'].set_linewidth(1.5)
+    plt.gca().spines['bottom'].set_linewidth(1.5)
+    plt.gca().spines['left'].set_linewidth(1.5)
         
-        # Configure the plot
-        plt.figure(figsize=(9.71, 6))
-        colors = sns.color_palette("Set1", 10)
-        eos_colors = {"soft": 0, "middle": 1, "stiff": 2}
-        c = eos_colors[eos_c]
+    # Add a legend
+    plt.legend(fontsize=12, frameon=False, ncol = 3, loc='upper center') #  loc='upper right',
         
-        # Plot the data
-        plt.plot(r, p_A*10**p_scale, label = rf'$p_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m_A*m_scale, label = rf'$m_{{{eos_c}}}(r)$', color = colors[c], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, p_B*10**p_scale, label = r'$p_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m_B*m_scale, label = r'$m_{DM}(r)$', color = colors[3], linewidth = 1.5, linestyle = '-.') # , marker = "*",  mfc='w', mec = 'w', ms = 5
-        plt.plot(r, m*m_scale, label = r'$m(r)$', color = 'k', linewidth = 1.5, linestyle = '--') # , marker = "*",  mfc='w', mec = 'w', ms = 5
+    # Save the plot as a PDF
+    plt.savefig(f"preliminary_figures\dmmt_{p1_v}_{p2_v}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
         
-        # Set the axis to logarithmic scale
-        #plt.xscale('log')
-        #plt.yscale('log')
-        
-        # Add labels and title
-        if param_c == 'a':
-            param_val_round = round(param_val, 4)
-            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\alpha = {param_val_round},$ $m_{{\chi}}={DM_mass}[GeV]$', loc='left', fontsize=15, fontweight='bold')
-        elif param_c == 'l':
-            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $\lambda = {param_val},$ $m_{{\chi}}={DM_mass}[GeV]$', loc='left', fontsize=15, fontweight='bold')
-        plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
-        if m_scale == 1:
-            plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & $m$ $\left[ M_{\odot}\right]$', fontsize=15, loc='center')
-        else:
-            plt.ylabel(rf'$p\cdot 10^{p_scale}$' r'$\left[ M_{{\odot}}/km^3\right]$ & ' rf'$m \cdot {m_scale}$' r'$\left[ M_{\odot}\right]$', fontsize=15, loc='center')
-        plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
-        plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
-        
-        # Set limits
-        plt.xlim(0, 11.29)
-        plt.ylim(0, 1.15)
-        
-        # Add grid
-        #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
-        
-        # Configure ticks for all four sides
-        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
-        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
-        plt.minorticks_on()
-        
-        # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(0, 11.29, 1))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 1.15, 0.2))  # Major y ticks 
-        
-        # Set thicker axes
-        plt.gca().spines['top'].set_linewidth(1.5)
-        plt.gca().spines['right'].set_linewidth(1.5)
-        plt.gca().spines['bottom'].set_linewidth(1.5)
-        plt.gca().spines['left'].set_linewidth(1.5)
-        
-        # Add a legend
-        plt.legend(fontsize=12, frameon=False, ncol = 3) #  loc='upper right',
-        
-        # Save the plot as a PDF
-        plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{param_c}_{param_val}_{p_c}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
-        
-        plt.tight_layout()
-        plt.show()
-        
-    if d_type == 4: # MR curves
-        # Read data
-        df = pd.read_csv(f"data\{d_type}_{eos_c}_{param_c}_{param_val}_{DM_mass}.csv")
-        R = df["R"]
-        M = df["M"]
-        M_A = df["M_A"]
-        M_B = df["M_B"]
-        
-        # Configure the plot
-        plt.figure(figsize=(9.71, 6))
-        colors = sns.color_palette("Set1", 10)
-        eos_colors = {"soft": 0, "middle": 1, "stiff": 2}
-        c = eos_colors[eos_c]
-        
-        # Plot the data
-        plt.plot(R, M, label = r'$M(R)$', color = 'k', linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-        plt.plot(R, M_A, label = rf'$M_{{{eos_c}}}(R)$', color = colors[c], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-        plt.plot(R, M_B, label = r'$M_{{DM}}(R)$', color = colors[3], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-        
-        # Add labels and title
-        if param_c == 'a':
-            plt.title(rf'MR curve for a DANS with: $EoS={eos_c},$ $\alpha = {param_val},$ $m_{{\chi}}=1[GeV]$', loc='left', fontsize=15, fontweight='bold')
-        elif param_c == 'l':
-            plt.title(rf'MR curve for a DANS with: $EoS={eos_c},$ $\lambda = {param_val},$ $m_{{\chi}}=1[GeV]$', loc='left', fontsize=15, fontweight='bold')
-        plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
-        plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
-        
-        # Set limits
-        plt.xlim(8, 17)
-        plt.ylim(0, 3.5)
-        
-        # Add grid
-        #plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.5)
-        
-        # Configure ticks for all four sides
-        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
-        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
-        plt.minorticks_on()
-        
-        # Customize tick spacing for more frequent ticks on x-axis
-        plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
-        
-        # Set thicker axes
-        plt.gca().spines['top'].set_linewidth(1.5)
-        plt.gca().spines['right'].set_linewidth(1.5)
-        plt.gca().spines['bottom'].set_linewidth(1.5)
-        plt.gca().spines['left'].set_linewidth(1.5)
-        
-        # Add a legend
-        plt.legend(fontsize=12, frameon=False, ncol = 1) #  loc='upper right',
-        
-        # Save the plot as a PDF
-        plt.savefig(f"preliminary_figures\{d_type}_{eos_c}_{param_c}_{param_val}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
-        
-        plt.tight_layout()
-        plt.show()
-        
-        
+    plt.tight_layout()
+    plt.show()
