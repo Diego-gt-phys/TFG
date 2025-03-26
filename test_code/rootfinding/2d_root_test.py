@@ -214,7 +214,7 @@ def TOV_solver(y0, r_range, h):
 ###############################################################################
 # TEST
 ###############################################################################
-
+"""
 def f(x):
     p_c, alpha = x
     r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, p_c, alpha*p_c, 0, 0), (1e-6, 100), 1e-3)
@@ -238,4 +238,34 @@ print(f"L:{res_l}")
 
 sol = opt.root(f, x0, method='hybr')
 
+print(sol)
+"""
 
+
+def find_sc (M_target, l_target):
+    
+    def f(x):
+        p_c, alpha = x
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, p_c, alpha*p_c, 0, 0), (1e-6, 100), 1e-3)
+        M = m[-1]
+        l = m_B[-1]/m[-1]
+        
+        return M-M_target, l-l_target
+    
+    x0 = [M_target*1e-4, l_target] # Inital Guess
+    sol = opt.root(f, x0, method='hybr')
+    
+    if sol.success:
+        return sol.x  # Returns (pc, alpha)
+    else:
+        raise ValueError(f"->{sol.message}")
+        
+M_target, l_target = (1, 0.2)
+eos = "soft"
+eos_data = pd.read_excel(f"eos_{eos}.xlsx")
+rho_data = eos_data['Density'].values
+p_data = eos_data['Pressure'].values
+
+pc, alpha = find_sc(M_target, l_target)
+
+print(f"For a star of {M_target} solar mass, and {l_target} of DM. The initial conditions are:", pc, alpha)

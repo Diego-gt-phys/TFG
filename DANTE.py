@@ -612,6 +612,62 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
     
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
     
+def find_sc (M_target, l_target):
+    """
+    Function that calculates the starting conditions [p_c, alpha], that guive a certain M_target, l_target.
+    The function uses a hybrid method to solve the roots of a vector function
+    
+    Parameters
+    ----------
+    M_target : float
+        Desidered mass of the star.
+    l_target : float
+        Desidered fraction of mass correspondant to the DM.
+    
+    Raises
+    ------
+    ValueError
+        When the numerical method to solve the roots does not converge.
+        
+    Returns
+    -------
+    float
+        Central pressure of fluid A.
+    float
+        Alpha parameter (p_c_B/p_c_A).
+    """
+    def f(x):
+        """
+        Auxilary function used to calculate the residuals of M and alpha to their respective target values.
+        This function takes a vector x=[pc, alpha] and calculates [M,lambda]
+        
+        Parameters
+        ----------
+        x : list
+            vector input [p_c, alpha].
+            
+        Returns
+        -------
+        M-M_target : float
+            Residual of calculated M to a M_target.
+        l-l_target : float
+            Residual of calculated l to a l_taget.
+        """
+        p_c, alpha = x
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, p_c, alpha*p_c, 0, 0), (1e-6, 100), 1e-3)
+        M = m[-1]
+        l = m_B[-1]/m[-1]
+        
+        return M-M_target, l-l_target
+    
+    x0 = [M_target*1e-4, l_target] # Inital Guess
+    sol = opt.root(f, x0, method='hybr')
+    
+    if sol.success:
+        return sol.x  # Returns (pc, alpha)
+    else:
+        raise ValueError(f"->{sol.message}")
+
 ###############################################################################
 # Define the parameters
 ###############################################################################
