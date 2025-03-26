@@ -23,7 +23,7 @@ import scipy.optimize as opt # Needed to find the values od lambda
 G = 1.4765679173556 # G in units of km / solar masses
 
 PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
-DM_mass = 1 # Mass of dark matter particle in GeV
+DM_mass = 2 # Mass of dark matter particle in GeV
 Gamma = 5/3 # Polytropic coeficient for a degenetare (T=0) IFG
 K = ((DM_mass)**(-8/3))*8.0165485819726 # Polytropic constant for a degenetare (T=0) IFG
 
@@ -670,7 +670,7 @@ are going to be fixed. Still I include them so when this is incorparated to DANT
 the results can be cheked again.
 """
 
-mode = 1 # 0 : calculate / 1 : plot
+mode = 2 # 0 : calculate / 1 : plot
 d_type = 3 # 3 : Solve 2 fluid
 eos_c = 'soft' # soft / middle / stiff
 #p1_c = 'M' # pc / M
@@ -765,10 +765,68 @@ if mode == 1:
     plt.gca().spines['left'].set_linewidth(1.5)
         
     # Add a legend
-    plt.legend(fontsize=12, frameon=False, ncol = 3, loc='upper center') #  loc='upper right',
+    plt.legend(fontsize=12, frameon=False, ncol = 3, loc='center right') #  loc='upper right',
         
     # Save the plot as a PDF
     plt.savefig(f"preliminary_figures\dmmt_{p1_v}_{p2_v}_{DM_mass}.pdf", format="pdf", bbox_inches="tight")
         
     plt.tight_layout()
     plt.show()
+
+###############################################################################
+# Plot ALL the data
+###############################################################################
+
+if mode == 2:
+    data = {}
+    dm_masses = [0.4, 0.45, 0.5, 0.75, 1, 1.25, 1.5, 1.75]
+    plt.figure(figsize=(12, 6))
+    colors = sns.color_palette("Set1", 10)
+    c = 0
+    for dm_mass in dm_masses:
+        if c==5:
+            c+=1
+        df = pd.read_csv(f"data\dmmt_{p1_v}_{p2_v}_{dm_mass}.csv")
+        data[f'{dm_mass}'] = df
+        plt.plot(df['r'], df['p_B'], label = rf'$m_{{\chi}} = {dm_mass}$', color = colors[c], linewidth = 1.5, linestyle = '-')
+        plt.axvline(df['R_A'][0], color=colors[c], linewidth=1, linestyle=(c,[3.7, 1.6]))
+        c+=1
+    
+    plt.yscale('log')
+    
+    # Add labels and title
+    plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ $M={p1_v}$' r'$\left[ M_{\odot}\right],$' rf' $\lambda = {p2_v},$ $m_{{\chi}}={DM_mass}$ $[GeV]$', loc='left', fontsize=15, fontweight='bold')
+    plt.xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+    plt.ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center')
+    plt.axhline(0, color='k', linewidth=1.0, linestyle='--')  # x-axis
+    plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
+    
+    # Set limits
+    #plt.xlim(9, 10)
+    plt.xlim(0, 17.5)
+    plt.ylim(1e-14, 2e-4)
+        
+    # Configure ticks for all four sides
+    plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+    plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+    plt.minorticks_on()
+        
+    # Customize tick spacing for more frequent ticks on x-axis
+    plt.gca().set_xticks(np.arange(0, 17.5, 1))  # Major x ticks 
+    plt.gca().set_yticks(np.logspace(-14, -4, num=11))  # Major y ticks 
+        
+    # Set thicker axes
+    plt.gca().spines['top'].set_linewidth(1.5)
+    plt.gca().spines['right'].set_linewidth(1.5)
+    plt.gca().spines['bottom'].set_linewidth(1.5)
+    plt.gca().spines['left'].set_linewidth(1.5)
+        
+    # Add a legend
+    plt.legend(fontsize=12, frameon=False, ncol = 2) #  loc='upper right',
+        
+    # Save the plot as a PDF
+    plt.savefig(f"figures\dmmt_{p1_v}_{p2_v}_L.pdf", format="pdf", bbox_inches="tight")
+    
+    plt.tight_layout()
+    plt.show()
+    
