@@ -325,7 +325,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
     cont = 0
     
     for pc in pc_list:
-        alpha = find_lambda(pc, l)
+        alpha = find_alpha(pc, l)
         r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
         
         R_i = R_A
@@ -646,7 +646,43 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
     return mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v
 
 def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
-    
+    """
+    s_type : int
+        Type of star configuration:
+        - 1: Neutron Star (NS)
+        - 2: Dark Matter Admixed Neutron Star (DANS)
+        - 3: Double Admixed Neutron Star (DANS with extra parameters)
+    eos_c : str
+        Identifier of the equation of state (EOS) used for baryonic matter.
+    dm_m : float
+        Dark matter particle mass, relevant for s_type = 2 or 3.
+    p1_c : str
+        Parameter type for the first input value (e.g., "M" for mass, "pc" for central pressure).
+    p1_v : float
+        Value corresponding to the first parameter.
+    p2_c : str
+        Parameter type for the second input value (only used for s_type = 3).
+    p2_v : float
+        Value corresponding to the second parameter (only used for s_type = 3).
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        Dataframe containing the computed radial profile of the star, including:
+        - r : Radial coordinate values.
+        - m : Enclosed mass at each radius.
+        - p_A : Pressure of baryonic matter.
+        - p_B : Pressure of dark matter.
+        - m_A : Mass contribution from baryonic matter.
+        - m_B : Mass contribution from dark matter.
+        - R_A : Outer radius of the baryonic component.
+
+    Notes
+    -----
+    - The function uses interpolation for the EOS and integrates the TOV 
+      equations using a Runge-Kutta method.
+    - The output filename is constructed based on the input parameters.
+    """
     if s_type == 3: # DANS
         if p1_c == "M" and p2_c == "l":
             pc, alpha = find_sc(p1_v, p2_v)
@@ -701,10 +737,19 @@ print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', 
 ###############################################################################
 # Calculate the data
 ###############################################################################
+
 if mode == 0:
     p_data, rho_data = read_eos(eos_c)
+    
     if d_type == 0:
         df = Save_TOV(s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v)
         print(df)
         print("\nData Saved.")
+
+    else:
+        print("You really want to calculate all this shit?")
+
+###############################################################################
+# Plot the data
+###############################################################################
 
