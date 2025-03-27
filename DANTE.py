@@ -191,7 +191,7 @@ def RK4O_with_stop (y0, r_range, h):
         
     return (np.array(r_values), np.array(y_values), R_A)
 
-def TOV_solver(y0, r_range, h):
+def TOV_solver (y0, r_range, h):
     """
     Using a 4th Runge Kutta method, it solves the TOV for a 2 perfect fluid star.
     It guives the mass and preassure values for both fluids in all of the stars radius.
@@ -231,7 +231,7 @@ def TOV_solver(y0, r_range, h):
 
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values, R_A)
 
-def MR_curve(pc_range, alpha, r_range, h, n):
+def MR_curve (pc_range, alpha, r_range, h, n):
     """
     Creates the mass radius curve of a family of 2-fluid stars by solving the TOV equations.
     The different masses are calculating by changing the central pressure of fluid A and mantaining the alpha value of fluid B. 
@@ -343,7 +343,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
     
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
 
-def find_lambda (pc, l_target):
+def find_alpha (pc, l_target):
     """
     Finds the alpha parameter for which lambda becomes lambda_target by using the secant method for finding the roots of a function.
 
@@ -393,6 +393,59 @@ def find_lambda (pc, l_target):
             return result.root
         else:
             raise ValueError("Root-finding did not converge")
+
+def find_pc (M_target, s_type, alpha):
+    """
+    Finds the central pressure that guives a 1 fluid star a certain Target Mass by using the secant method for finding the roots of a function.
+
+    Parameters
+    ----------
+    M_target : float
+        Target Mass.
+    s_type : int
+        0 for a NS, or 1 for a DMS.
+    alpha : float or None
+        If DANS, alpha parameter.
+
+    Raises
+    ------
+    ValueError
+        When root finding algorithm does not converge.
+
+    Returns
+    -------
+    float
+        Central pressure that guives target mass.
+    """
+    def f(pc):
+        """
+        Auxiliaryfunction that guives the residuals of a star with central pressure pc.
+
+        Parameters
+        ----------
+        pc : float
+            cental pressure.
+
+        Returns
+        -------
+        float
+            Residual of Mass compared to M_target.
+        """
+        if s_type == 1:
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 50), 1e-3)
+        elif s_type == 2:
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 50), 1e-3)
+        else:
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3)
+        M = m[-1]
+        return M - M_target
+    x0 = M_target*1e-4
+    result = opt.root_scalar(f, x0, method='secant', x1=x0*1.1)
+    if result.converged:
+        return result.root
+    else:
+        raise ValueError("Root-finding did not converge")
+
 
 def find_sc (M_target, l_target):
     """
@@ -449,6 +502,29 @@ def find_sc (M_target, l_target):
         return sol.x  # Returns (pc, alpha)
     else:
         raise ValueError(f"->{sol.message}")
+
+def read_eos (eos_c):
+    """
+    Reads an equation of state (EOS) file in Excel format and extracts density 
+    and pressure data.
+
+    Parameters
+    ----------
+    eos_c : str
+        Identifier of the EOS file to be read. The function expects a file 
+        named 'eos_{eos_c}.xlsx' located in the 'data_eos' directory.
+
+    Returns
+    -------
+    p_data : numpy.ndarray
+        Array containing pressure values extracted from the EOS file.
+    rho_data : numpy.ndarray
+        Array containing density values extracted from the EOS file.
+    """
+    eos_data = pd.read_excel(f"data_eos\eos_{eos_c}.xlsx")
+    rho_data = eos_data['Density'].values
+    p_data = eos_data['Pressure'].values
+    return p_data, rho_data
 
 def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_DB, p2_c_DB, p2_v_DB):
     """
@@ -569,6 +645,49 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
     
     return mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v
 
+def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
+    
+    if s_type == 3: # DANS
+        if p1_c == "M" and p2_c == "l":
+            pc, alpha = find_sc(p1_v, p2_v)
+        elif p1_c == "M" and p2_c == "a": #DEBUG
+            pc = find_pc(p1_v, s_type, p2_v)
+        elif p2_c == "l" and p1_c == "pc": #DEBUG
+            alpha = find_alpha(p1_v, p2_v)
+        else:
+            pc, alpha = [p1_v, p2_v]
+        
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 100), 1e-3)
+        
+    else:
+        if p1_c == "M":
+            pc = find_pc(p1_v, s_type, None)
+        else:
+            pc = p1_v
+            
+        if s_type == 1:
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 100), 1e-3)
+        else:
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 100), 1e-3)
+            
+    data = {}
+    data["r"] = r
+    data["m"] = m
+    data["p_A"] = p_A
+    data["p_B"] = p_B
+    data["m_A"] = m_A
+    data["m_B"] = m_B
+    data["R_A"] = R_A
+    df = pd.DataFrame(data)
+    
+    if s_type == 1:
+        df.to_csv(f"data\{mode}_{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.csv", index=False)
+    elif s_type == 2:
+        df.to_csv(f"data\{mode}_{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.csv", index=False)
+    else:
+        df.to_csv(f"data\{mode}_{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.csv", index=False)
+    
+    return df
 
 ###############################################################################
 # Define the parameters
@@ -576,5 +695,16 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 1, 0, 'soft', 1, 'pc', 3e-5, None, None)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 3, 0, 'soft', 1.0, 'M', 1.0, 'l', 0.1)
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
+
+###############################################################################
+# Calculate the data
+###############################################################################
+if mode == 0:
+    p_data, rho_data = read_eos(eos_c)
+    if d_type == 0:
+        df = Save_TOV(s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v)
+        print(df)
+        print("\nData Saved.")
+
