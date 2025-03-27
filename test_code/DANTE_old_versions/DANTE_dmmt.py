@@ -779,7 +779,7 @@ if mode == 1:
 
 if mode == 2:
     data = {}
-    dm_masses = [0.4, 0.45, 0.5, 0.75, 1, 1.25, 1.5, 1.75]
+    dm_masses = [0.4, 0.45, 0.5, 0.75, 1, 1.75, 2]
     plt.figure(figsize=(12, 6))
     colors = sns.color_palette("Set1", 10)
     c = 0
@@ -802,9 +802,8 @@ if mode == 2:
     plt.axvline(0, color='k', linewidth=1.0, linestyle='--')  # y-axis
     
     # Set limits
-    #plt.xlim(9, 10)
     plt.xlim(0, 17.5)
-    plt.ylim(1e-14, 2e-4)
+    plt.ylim(2e-15, 3e-4)
         
     # Configure ticks for all four sides
     plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
