@@ -466,7 +466,7 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
         0 for a TOV solution or 1 for a MR curve.
     eos_c_DB : str
         'soft', 'middle', 'stiff' for the EoS to use for baryonic matter.
-    dm_m_DB : float or None
+    dm_m_DB : float
         Mass of the Dark Matter particle in GeV.
     p1_c_DB : str or None
         'p_c' for central pressure, 'M' for total mass.
@@ -570,3 +570,11 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
     return mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v
 
 
+###############################################################################
+# Define the parameters
+###############################################################################
+
+print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
+
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 1, 0, 'soft', 1, 'pc', 3e-5, None, None)
+print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
