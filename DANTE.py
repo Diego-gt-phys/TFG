@@ -730,7 +730,7 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 0, 'stiff', 1, 'M', 2.2, None, None)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 2, 0, 'soft', 1, 'pc', 1e-6, 'None', None)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
@@ -795,19 +795,15 @@ if mode == 1:
         ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
         ax2.tick_params(axis='y', colors='k')
         
-        # Add title
-        star_names = {1:'NS', 2:'DMS', 3:'DANS'}
-        star_name = star_names[s_type]
-        
         # Add axis lines
         ax1.axhline(0, color='k', linewidth=1.0, linestyle='--')
         ax1.axvline(0, color='k', linewidth=1.0, linestyle='--')
         
         # Set limits
-        if True:
-            ax1.set_xlim(0, 14.6)
-            ax1.set_ylim(0, 6.4e-5)
-            ax2.set_ylim(0, 2.3)
+        if False == True:
+            ax1.set_xlim(0, 9.6)
+            ax1.set_ylim(0, 8e-5)
+            ax2.set_ylim(0, 1)
         
         # Configure ticks
         ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
@@ -817,13 +813,14 @@ if mode == 1:
         ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
         ax2.minorticks_on()
         
-        # Customize tick spacing 
-        #ax1.set_xticks(np.arange(0, 9.6, 1))
-        #ax1.set_xticks(np.arange(0, 9.6, 0.1), minor=True)
-        #ax1.set_yticks(np.arange(0, 8.1e-5, 1e-5))
-        #ax1.set_yticks(np.arange(0, 8.1e-5, 1e-5), minor=True)
-        #ax2.set_yticks(np.arange(0, 1.01, 0.1))
-        #ax2.set_yticks(np.arange(0, 1.01, 0.1), minor=True)
+        # Configure ticks spacing
+        if False:
+            ax1.set_xticks(np.arange(0, 9.6, 1))
+            ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
+            ax1.set_yticks(np.arange(0, 8.1e-5, 1e-5))
+            ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
+            ax2.set_yticks(np.arange(0, 1.01, 0.1))
+            ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
         
         # Set thicker axes
         for ax in [ax1, ax2]:
@@ -837,14 +834,18 @@ if mode == 1:
             ax.spines['left'].set_color('k')
             
         # Add a legend
-        ax1.legend(fontsize=12, frameon=False, loc = "center left")
-        ax2.legend(fontsize=12, frameon=False, loc = "center right")
+        ax1.legend(fontsize=15, frameon=False, loc = "center left")
+        ax2.legend(fontsize=15, frameon=False, loc = "center right")
             
         # Save the plot as a PDF
-        plt.tight_layout()
+        
         if s_type == 1:
+            plt.title(rf'TOV solution for a NS with: $EoS={eos_c},$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
+            plt.tight_layout()
             plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
         elif s_type == 2:
+            plt.title(rf'TOV solution for a DMS with: 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v},$', loc='left', fontsize=15, fontweight='bold')
+            plt.tight_layout()
             plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
         else:
             plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
