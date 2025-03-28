@@ -730,7 +730,7 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 2, 0, 'soft', 1, 'pc', 1e-6, 'None', None)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'soft', 1.0, 'M', 1.0, 'l', 0.05)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
@@ -800,7 +800,7 @@ if mode == 1:
         ax1.axvline(0, color='k', linewidth=1.0, linestyle='--')
         
         # Set limits
-        if False == True:
+        if True == True:
             ax1.set_xlim(0, 9.6)
             ax1.set_ylim(0, 8e-5)
             ax2.set_ylim(0, 1)
@@ -814,7 +814,7 @@ if mode == 1:
         ax2.minorticks_on()
         
         # Configure ticks spacing
-        if False:
+        if True == True:
             ax1.set_xticks(np.arange(0, 9.6, 1))
             ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
             ax1.set_yticks(np.arange(0, 8.1e-5, 1e-5))
@@ -844,10 +844,14 @@ if mode == 1:
             plt.tight_layout()
             plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
         elif s_type == 2:
-            plt.title(rf'TOV solution for a DMS with: 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v},$', loc='left', fontsize=15, fontweight='bold')
+            plt.title(rf'TOV solution for a DMS with: 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
             plt.tight_layout()
             plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
         else:
+            DM_ps = {'a':'\alpha', 'l':'\lambda'}
+            DM_p = DM_ps[p2_c]
+            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v},$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
+            plt.tight_layout()
             plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
         plt.show()
 
