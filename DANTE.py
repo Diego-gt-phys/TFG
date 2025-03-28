@@ -639,7 +639,19 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
                 p2_c = p2_v = None
                 
         else:
-            p1_c = p1_v = p2_c = p2_v = None
+            p1_c = p1_v = None
+            if s_type == 3:
+                while True:
+                    try:
+                        p2_c = input("\nWhat parameter of DM do you want to use? \n'a' : central pressure fraction. \n'l' : Mass fraction of DM. \nEnter choice ('a', 'l') -> ")
+                        if p2_c not in ["a", "l"]:
+                            raise ValueError("Invalid choice. Enter 'a' for Alpha or 'l' for Lambda.")
+                        p2_v = float(input(f"\nEnter the value of {p2_c} -> "))
+                        break
+                    except ValueError as e:
+                        print(e)
+            else:
+                p2_c = p2_v = None
     
     else: # Use DEBUG mode
         print("\nUsing DEBUG data:")
@@ -649,6 +661,11 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
 
 def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
     """
+    Calculates and Saves the solution of the TOV, for a systems whose imputs are 
+    this functions parameters.
+    
+    Parameters
+    ----------
     s_type : int
         Type of star configuration:
         - 1: Neutron Star (NS)
@@ -730,13 +747,126 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
     
     return df
 
+def MR_curve_1f (pc_range, s_type, r_range, h, n):
+    """
+    Creates the mass radius curve of a family of 1-fluid stars by solving the TOV equations.
+    The different masses are calculating by changing the central pressure. 
+    
+    Parameters
+    ----------
+    pc_range : tuple
+        Range of central pressures to integrate: (pc_start, pc_end)
+    style : str
+        Type of star: 1 for NS or 2 for DMS
+    r_range : tuple
+        Range of radius integration: (r_0, r_max)
+    h : float
+        integration step.
+    n : int
+        Number of datapoints of the curve.
+        
+    Returns
+    -------
+    R_values : array
+        Array containig the radius of the stars.
+    M_values : array
+        Array containing the total masses of the stars.
+    """
+    
+    pc_start, pc_end = pc_range
+    pc_list = np.geomspace(pc_start, pc_end, n) 
+    R_values = []
+    M_values = []
+    cont = 0
+    
+    if s_type == 1:
+        for pc in pc_list:
+            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, 0, 0, 0), r_range, h)
+            
+            R_i = r_i[-1]
+            M_i = m_i[-1]
+            
+            R_values.append(R_i)
+            M_values.append(M_i)
+            
+            cont += 1
+            print(cont)
+    else:
+        for pc in pc_list:
+            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, 0, pc, 0, 0), r_range, h)
+            
+            R_i = r_i[-1]
+            M_i = m_i[-1]
+            
+            R_values.append(R_i)
+            M_values.append(M_i)
+            
+            cont += 1
+            print(cont)
+    
+    return (np.array(R_values), np.array(M_values))
+
+def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v):
+    """
+    Calculates and Saves the solution of the TOV, for a systems whose imputs are 
+    this functions parameters.
+    
+    Parameters
+    ----------
+    s_type : int
+        Type of star configuration:
+        - 1: Neutron Star (NS)
+        - 2: Dark Matter Admixed Neutron Star (DANS)
+        - 3: Double Admixed Neutron Star (DANS with extra parameters)
+    eos_c : str
+        Identifier of the equation of state (EOS) used for baryonic matter.
+    dm_m : float
+        Dark matter particle mass, relevant for s_type = 2 or 3.
+    p2_c : str
+        Parameter type for the second input value (only used for s_type = 3).
+    p2_v : float
+        Value corresponding to the second parameter (only used for s_type = 3).
+        
+    Returns
+    -------
+    f : Pandas DataFrame
+        DF containing all the datapoints of the MR curve.
+    """
+    data = {}
+    pc_range = PCS[eos_c]
+    
+    if s_type != 3:
+        R, M = MR_curve_1f(pc_range, s_type, (1e-6, 100), 1e-3, 20)
+        data["R"] = R
+        data["M"] = M
+        df = pd.DataFrame(data)
+        if s_type == 1:
+            df.to_csv(f"data\{s_type}_{d_type}_{eos_c}.csv", index=False)
+        else:
+            df.to_csv(f"data\{s_type}_{d_type}_{dm_m}.csv", index=False)
+            
+    else:
+        if p2_c == 'a':
+            R, M, M_A, M_B = MR_curve(pc_range, p2_v, (1e-6, 100), 1e-3, 20)
+        else:
+            R, M, M_A, M_B = MR_curve_lambda(pc_range, p2_v, (1e-6, 100), 1e-3, 20)
+        
+        data["R"] = R
+        data["M"] = M
+        data["M_A"] = M_A
+        data["M_B"] = M_B
+        df = pd.DataFrame(data)
+        df.to_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p2_c}_{p2_v}.csv", index=False)
+        
+    return df
+
 ###############################################################################
 # Define the parameters
 ###############################################################################
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'soft', 1.0, 'M', 0.33, 'l', 0.69)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 1, 'soft', 1.0, 'None', None, 'a', 0.0)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
@@ -751,9 +881,11 @@ if mode == 0:
         df = Save_TOV(s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v)
         print(df)
         print("\nData Saved.")
-
+    
     else:
-        print("You really want to calculate all this shit?")
+        df = Save_MR(s_type, eos_c, dm_m, p2_c, p2_v)
+        print(df)
+        print("\nData Saved.")
 
 ###############################################################################
 # Plot the data
@@ -840,8 +972,8 @@ if mode == 1:
             ax.spines['left'].set_color('k')
             
         # Add a legend
-        ax1.legend(fontsize=15, frameon=True, fancybox=False, loc = "center left", bbox_to_anchor=(0.01, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handlelength=1, columnspacing=1)
-        ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "center right", bbox_to_anchor=(0.99, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handlelength=1, columnspacing=1)
+        ax1.legend(fontsize=15, frameon=True, fancybox=False, loc = "center left", bbox_to_anchor=(0.01, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+        ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "center right", bbox_to_anchor=(0.99, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
             
         # Save the plot as a PDF
         
@@ -860,5 +992,73 @@ if mode == 1:
             plt.tight_layout()
             plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
         plt.show()
-
+    
+    else:
+        if s_type == 1:
+            df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}.csv")
+        elif s_type == 2:
+            df = pd.read_csv(f"data\{s_type}_{d_type}_{dm_m}.csv")
+        else:
+            df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p2_c}_{p2_v}.csv")
+            M_A = df["M_A"]
+            M_B = df["M_B"]
+        
+        R = df["R"]
+        M = df["M"]
+        
+        # Configure the plot
+        plt.figure(figsize=(9.71, 6))
+        colors = sns.color_palette("Set1", 10)
+        eos_colors = {"soft": 0, "middle": 1, "stiff": 2}
+        c = eos_colors[eos_c]
+        
+        # Plot the data
+        plt.plot(R, M, label = r'$M(R)$', color = 'k', linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+        if s_type == 3:
+            plt.plot(R, M_A, label = rf'$M_{{{eos_c}}}(R)$', color = colors[c], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+            plt.plot(R, M_B, label = r'$M_{{DM}}(R)$', color = colors[3], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+        
+        # Add labels and title
+        plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
+        plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
+        
+        # Set limits
+        plt.xlim(8, 17)
+        plt.ylim(0, 3.5)
+        
+        # Configure ticks for all four sides
+        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+        plt.minorticks_on()
+        
+        # Customize tick spacing for more frequent ticks on x-axis
+        plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
+        plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
+        
+        # Set thicker axes
+        plt.gca().spines['top'].set_linewidth(1.5)
+        plt.gca().spines['right'].set_linewidth(1.5)
+        plt.gca().spines['bottom'].set_linewidth(1.5)
+        plt.gca().spines['left'].set_linewidth(1.5)
+        
+        # Add a legend
+        plt.legend(fontsize=15, frameon=True, fancybox=False, ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+        
+        # Save plot as PDF
+        if s_type == 1:
+            plt.title(rf'MR curve NS: $EoS={eos_c}.$', loc='left', fontsize=15, fontweight='bold')
+            plt.tight_layout()
+            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}.pdf", format="pdf", bbox_inches="tight")
+        elif s_type == 2:
+            plt.title(rf'MR curve DMS: 'r'$m_{\chi}=$'rf'${dm_m}$  $\left[ GeV \right].$', loc='left', fontsize=15, fontweight='bold')
+            plt.tight_layout()
+            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}.pdf", format="pdf", bbox_inches="tight")
+        else:
+            DM_ps = {'a':r'\alpha', 'l':r'\lambda'}
+            DM_p = DM_ps[p2_c]
+            plt.title(rf'MR curve DANS: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
+            plt.tight_layout()
+            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
+            
+        plt.show()
 
