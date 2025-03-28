@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Version: 2.0
+Version: 2.3
 
 Created on Thu Mar 27 09:54:31 2025
 
@@ -736,7 +736,7 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'soft', 1.0, 'M', 0.5, 'l', 0.5)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'soft', 1.0, 'M', 0.33, 'l', 0.69)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
@@ -807,9 +807,9 @@ if mode == 1:
         
         # Set limits
         if True == True:
-            ax1.set_xlim(0, 7.66)
-            ax1.set_ylim(0, 4.7e-5)
-            ax2.set_ylim(0, 0.5)
+            ax1.set_xlim(0, 10.97)
+            ax1.set_ylim(0, 1.42e-5)
+            ax2.set_ylim(0, 0.333)
         
         # Configure ticks
         ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
@@ -820,12 +820,12 @@ if mode == 1:
         ax2.minorticks_on()
         
         # Configure ticks spacing
-        if False == True:
-            ax1.set_xticks(np.arange(0, 11.3, 1))
+        if True == True:
+            ax1.set_xticks(np.arange(0, 11.1, 1))
             #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
-            ax1.set_yticks(np.arange(0, 1.2e-5, 1e-5))
+            ax1.set_yticks(np.arange(0, 1.42e-5, 0.2e-5))
             #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
-            ax2.set_yticks(np.arange(0, 1.01, 0.1))
+            ax2.set_yticks(np.arange(0.05, 0.34, 0.05))
             #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
         
         # Set thicker axes
@@ -841,7 +841,7 @@ if mode == 1:
             
         # Add a legend
         ax1.legend(fontsize=15, frameon=True, fancybox=False, loc = "center left", bbox_to_anchor=(0.01, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handlelength=1, columnspacing=1)
-        ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "upper center", bbox_to_anchor=(0.5, 0.99), ncol = 3, edgecolor="black", framealpha=1, labelspacing=0.2, handlelength=1, columnspacing=1)
+        ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "center right", bbox_to_anchor=(0.99, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handlelength=1, columnspacing=1)
             
         # Save the plot as a PDF
         
