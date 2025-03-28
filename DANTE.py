@@ -439,13 +439,12 @@ def find_pc (M_target, s_type, alpha):
             r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3)
         M = m[-1]
         return M - M_target
-    x0 = M_target*1e-4
-    result = opt.root_scalar(f, x0, method='secant', x1=x0*1.1)
+    pc_guess = M_target*1e-4
+    result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1)
     if result.converged:
         return result.root
     else:
         raise ValueError("Root-finding did not converge")
-
 
 def find_sc (M_target, l_target):
     """
@@ -717,11 +716,11 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
     df = pd.DataFrame(data)
     
     if s_type == 1:
-        df.to_csv(f"data\{mode}_{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.csv", index=False)
+        df.to_csv(f"data\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.csv", index=False)
     elif s_type == 2:
-        df.to_csv(f"data\{mode}_{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.csv", index=False)
+        df.to_csv(f"data\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.csv", index=False)
     else:
-        df.to_csv(f"data\{mode}_{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.csv", index=False)
+        df.to_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.csv", index=False)
     
     return df
 
@@ -731,7 +730,8 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 3, 0, 'soft', 1.0, 'M', 1.0, 'l', 0.1)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 0, 'stiff', 1, 'M', 2.2, None, None)
+
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
 ###############################################################################
@@ -752,4 +752,102 @@ if mode == 0:
 ###############################################################################
 # Plot the data
 ###############################################################################
+
+if mode == 1:
+    
+    if d_type == 0:
+        # Read data
+        if s_type == 1:
+            df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.csv")
+        elif s_type == 2:
+            df = pd.read_csv(f"data\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.csv")
+        else:
+            df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.csv")
+        
+        r = df['r']
+        m = df['m']
+        p_A = df['p_A']
+        p_B = df['p_B']
+        m_A = df['m_A']
+        m_B = df['m_B']
+        
+        # Configure the plot
+        fig, ax1 = plt.subplots(figsize=(9.71, 6))
+        colors = sns.color_palette("Set1", 10)
+        eos_colors = {"soft": 0, "middle": 1, "stiff": 2, "DM": 3}
+        c = eos_colors[eos_c]
+        
+        # Plot pressures 
+        if s_type != 2:
+            ax1.plot(r, p_A, label=rf'$p_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-')
+        if s_type != 1:
+            ax1.plot(r, p_B, label=rf'$p_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-')
+        ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+        ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+        ax1.tick_params(axis='y', colors='k')
+        
+        # Plot Mass
+        ax2 = ax1.twinx()
+        ax2.plot(r, m, label=rf'$m(r)$', color = 'k', linewidth=1.5, linestyle='--')
+        if s_type == 3:
+            ax2.plot(r, m_A, label=rf'$m_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-.')
+            ax2.plot(r, m_B, label=rf'$m_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-.')
+        ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
+        ax2.tick_params(axis='y', colors='k')
+        
+        # Add title
+        star_names = {1:'NS', 2:'DMS', 3:'DANS'}
+        star_name = star_names[s_type]
+        
+        # Add axis lines
+        ax1.axhline(0, color='k', linewidth=1.0, linestyle='--')
+        ax1.axvline(0, color='k', linewidth=1.0, linestyle='--')
+        
+        # Set limits
+        if True:
+            ax1.set_xlim(0, 14.6)
+            ax1.set_ylim(0, 6.4e-5)
+            ax2.set_ylim(0, 2.3)
+        
+        # Configure ticks
+        ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
+        ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True)
+        ax1.minorticks_on()
+        ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+        ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+        ax2.minorticks_on()
+        
+        # Customize tick spacing 
+        #ax1.set_xticks(np.arange(0, 9.6, 1))
+        #ax1.set_xticks(np.arange(0, 9.6, 0.1), minor=True)
+        #ax1.set_yticks(np.arange(0, 8.1e-5, 1e-5))
+        #ax1.set_yticks(np.arange(0, 8.1e-5, 1e-5), minor=True)
+        #ax2.set_yticks(np.arange(0, 1.01, 0.1))
+        #ax2.set_yticks(np.arange(0, 1.01, 0.1), minor=True)
+        
+        # Set thicker axes
+        for ax in [ax1, ax2]:
+            ax.spines['top'].set_linewidth(1.5)
+            ax.spines['right'].set_linewidth(1.5)
+            ax.spines['bottom'].set_linewidth(1.5)
+            ax.spines['left'].set_linewidth(1.5)
+            ax.spines['top'].set_color('k')
+            ax.spines['right'].set_color('k')
+            ax.spines['bottom'].set_color('k')
+            ax.spines['left'].set_color('k')
+            
+        # Add a legend
+        ax1.legend(fontsize=12, frameon=False, loc = "center left")
+        ax2.legend(fontsize=12, frameon=False, loc = "center right")
+            
+        # Save the plot as a PDF
+        plt.tight_layout()
+        if s_type == 1:
+            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
+        elif s_type == 2:
+            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
+        else:
+            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
+        plt.show()
+
 
