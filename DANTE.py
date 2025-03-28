@@ -439,7 +439,10 @@ def find_pc (M_target, s_type, alpha):
             r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3)
         M = m[-1]
         return M - M_target
-    pc_guess = M_target*1e-4
+    if s_type == 2:
+        pc_guess = M_target*1e-5
+    else:
+        pc_guess = M_target*1e-4
     result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1)
     if result.converged:
         return result.root
@@ -687,8 +690,11 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
             pc, alpha = find_sc(p1_v, p2_v)
         elif p1_c == "M" and p2_c == "a": #DEBUG
             pc = find_pc(p1_v, s_type, p2_v)
+            alpha = p2_v
         elif p2_c == "l" and p1_c == "pc": #DEBUG
+            pc = p1_v
             alpha = find_alpha(p1_v, p2_v)
+            print(alpha)
         else:
             pc, alpha = [p1_v, p2_v]
         
@@ -730,7 +736,7 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'soft', 1.0, 'M', 1.0, 'l', 0.05)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'soft', 1.0, 'M', 0.5, 'l', 0.5)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
@@ -779,19 +785,19 @@ if mode == 1:
         
         # Plot pressures 
         if s_type != 2:
-            ax1.plot(r, p_A, label=rf'$p_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-')
+            pa = ax1.plot(r, p_A, label=rf'$p_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-')
         if s_type != 1:
-            ax1.plot(r, p_B, label=rf'$p_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-')
+            pb = ax1.plot(r, p_B, label=r'$p_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-')
         ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
         ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
         ax1.tick_params(axis='y', colors='k')
         
         # Plot Mass
         ax2 = ax1.twinx()
-        ax2.plot(r, m, label=rf'$m(r)$', color = 'k', linewidth=1.5, linestyle='--')
+        m = ax2.plot(r, m, label=r'$m(r)$', color = 'k', linewidth=1.5, linestyle='--')
         if s_type == 3:
-            ax2.plot(r, m_A, label=rf'$m_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-.')
-            ax2.plot(r, m_B, label=rf'$m_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-.')
+            ma = ax2.plot(r, m_A, label=rf'$m_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-.')
+            mb = ax2.plot(r, m_B, label=r'$m_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-.')
         ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
         ax2.tick_params(axis='y', colors='k')
         
@@ -801,9 +807,9 @@ if mode == 1:
         
         # Set limits
         if True == True:
-            ax1.set_xlim(0, 9.6)
-            ax1.set_ylim(0, 8e-5)
-            ax2.set_ylim(0, 1)
+            ax1.set_xlim(0, 7.66)
+            ax1.set_ylim(0, 4.7e-5)
+            ax2.set_ylim(0, 0.5)
         
         # Configure ticks
         ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
@@ -814,13 +820,13 @@ if mode == 1:
         ax2.minorticks_on()
         
         # Configure ticks spacing
-        if True == True:
-            ax1.set_xticks(np.arange(0, 9.6, 1))
-            ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
-            ax1.set_yticks(np.arange(0, 8.1e-5, 1e-5))
-            ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
+        if False == True:
+            ax1.set_xticks(np.arange(0, 11.3, 1))
+            #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
+            ax1.set_yticks(np.arange(0, 1.2e-5, 1e-5))
+            #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
             ax2.set_yticks(np.arange(0, 1.01, 0.1))
-            ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
+            #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
         
         # Set thicker axes
         for ax in [ax1, ax2]:
@@ -834,23 +840,23 @@ if mode == 1:
             ax.spines['left'].set_color('k')
             
         # Add a legend
-        ax1.legend(fontsize=15, frameon=False, loc = "center left")
-        ax2.legend(fontsize=15, frameon=False, loc = "center right")
+        ax1.legend(fontsize=15, frameon=True, fancybox=False, loc = "center left", bbox_to_anchor=(0.01, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handlelength=1, columnspacing=1)
+        ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "upper center", bbox_to_anchor=(0.5, 0.99), ncol = 3, edgecolor="black", framealpha=1, labelspacing=0.2, handlelength=1, columnspacing=1)
             
         # Save the plot as a PDF
         
         if s_type == 1:
-            plt.title(rf'TOV solution for a NS with: $EoS={eos_c},$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
+            plt.title(rf'TOV solution NS: $EoS={eos_c},$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
             plt.tight_layout()
             plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
         elif s_type == 2:
-            plt.title(rf'TOV solution for a DMS with: 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
+            plt.title(rf'TOV solution DMS: 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
             plt.tight_layout()
             plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
         else:
             DM_ps = {'a':'\alpha', 'l':'\lambda'}
             DM_p = DM_ps[p2_c]
-            plt.title(rf'TOV solution for a DANS with: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v},$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
+            plt.title(rf'TOV solution DANS: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v},$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
             plt.tight_layout()
             plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
         plt.show()
