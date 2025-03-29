@@ -1031,7 +1031,7 @@ if mode == 1:
         plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
         plt.minorticks_on()
         
-        # Customize tick spacing for more frequent ticks on x-axis
+        # Customize tick spacing
         plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
         plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
         
