@@ -164,5 +164,87 @@ plt.savefig(f"figures\stiffness_test_NS_{p1_c}_{p1_v}.pdf", format="pdf", bbox_i
 
 plt.show()
 """
+###############################################################################
+# Dark Matter Mass Test (DMMT)
+###############################################################################
 
+# READ THE DATA
+data = {}
+
+s_type = 3
+d_type = 0
+eos_c = 'soft'
+dm_ms = ['0.4', '0.45', '0.5', '0.6', '0.8', '1.0', '1.2', '1.4', '1.6']
+p1_c = 'M'
+p1_v = 1.0
+p2_c = 'l'
+p2_v = 0.1
+
+for dm_m in dm_ms:
+    df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.csv")
+    data[f"{dm_m}"] = df
+
+# PLOT THE DATA
+# Configure the plot
+fig, ax1 = plt.subplots(figsize=(12, 6.5))
+colors = sns.color_palette("Set1", 12)
+c=0
+styles = ["-", "-."]
+s=0
+
+# Plot the pressure
+for dm_m in dm_ms:
+    if c == 9:
+        s+=1
+    ax1.plot(data[f'{dm_m}']['r'], data[f'{dm_m}']['p_B'], label=r'$m_{\chi}=$'rf'{dm_m}', color = colors[c], linewidth=1.5, linestyle=styles[s])
+    ax1.axvline(data[f'{dm_m}']['R_A'][0], color=colors[c], linewidth=1.0, linestyle=(c,[3.7, 1.6]))
+    c+=1
+ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+ax1.tick_params(axis='y', colors='k')
+ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
+
+# Set ax1_y to log scale
+ax1.set_yscale('log')
+
+# Set limits
+if True == True:
+    ax1.set_xlim(0, 17.5)
+    ax1.set_ylim(1.8e-15, 2e-4)
+
+# Configure ticks
+ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+ax1.minorticks_on()
+
+# Configure ticks spacing
+if True == True:
+    ax1.set_xticks(np.arange(0, 17.51, 1))
+    #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
+    ax1.set_yticks(np.logspace(-14, -4, num=11))
+    #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
+
+# Set thicker axes
+for ax in [ax1]:
+    ax.spines['top'].set_linewidth(1.5)
+    ax.spines['right'].set_linewidth(1.5)
+    ax.spines['bottom'].set_linewidth(1.5)
+    ax.spines['left'].set_linewidth(1.5)
+    ax.spines['top'].set_color('k')
+    ax.spines['right'].set_color('k')
+    ax.spines['bottom'].set_color('k')
+    ax.spines['left'].set_color('k')
+
+# Add a legend
+ax1.legend(loc = "upper right", bbox_to_anchor=(0.99, 0.99), fontsize=15, frameon=True, fancybox=False, ncol = 3, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+
+# Save Fig as pdf
+p2_values = {'a':r'\alpha', 'l':r'\lambda'}
+p2 = p2_values[f"{p2_c}"]
+plt.title(rf'Dark Matter Mass Test: ${p1_c}={p1_v}$'r'$\left[ M_{\odot} \right],$'rf' ${p2}={p2_v}$', loc='left', fontsize=15, fontweight='bold')
+plt.tight_layout()
+plt.savefig(f"figures\DMMT_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
+
+plt.show()
 
