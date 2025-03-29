@@ -160,7 +160,7 @@ ax1.legend(handles=[soft, p, middle, m, stiff], loc = "upper right", bbox_to_anc
 # Save Fig as pdf
 plt.title(rf'Stiffnes test for a NS: $M={p1_v}$'r'$\left[M_{\odot}\right]$', loc='left', fontsize=15, fontweight='bold')
 plt.tight_layout()
-plt.savefig("figures\stiffness_test_NS_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
+plt.savefig(f"figures\stiffness_test_NS_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
 
