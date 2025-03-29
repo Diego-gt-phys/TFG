@@ -24,6 +24,8 @@ author: Diego García Tejada
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import ScalarFormatter
+import matplotlib.lines as mlines
 import seaborn as sns
 import pandas as pd
 from scipy.interpolate import interp1d # Needed for interpolation of EoS
@@ -863,7 +865,7 @@ def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 1, 0, 'soft', 1, 'M', 1.5, 'None', None)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 0, 'stiff', 1, 'M', 1.5, 'None', None)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
@@ -920,6 +922,8 @@ if mode == 1:
         ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
         ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
         ax1.tick_params(axis='y', colors='k')
+        ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+        ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
         
         # Plot Mass
         ax2 = ax1.twinx()
