@@ -116,7 +116,7 @@ ax2.tick_params(axis='y', colors='k')
 
 # Set limits
 if True == True:
-    ax1.set_xlim(0, 14)
+    ax1.set_xlim(0, 13.93)
     ax1.set_ylim(0, 1.3e-4)
     ax2.set_ylim(0, 2)
 
@@ -129,12 +129,12 @@ ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, l
 ax2.minorticks_on()
 
 # Configure ticks spacing
-if False == True:
-    ax1.set_xticks(np.arange(0, 11.1, 1))
+if True == True:
+    ax1.set_xticks(np.arange(0, 13.93, 1))
     #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
-    ax1.set_yticks(np.arange(0, 1.42e-5, 0.2e-5))
-    #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
-    ax2.set_yticks(np.arange(0.05, 0.34, 0.05))
+    ax1.set_yticks(np.arange(0, 1.31e-4, 0.1e-4))
+    ax1.set_yticks(np.arange(0, 1.31e-4, 0.025e-4), minor=True)
+    ax2.set_yticks(np.arange(0, 2.01, 0.2))
     #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
 
 # Set thicker axes
