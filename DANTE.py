@@ -439,7 +439,7 @@ def find_pc (M_target, s_type, alpha):
             r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3)
         M = m[-1]
         return M - M_target
-    pc_guess = M_target*1e-5
+    pc_guess = M_target*5e-5
     result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1)
     if result.converged:
         return result.root
