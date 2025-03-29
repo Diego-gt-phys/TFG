@@ -76,7 +76,7 @@ plt.show()
 ###############################################################################
 # Stiffness test for NSs
 ###############################################################################
-
+"""
 # READ THE DATA
 data = {}
 
@@ -163,6 +163,6 @@ plt.tight_layout()
 plt.savefig(f"figures\stiffness_test_NS_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
-
+"""
 
 
