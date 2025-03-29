@@ -63,7 +63,7 @@ plt.gca().spines['bottom'].set_linewidth(1.5)
 plt.gca().spines['left'].set_linewidth(1.5)
 
 # Add a legend
-plt.legend(fontsize=15, loc = "upper left", bbox_to_anchor=(0.01, 0.99), frameon=True, fancybox=False, ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+plt.legend(fontsize=15, loc = "upper left", bbox_to_anchor=(0.009, 0.99), frameon=True, fancybox=False, ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
 
 # Save plot as PDF
 plt.tight_layout()

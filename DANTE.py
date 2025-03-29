@@ -439,10 +439,7 @@ def find_pc (M_target, s_type, alpha):
             r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3)
         M = m[-1]
         return M - M_target
-    if s_type == 2:
-        pc_guess = M_target*1e-5
-    else:
-        pc_guess = M_target*1e-4
+    pc_guess = M_target*1e-5
     result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1)
     if result.converged:
         return result.root
@@ -866,7 +863,7 @@ def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 1, 'stiff', 1.0, 'None', None, 'l', 0.0)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 1, 0, 'soft', 1, 'M', 1.5, 'None', None)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
@@ -938,7 +935,7 @@ if mode == 1:
         ax1.axvline(0, color='k', linewidth=1.0, linestyle='--')
         
         # Set limits
-        if True == True:
+        if False == True:
             ax1.set_xlim(0, 10.97)
             ax1.set_ylim(0, 1.42e-5)
             ax2.set_ylim(0, 0.333)
@@ -952,7 +949,7 @@ if mode == 1:
         ax2.minorticks_on()
         
         # Configure ticks spacing
-        if True == True:
+        if False == True:
             ax1.set_xticks(np.arange(0, 11.1, 1))
             #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
             ax1.set_yticks(np.arange(0, 1.42e-5, 0.2e-5))
