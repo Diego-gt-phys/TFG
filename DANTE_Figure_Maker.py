@@ -242,9 +242,9 @@ ax1.legend(loc = "upper right", bbox_to_anchor=(0.99, 0.99), fontsize=15, frameo
 # Save Fig as pdf
 p2_values = {'a':r'\alpha', 'l':r'\lambda'}
 p2 = p2_values[f"{p2_c}"]
-plt.title(rf'Dark Matter Mass Test: ${p1_c}={p1_v}$'r'$\left[ M_{\odot} \right],$'rf' ${p2}={p2_v}$', loc='left', fontsize=15, fontweight='bold')
+plt.title(rf'Dark Matter Mass Test: $EoS={eos_c},$ ${p1_c}={p1_v}$'r'$\left[ M_{\odot} \right],$'rf' ${p2}={p2_v}$', loc='left', fontsize=15, fontweight='bold')
 plt.tight_layout()
-plt.savefig(f"figures\DMMT_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
+plt.savefig(f"figures\DMMT_{eos_c}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
 
