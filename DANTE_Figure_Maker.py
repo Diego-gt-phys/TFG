@@ -251,7 +251,7 @@ plt.show()
 ###############################################################################
 # Lambda Sweep Test (LST) 1
 ###############################################################################
-#"""
+"""
 data = {}
 l_dic = {0.0 : 1.0, 0.05 : 1.053, 0.1 : 1.111, 0.15 : 1.176, 0.2 : 1.25, 0.25 : 1.333}
 
@@ -337,15 +337,21 @@ m = mlines.Line2D([], [], color='k', linestyle='--', label=r"$m(r)$")
 ax1.legend(handles=[pa, l0, l5, pb, l10,l15, m, l20, l25], loc = "upper right", bbox_to_anchor=(0.99, 0.99), fontsize=15, frameon=True, fancybox=False, ncol = 3, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
 
 # Save the plot as a PDF
-plt.title(rf'$\lambda$ Sweep Test: $EoS = {eos_c},$ $M_{{NS}} = 1$ 'r'$\left[ M_{\odot} \right]$, $m_{\chi}=$'rf'${dm_m} \left[ GeV \right].$', loc='left', fontsize=15, fontweight='bold')
+plt.title(rf'$\lambda$ Sweep Test: $EoS = {eos_c},$ $M_{{NS}} = 1$ 'r'$\left[ M_{\odot} \right],$ $m_{\chi}=$'rf'${dm_m} \left[ GeV \right].$', loc='left', fontsize=15, fontweight='bold')
 plt.tight_layout()
 plt.savefig(f"figures\LST_{eos_c}_{dm_m}_{p1_c}_NS_1.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
-#"""
+"""
 ###############################################################################
 # MR curves of DANS
 ###############################################################################
 
+data = {}
 
-
+s_type = 3
+d_type = 1
+eos_list = ['soft', 'middle', 'stiff']
+dm_m = 1
+p2_c = 'l'
+p2_list = [0.0, 0.01, 0.02, 0.03, 0.04]
