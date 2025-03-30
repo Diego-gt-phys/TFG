@@ -251,8 +251,101 @@ plt.show()
 ###############################################################################
 # Lambda Sweep Test (LST) 1
 ###############################################################################
+#"""
+data = {}
+l_dic = {0.0 : 1.0, 0.05 : 1.053, 0.1 : 1.111, 0.15 : 1.176, 0.2 : 1.25, 0.25 : 1.333}
 
+s_type = 3
+d_type = 0
+eos_c = 'soft'
+dm_m = 1.0
+p1_c = 'M'
+p2_c = 'l'
+l_list = keys_list = list(l_dic.keys())
 
+for p2_v in l_list:
+    p1_v = l_dic[p2_v]
+    df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.csv")
+    data[f"{p2_v}"] = df
+
+# Configure the plot
+fig, ax1 = plt.subplots(figsize=(9.71, 6))
+colors = sns.color_palette("Set1", 12)
+c=0
+
+# Set the axis.
+ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+ax1.tick_params(axis='y', colors='k')
+ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
+ax2 = ax1.twinx()
+ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
+ax2.tick_params(axis='y', colors='k')
+
+for p2_v in l_list:
+    if c == 5:
+        c+=1
+    p1_v = l_dic[p2_v]
+    ax1.plot(data[f"{p2_v}"]["r"], data[f"{p2_v}"]["p_A"], label='p_{{{eos_c}}}(r)', color=colors[c], linewidth=1.5, linestyle='-')
+    ax1.plot(data[f"{p2_v}"]["r"], data[f"{p2_v}"]["p_B"], label='p_{{DM}}(r)', color=colors[c], linewidth=1.5, linestyle='-.')
+    ax2.plot(data[f"{p2_v}"]["r"], data[f"{p2_v}"]["m"], label='m(r)', color=colors[c], linewidth=1.5, linestyle='--')
+    c+=1
+    
+# Set limits
+ax1.set_xlim(0, 9.86)
+ax1.set_ylim(0, 3.5e-4)
+ax2.set_ylim(0, 2)
+
+# Configure ticks
+ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
+ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True)
+ax1.minorticks_on()
+ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+ax2.minorticks_on()
+
+# Configure ticks spacing
+ax1.set_xticks(np.arange(0, 9.86, 1))
+#ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
+ax1.set_yticks(np.arange(0, 3.5e-4, 0.5e-4))
+#ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
+ax2.set_yticks(np.arange(0, 2.01, 0.25))
+#ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
+
+# Set thicker axes
+for ax in [ax1, ax2]:
+    ax.spines['top'].set_linewidth(1.5)
+    ax.spines['right'].set_linewidth(1.5)
+    ax.spines['bottom'].set_linewidth(1.5)
+    ax.spines['left'].set_linewidth(1.5)
+    ax.spines['top'].set_color('k')
+    ax.spines['right'].set_color('k')
+    ax.spines['bottom'].set_color('k')
+    ax.spines['left'].set_color('k')
+    
+# Add a legend
+l0 = mlines.Line2D([], [], color=colors[0], linestyle='-', label=r"$\lambda=0$")
+l5 = mlines.Line2D([], [], color=colors[1], linestyle='-', label=r"$\lambda=0.05$")
+l10 = mlines.Line2D([], [], color=colors[2], linestyle='-', label=r"$\lambda=0.1$")
+l15 = mlines.Line2D([], [], color=colors[3], linestyle='-', label=r"$\lambda=0.15$")
+l20 = mlines.Line2D([], [], color=colors[4], linestyle='-', label=r"$\lambda=0.2$")
+l25 = mlines.Line2D([], [], color=colors[6], linestyle='-', label=r"$\lambda=0.25$")
+pa = mlines.Line2D([], [], color='k', linestyle='-', label=r"$p_{soft}$")
+pb = mlines.Line2D([], [], color='k', linestyle='-.', label=r"$p_{DM}$")
+m = mlines.Line2D([], [], color='k', linestyle='--', label=r"$m(r)$")
+ax1.legend(handles=[pa, l0, l5, pb, l10,l15, m, l20, l25], loc = "upper right", bbox_to_anchor=(0.99, 0.99), fontsize=15, frameon=True, fancybox=False, ncol = 3, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+
+# Save the plot as a PDF
+plt.title(rf'$\lambda$ Sweep Test: $EoS = {eos_c},$ $M_{{NS}} = 1$ 'r'$\left[ M_{\odot} \right]$, $m_{\chi}=$'rf'${dm_m} \left[ GeV \right].$', loc='left', fontsize=15, fontweight='bold')
+plt.tight_layout()
+plt.savefig(f"figures\LST_{eos_c}_{dm_m}_{p1_c}_NS_1.pdf", format="pdf", bbox_inches="tight")
+
+plt.show()
+#"""
+###############################################################################
+# MR curves of DANS
+###############################################################################
 
 
 
