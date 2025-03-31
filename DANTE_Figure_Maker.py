@@ -352,6 +352,60 @@ data = {}
 s_type = 3
 d_type = 1
 eos_list = ['soft', 'middle', 'stiff']
-dm_m = 1
+dm_m = 1.0
 p2_c = 'l'
-p2_list = [0.0, 0.01, 0.02, 0.03, 0.04]
+p2_list = [0.0, 0.01, 0.02, 0.03, 0.04, 0.05]
+
+for eos_c in eos_list:
+    for p2_v in p2_list:
+        df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p2_c}_{p2_v}.csv")
+        data[f"{eos_c}_{p2_v}"] = df
+        
+plt.figure(figsize=(9.71, 6))
+colors = sns.color_palette("Set1", 10)
+eos_colors = {"soft": 0, "middle": 1, "stiff": 2}
+linestyles = {0.0:'-', 0.01:'--', 0.02:'-.', 0.03:(0, (8, 3)), 0.04:(0, (5, 2, 1, 2, 1, 2)), 0.05:(0, (3, 2, 1, 2))}
+
+for eos_c in eos_list:
+    for p2_v in p2_list:
+        plt.plot(data[f"{eos_c}_{p2_v}"]["R"], data[f"{eos_c}_{p2_v}"]["M"], label = rf'{eos_c}_{p2_v}', color = colors[eos_colors[f'{eos_c}']], linewidth = 1.5, linestyle = linestyles[p2_v], marker = "*",  mfc='k', mec = 'k', ms = 5)
+        
+# Add labels and title
+plt.title(r'MR curves for the DANS: $m_{\chi}=$'rf'${dm_m}$'r' $\left[ GeV \right]$', loc='left', fontsize=15, fontweight='bold')
+plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
+plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
+
+# Set limits
+plt.xlim(8, 17)
+plt.ylim(0, 3.5)
+
+# Configure ticks for all four sides
+plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+plt.minorticks_on()
+
+# Customize tick spacing 
+plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
+plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
+
+# Set thicker axes
+plt.gca().spines['top'].set_linewidth(1.5)
+plt.gca().spines['right'].set_linewidth(1.5)
+plt.gca().spines['bottom'].set_linewidth(1.5)
+plt.gca().spines['left'].set_linewidth(1.5)
+
+
+# Add a legend
+l0 = mlines.Line2D([], [], color='k', linestyle='-', label=r"$\lambda=0$")
+handles_list = []
+for p2_v in p2_list:
+    handle = mlines.Line2D([], [], color='k', linestyle=linestyles[p2_v], label=rf"$\lambda={p2_v}$")
+    handles_list.append(handle)
+plt.legend(handles=handles_list, loc = "upper left", bbox_to_anchor=(0.009, 0.99), fontsize=15, frameon=True, fancybox=False, ncol = 2, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+
+
+# Save plot as PDF
+plt.tight_layout()
+plt.savefig(f"figures\MR_curves_DANS_{dm_m}.pdf", format="pdf", bbox_inches="tight")
+
+plt.show()
