@@ -865,7 +865,7 @@ def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 3, 0, 'soft', 1.0, 'M', 1.0, 'l', 0.2)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 3, 0, 'soft', 0.45, 'M', 1.0, 'l', 0.2)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
@@ -924,6 +924,7 @@ if mode == 1:
         ax1.tick_params(axis='y', colors='k')
         ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
         ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
+        #ax1.set_yscale('log')
         
         # Plot Mass
         ax2 = ax1.twinx()
@@ -933,7 +934,7 @@ if mode == 1:
             mb = ax2.plot(r, m_B, label=r'$m_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-.')
         ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
         ax2.tick_params(axis='y', colors='k')
-        
+                
         # Add axis lines
         ax1.axhline(0, color='k', linewidth=1.0, linestyle='--')
         ax1.axvline(0, color='k', linewidth=1.0, linestyle='--')
