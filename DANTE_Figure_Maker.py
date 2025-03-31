@@ -414,4 +414,82 @@ plt.show()
 # Stiffnes test for DANSs
 ###############################################################################
 
-data = {☻}
+data = {}
+
+s_type = 3
+d_type = 0
+eos_c = 'soft'
+dm_m = 0.45
+p1_c = 'M'
+p1_v = 1.0
+p2_c = 'l'
+p2_list = [0.0, 0.05, 0.1, 0.15, 0.2, 0.25]
+
+for p2_v in p2_list:
+    df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.csv")
+    data[f'{p2_v}'] = df
+
+# Configure the plot
+fig, ax1 = plt.subplots(figsize=(9.71, 6))
+colors = sns.color_palette("Set1", 12)
+c=0
+
+# Set the axis.
+ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+ax1.tick_params(axis='y', colors='k')
+ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
+#ax1.set_yscale('log')
+ax2 = ax1.twinx()
+ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
+ax2.tick_params(axis='y', colors='k')
+
+## The plot thickenss
+for p2_v in p2_list:
+    if c == 5:
+        c+=1
+    ax1.plot(data[f'{p2_v}']['r'], data[f'{p2_v}']['p_A'], color = colors[c], linewidth=1.5, linestyle='-')
+    ax1.plot(data[f'{p2_v}']['r'], data[f'{p2_v}']['p_B'], color = colors[c], linewidth=1.5, linestyle='-.')
+    ax2.plot(data[f'{p2_v}']['r'], data[f'{p2_v}']['m'], color = colors[c], linewidth=1.5, linestyle='--')
+    c+=1
+
+# Set limits
+#ax1.set_xlim(0, 9.86)
+#ax1.set_ylim(0, 3.5e-4)
+#ax2.set_ylim(0, 2)
+
+# Configure ticks
+ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
+ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True)
+ax1.minorticks_on()
+ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+ax2.minorticks_on()
+
+# Configure ticks spacing
+#ax1.set_xticks(np.arange(0, 9.86, 1))
+#ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
+#ax1.set_yticks(np.arange(0, 3.5e-4, 0.5e-4))
+#ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
+#ax2.set_yticks(np.arange(0, 2.01, 0.25))
+#ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
+
+# Set thicker axes
+for ax in [ax1, ax2]:
+    ax.spines['top'].set_linewidth(1.5)
+    ax.spines['right'].set_linewidth(1.5)
+    ax.spines['bottom'].set_linewidth(1.5)
+    ax.spines['left'].set_linewidth(1.5)
+    ax.spines['top'].set_color('k')
+    ax.spines['right'].set_color('k')
+    ax.spines['bottom'].set_color('k')
+    ax.spines['left'].set_color('k')
+    
+# Save plot as PDF
+plt.title(rf'Siffnes test for a DANS: $EoS={eos_c},$ $m_{{\chi}}={dm_m},$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
+plt.tight_layout()
+plt.savefig(f"figures\stiffness_test_{s_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
+
+plt.show()
+
