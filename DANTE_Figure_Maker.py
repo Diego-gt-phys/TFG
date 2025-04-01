@@ -396,7 +396,6 @@ plt.gca().spines['left'].set_linewidth(1.5)
 
 
 # Add a legend
-l0 = mlines.Line2D([], [], color='k', linestyle='-', label=r"$\lambda=0$")
 handles_list = []
 for p2_v in p2_list:
     handle = mlines.Line2D([], [], color='k', linestyle=linestyles[p2_v], label=rf"$\lambda={p2_v}$")
@@ -419,7 +418,7 @@ data = {}
 s_type = 3
 d_type = 0
 eos_c = 'soft'
-dm_m = 0.45
+dm_m = 1.0
 p1_c = 'M'
 p1_v = 1.0
 p2_c = 'l'
@@ -440,7 +439,7 @@ ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='cente
 ax1.tick_params(axis='y', colors='k')
 ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
 ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
-#ax1.set_yscale('log')
+ax1.set_yscale('log')
 ax2 = ax1.twinx()
 ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
 ax2.tick_params(axis='y', colors='k')
@@ -455,9 +454,9 @@ for p2_v in p2_list:
     c+=1
 
 # Set limits
-#ax1.set_xlim(0, 9.86)
-#ax1.set_ylim(0, 3.5e-4)
-#ax2.set_ylim(0, 2)
+ax1.set_xlim(0, 9.9)
+ax1.set_ylim(2e-14, 2e-4)
+ax2.set_ylim(0, 1.4)
 
 # Configure ticks
 ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
@@ -468,11 +467,11 @@ ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, l
 ax2.minorticks_on()
 
 # Configure ticks spacing
-#ax1.set_xticks(np.arange(0, 9.86, 1))
+ax1.set_xticks(np.arange(0, 9.9, 1))
 #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
-#ax1.set_yticks(np.arange(0, 3.5e-4, 0.5e-4))
+ax1.set_yticks(np.logspace(-13, -4, num=10))
 #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
-#ax2.set_yticks(np.arange(0, 2.01, 0.25))
+ax2.set_yticks(np.arange(0, 1.41, 0.2))
 #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
 
 # Set thicker axes
@@ -486,10 +485,21 @@ for ax in [ax1, ax2]:
     ax.spines['bottom'].set_color('k')
     ax.spines['left'].set_color('k')
     
+# Add a legend
+handles_list = []
+c=0
+for p2_v in p2_list:
+    if c==5:
+        c+=1
+    handle = mlines.Line2D([], [], color=colors[c], linestyle='-', label=rf"$\lambda={p2_v}$")
+    handles_list.append(handle)
+    c+=1
+plt.legend(handles=handles_list, loc = "center left", bbox_to_anchor=(0.009, 0.5), fontsize=15, frameon=True, fancybox=False, ncol = 2, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+    
 # Save plot as PDF
 plt.title(rf'Siffnes test for a DANS: $EoS={eos_c},$ $m_{{\chi}}={dm_m},$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
 plt.tight_layout()
-plt.savefig(f"figures\stiffness_test_{s_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
+plt.savefig(f"figures\stiffness_test_DANS_{eos_c}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
 
