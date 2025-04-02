@@ -249,7 +249,7 @@ plt.savefig(f"figures\DMMT_{eos_c}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf
 plt.show()
 """
 ###############################################################################
-# Lambda Sweep Test (LST) 1
+# Lambda Sweep Test (LST)
 ###############################################################################
 """
 data = {}
@@ -412,13 +412,13 @@ plt.show()
 ###############################################################################
 # Stiffnes test for DANSs
 ###############################################################################
-
+"""
 data = {}
 
 s_type = 3
 d_type = 0
 eos_c = 'soft'
-dm_m = 1.0
+dm_m = 0.45
 p1_c = 'M'
 p1_v = 1.0
 p2_c = 'l'
@@ -439,10 +439,10 @@ ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='cente
 ax1.tick_params(axis='y', colors='k')
 ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
 ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
-ax1.set_yscale('log')
-ax2 = ax1.twinx()
-ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
-ax2.tick_params(axis='y', colors='k')
+#ax1.set_yscale('log')
+#ax2 = ax1.twinx()
+#ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
+#ax2.tick_params(axis='y', colors='k')
 
 ## The plot thickenss
 for p2_v in p2_list:
@@ -450,32 +450,32 @@ for p2_v in p2_list:
         c+=1
     ax1.plot(data[f'{p2_v}']['r'], data[f'{p2_v}']['p_A'], color = colors[c], linewidth=1.5, linestyle='-')
     ax1.plot(data[f'{p2_v}']['r'], data[f'{p2_v}']['p_B'], color = colors[c], linewidth=1.5, linestyle='-.')
-    ax2.plot(data[f'{p2_v}']['r'], data[f'{p2_v}']['m'], color = colors[c], linewidth=1.5, linestyle='--')
+    #ax2.plot(data[f'{p2_v}']['r'], data[f'{p2_v}']['m'], color = colors[c], linewidth=1.5, linestyle='--')
     c+=1
 
 # Set limits
 ax1.set_xlim(0, 9.9)
 ax1.set_ylim(2e-14, 2e-4)
-ax2.set_ylim(0, 1.4)
+#ax2.set_ylim(0, 1.4)
 
 # Configure ticks
 ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
 ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True)
 ax1.minorticks_on()
-ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
-ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
-ax2.minorticks_on()
+#ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+#ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+#ax2.minorticks_on()
 
 # Configure ticks spacing
 ax1.set_xticks(np.arange(0, 9.9, 1))
 #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
 ax1.set_yticks(np.logspace(-13, -4, num=10))
 #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
-ax2.set_yticks(np.arange(0, 1.41, 0.2))
+#ax2.set_yticks(np.arange(0, 1.41, 0.2))
 #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
 
 # Set thicker axes
-for ax in [ax1, ax2]:
+for ax in [ax1]:
     ax.spines['top'].set_linewidth(1.5)
     ax.spines['right'].set_linewidth(1.5)
     ax.spines['bottom'].set_linewidth(1.5)
@@ -502,4 +502,70 @@ plt.tight_layout()
 plt.savefig(f"figures\stiffness_test_DANS_{eos_c}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
+"""
+###############################################################################
+# Lambda vs Radius plot (LvR)
+###############################################################################
 
+data = {}
+
+s_type = 3
+d_type = 0
+eos_c = 'soft'
+dm_mlist = [0.45, 1.0, 1.5]
+p1_c = 'M'
+p1_v = 1.0
+p2_c = 'l'
+p2_list = [0.0, 0.025, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25]
+
+
+for dm_m in dm_mlist:
+    r_list = []
+    for p2_v in p2_list:
+        
+        df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.csv")
+        r_list.append(df['R_A'].tail(1).iloc[0])
+    data[f"{dm_m}"] = {'R':r_list, 'l':p2_list}
+    
+# Configure the plot
+plt.figure(figsize=(9.71, 6))
+colors = sns.color_palette("Set1", 10)
+
+#plot the lines
+c=0
+for dm_m in dm_mlist:
+    plt.plot(data[f"{dm_m}"]["l"], data[f"{dm_m}"]["R"], label = rf'$m_{{\chi}} = {dm_m}$', color = colors[c], linewidth=1.5, linestyle='-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+    c+=1
+
+# Add labels and title
+plt.title(rf'Lambda vs Radius: $EoS = {eos_c},$ $M={p1_v}.$', loc='left', fontsize=15, fontweight='bold')
+plt.xlabel(r'$\lambda$', fontsize=15, loc='center')
+plt.ylabel(r'$R$ $\left[ km \right]$', fontsize=15, loc='center')
+
+# Set limits
+plt.xlim(-0.01, 0.26)
+plt.ylim(8.25, 10)
+
+# Configure ticks for all four sides
+plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+plt.minorticks_on()
+
+# Customize tick spacing
+plt.gca().set_xticks(np.arange(0, 0.251, 0.05))  # Major x ticks 
+plt.gca().set_yticks(np.arange(8.25, 10.1, 0.25))  # Major y ticks 
+
+# Set thicker axes
+plt.gca().spines['top'].set_linewidth(1.5)
+plt.gca().spines['right'].set_linewidth(1.5)
+plt.gca().spines['bottom'].set_linewidth(1.5)
+plt.gca().spines['left'].set_linewidth(1.5)
+
+# Add a legend
+plt.legend(fontsize=15, frameon=True, fancybox=False, ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+
+# Save plot as PDF
+plt.tight_layout()
+plt.savefig(f"figures\LvR_{eos_c}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
+
+plt.show()
