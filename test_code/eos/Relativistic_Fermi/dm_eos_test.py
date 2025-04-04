@@ -18,7 +18,7 @@ import seaborn as sns
 
 # I belive that numerically it fails at scales of x = 10^-10
 
-x = np.geomspace(1e-3, 10, 5000)
+x = np.geomspace(1e-4, 10, 5000)
 
 def phi(x):
     return np.sqrt(1 + x**2) * ((2/3) * x**3 - x) + np.log(x + np.sqrt(1 + x**2))
@@ -38,73 +38,65 @@ def phi_nr(x):
 def psi_nr(x):
     return (8/3) * x**3
 
+def plytropic(rho):
+    K = 8.0164772576091
+    return K*rho**(5/3)
+
 ###############################################################################
 # Test of the code
 ###############################################################################
 
-p = 4.7038237577116e-7 * phi(x)
-rho = 4.7038237577116e-7 * psi(x)
-p_9th = 4.7038237577116e-7 * phi_9th(x)
-rho_9th = 4.7038237577116e-7 * psi_9th(x)
-p_nr = 4.7038237577116e-7 * phi_nr(x)
-rho_nr = 4.7038237577116e-7 * psi_nr(x)
-
-data = {0:[rho,p], 1:[rho_9th, p_9th], 2:[rho_nr, p_nr]}
+p = 1.4777498161008e-3 * phi(x)
+rho = 1.4777498161008e-3 * psi(x)
+p_9th = 1.4777498161008e-3 * phi_9th(x)
+rho_9th = 1.4777498161008e-3 * psi_9th(x)
+p_nr = 1.4777498161008e-3 * phi_nr(x)
+rho_nr = 1.4777498161008e-3 * psi_nr(x)
+rho_ply = np.geomspace(1e-12, 1e2)
+p_ply = plytropic(rho_ply)
 
 # Configure the plot
-fig, ax1 = plt.subplots(figsize=(9.71, 6))
+fig, ax = plt.subplots(figsize=(9.71, 6))
 colors = sns.color_palette("Set1", 11)
-styles = ['-', '--', '-.']
-s=0
+
 
 # Configure the axis
-ax1.set_xlabel(r'$\xi$', fontsize=15, loc='center')
-ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
-ax1.tick_params(axis='y', colors='k')
-ax1.xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-ax1.ticklabel_format(style='sci', axis='x', scilimits=(-3, 3))
-ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
-ax1.set_xscale('log')
-ax1.set_yscale('log')
-ax2 = ax1.twinx()
-ax2.set_ylabel(r'$\rho$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
-ax2.tick_params(axis='y', colors='k')
-ax2.xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-ax2.ticklabel_format(style='sci', axis='x', scilimits=(-3, 3))
-ax2.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-ax2.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
-ax2.set_yscale('log')
+ax.set_xlabel(r'$\rho$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center')
+ax.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+ax.tick_params(axis='y', colors='k')
+ax.xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax.ticklabel_format(style='sci', axis='x', scilimits=(-2, 2))
+ax.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax.ticklabel_format(style='sci', axis='y', scilimits=(-2, 2))
+ax.set_xscale('log')
+ax.set_yscale('log')
 
 # Plot
-for key in data.keys():
-    ax1.plot(x, data[key][1], color=colors[0], label=rf'$p_{{{key}}}$', linewidth=1.5, linestyle=styles[s]) #, marker = "+",  mfc='k', mec = 'k', ms = 5
-    ax2.plot(x, data[key][0], color=colors[1], label=rf'$\rho_{{{key}}}$', linewidth=1.5, linestyle=styles[s])
-    s += 1
+ax.plot(rho, p, label=r'EoS', color=colors[0], linewidth=1.5, linestyle='-')
+ax.plot(rho_ply, p_ply, label=r'NR-EoS', color=colors[1], linewidth=1.5, linestyle='--')
+ax.plot(rho_9th, p_9th, label=r'QR-EoS', color=colors[2], linewidth=1.5, linestyle='-.')
+
+
     
 # Set limits
-ax1.set_xlim(1e-2, 1e1)
-ax1.set_ylim(1e-18, 1e0)
-ax2.set_ylim(1e-18, 1e0)
+ax.set_xlim(1e-11, 2e1)
+ax.set_ylim(1e-17, 2e1)
+
 
 # Configure ticks
-ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
-ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True)
-ax1.minorticks_on()
-ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
-ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
-ax2.minorticks_on()
+ax.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+ax.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+ax.minorticks_on()
 
 # Configure ticks spacing
-#ax1.set_xticks(np.arange(0, 2.51, 0.25))
-#ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
-ax1.set_yticks(np.geomspace(1e-18, 1e0, 10))
-#ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
-ax2.set_yticks(np.geomspace(1e-16, 1e0, 9))
-#ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
+ax.set_xticks(np.geomspace(1e-11, 1e1, 13))
+#ax.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
+ax.set_yticks(np.geomspace(1e-17, 1e1, 10))
+#ax.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
+
 
 # Set thicker axes
-for ax in [ax1, ax2]:
+for ax in [ax]:
     ax.spines['top'].set_linewidth(1.5)
     ax.spines['right'].set_linewidth(1.5)
     ax.spines['bottom'].set_linewidth(1.5)
@@ -115,16 +107,11 @@ for ax in [ax1, ax2]:
     ax.spines['left'].set_color('k')
 
 # Make legend
-handles_list = [
-    mlines.Line2D([], [], color=colors[0], linestyle='-', label=r"$p(\xi)$"),
-    mlines.Line2D([], [], color=colors[1], linestyle='-', label=r"$\rho(\xi)$"),
-    mlines.Line2D([], [], color='k', linestyle='-', label=r"Relativistic"),
-    mlines.Line2D([], [], color='k', linestyle='--', label=r"Quasi-Relativistic"),
-    mlines.Line2D([], [], color='k', linestyle='-.', label=r"Non-Relativistic")]
+plt.legend(loc = "upper left", bbox_to_anchor=(0.009, 0.99), fontsize=15, frameon=True, fancybox=False, ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
 
-plt.legend(handles = handles_list, loc = "upper left", bbox_to_anchor=(0.009, 0.99), fontsize=15, frameon=True, fancybox=False, ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
-
+# Save fig as pdf
+plt.title(r'EoS of a Completely Degenerate, Ideal Fermi Gas', loc='left', fontsize=15, fontweight='bold')
 plt.tight_layout()
-plt.savefig("Parametrization_test_log.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("DIFG_EoS.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
