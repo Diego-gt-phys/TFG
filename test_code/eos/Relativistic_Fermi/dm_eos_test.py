@@ -13,12 +13,11 @@ WARNING: The notation in the book is different. My stress-energy tensor works wi
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
-import matplotlib.lines as mlines
 import seaborn as sns
 
 # I belive that numerically it fails at scales of x = 10^-10
 
-x = np.geomspace(1e-4, 10, 5000)
+x = np.geomspace(1e-6, 10, 5000)
 
 def phi(x):
     return np.sqrt(1 + x**2) * ((2/3) * x**3 - x) + np.log(x + np.sqrt(1 + x**2))
@@ -27,10 +26,16 @@ def psi(x):
     return np.sqrt(1 + x**2) * (2 * x**3 + x) - np.log(x + np.sqrt(1 + x**2))
 
 def phi_9th(x):
-    return (8/15) * x**5 - (4/21) * x**7 + (1/9) * x**9
+    return (8/15) * x**5 - (4/21) * x**7 + (1/9) * x**9 
 
 def psi_9th(x):
     return (8/3) * x**3 + (4/5) * x**5 - (1/7) * x**7 + (1/18) * x**9
+
+def phi_21st(x):
+    return (8/15) * x**5 - (4/21) * x**7 + (1/9) * x**9 - (5/66) * x**11 + (35/624) * x**13 - (7/160) * x**15 + (77/2176) * x**17 - (143/4864) * x**19 + (715/28672) * x**21
+
+def psi_21st(x):
+    return (8/3) * x**3 + (4/5) * x**5 - (1/7) * x**7 + (1/18) * x**9 - (5/176) * x**11 + (7/416) * x**13 - (7/640) * x**15 + (33/4352) * x**17 - (429/77824) * x**19 + (715/172032) * x**21
 
 def phi_nr(x):
     return (8/15) * x**5
@@ -50,9 +55,11 @@ p = 1.4777498161008e-3 * phi(x)
 rho = 1.4777498161008e-3 * psi(x)
 p_9th = 1.4777498161008e-3 * phi_9th(x)
 rho_9th = 1.4777498161008e-3 * psi_9th(x)
+p_21st = 1.4777498161008e-3 * phi_21st(x)
+rho_21st = 1.4777498161008e-3 * psi_21st(x)
 p_nr = 1.4777498161008e-3 * phi_nr(x)
 rho_nr = 1.4777498161008e-3 * psi_nr(x)
-rho_ply = np.geomspace(1e-12, 1e2)
+rho_ply = np.geomspace(1e-15, 1e2)
 p_ply = plytropic(rho_ply)
 
 # Configure the plot
@@ -73,14 +80,13 @@ ax.set_yscale('log')
 
 # Plot
 ax.plot(rho, p, label=r'EoS', color=colors[0], linewidth=1.5, linestyle='-')
-ax.plot(rho_ply, p_ply, label=r'NR-EoS', color=colors[1], linewidth=1.5, linestyle='--')
-ax.plot(rho_9th, p_9th, label=r'QR-EoS', color=colors[2], linewidth=1.5, linestyle='-.')
-
-
+ax.plot(rho_ply, p_ply, label=r'NR-EoS', color=colors[1], linewidth=1.5, linestyle=':')
+ax.plot(rho_9th, p_9th, label=r'9th order', color=colors[2], linewidth=1.5, linestyle='--')
+ax.plot(rho_21st, p_21st, label=r'21st order', color=colors[3], linewidth=1.5, linestyle='-.')
     
 # Set limits
-ax.set_xlim(1e-11, 2e1)
-ax.set_ylim(1e-17, 2e1)
+#ax.set_xlim(1e-11, 2e1)
+#ax.set_ylim(1e-17, 2e1)
 
 
 # Configure ticks
@@ -89,9 +95,9 @@ ax.tick_params(axis='both', which='minor', direction='in', length=4, width=1, la
 ax.minorticks_on()
 
 # Configure ticks spacing
-ax.set_xticks(np.geomspace(1e-11, 1e1, 13))
+#ax.set_xticks(np.geomspace(1e-11, 1e1, 13))
 #ax.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
-ax.set_yticks(np.geomspace(1e-17, 1e1, 10))
+#ax.set_yticks(np.geomspace(1e-17, 1e1, 10))
 #ax.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
 
 
@@ -112,6 +118,6 @@ plt.legend(loc = "upper left", bbox_to_anchor=(0.009, 0.99), fontsize=15, frameo
 # Save fig as pdf
 plt.title(r'EoS of a Completely Degenerate, Ideal Fermi Gas', loc='left', fontsize=15, fontweight='bold')
 plt.tight_layout()
-plt.savefig("DIFG_EoS.pdf", format="pdf", bbox_inches="tight")
+plt.savefig("DIFG_EoS_sans.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()

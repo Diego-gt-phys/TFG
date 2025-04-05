@@ -25,7 +25,6 @@ author: Diego García Tejada
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
-import matplotlib.lines as mlines
 import seaborn as sns
 import pandas as pd
 from scipy.interpolate import interp1d # Needed for interpolation of EoS
