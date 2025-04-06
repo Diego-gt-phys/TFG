@@ -62,6 +62,26 @@ def eos_A (p_A): # BM
     
     return rho
 
+def old_eos_B (p_B): # DM
+    """
+    Polytropic EOS for the star B. The polytropic constant and exponent are defined in the unit sections. 
+    
+    Parameters:
+        p_B (float): Preassure of the fluid B.
+        
+    Returns:
+        float: Density of the fluid B (rho) at preassure p_B.
+    """
+    # We work with an Ideal Fermi Gass
+    Gamma = 5/3 # Polytropic coeficient for a degenetare (T=0) IFG
+    K = ((dm_m)**(-8/3))*8.0165485819726 # Polytropic constant for a degenetare (T=0) IFG
+
+    if p_B <= 0:
+        return 0  # Avoid invalid values
+        
+    rho = (p_B / K) ** (1/Gamma)
+    return rho
+
 def eos_B (p_B): # DM
     """
     Guiven the arrays 'p_data_dm' and 'rho_data_d,' which contain the information for the equation of state for the dark matter,
