@@ -28,7 +28,7 @@ from matplotlib.ticker import ScalarFormatter
 import seaborn as sns
 import pandas as pd
 from scipy.interpolate import interp1d # Needed for interpolation of EoS
-import scipy.optimize as opt # Needed to find the values od lambda
+import scipy.optimize as opt # Needed to find roots
 
 # Physical parameters (solar mass = 1.98847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
