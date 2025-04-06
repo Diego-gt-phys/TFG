@@ -55,9 +55,13 @@ def calc_CDIFG (dm_m):
     df.to_excel(f'eos_cdifg_{dm_m}.xlsx', index=False)
     print("Data saved")
     
-calc_CDIFG(1)
+    return None
+    
+dm_m = 1
 
-df = pd.read_excel('eos_data.xlsx')
+calc_CDIFG(dm_m)
+
+df = pd.read_excel(f'eos_cdifg_{dm_m}.xlsx')
 rho = df['rho']
 p = df['P']
 
