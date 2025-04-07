@@ -62,26 +62,6 @@ def eos_A (p_A): # BM
     
     return rho
 
-def old_eos_B (p_B): # DM
-    """
-    Polytropic EOS for the star B. The polytropic constant and exponent are defined in the unit sections. 
-    
-    Parameters:
-        p_B (float): Preassure of the fluid B.
-        
-    Returns:
-        float: Density of the fluid B (rho) at preassure p_B.
-    """
-    # We work with an Ideal Fermi Gass
-    Gamma = 5/3 # Polytropic coeficient for a degenetare (T=0) IFG
-    K = ((dm_m)**(-8/3))*8.0165485819726 # Polytropic constant for a degenetare (T=0) IFG
-
-    if p_B <= 0:
-        return 0  # Avoid invalid values
-        
-    rho = (p_B / K) ** (1/Gamma)
-    return rho
-
 def eos_B (p_B): # DM
     """
     Guiven the arrays 'p_data_dm' and 'rho_data_d,' which contain the information for the equation of state for the dark matter,
@@ -100,8 +80,14 @@ def eos_B (p_B): # DM
     if p_B <= 0:
         return 0
     
-    interp_func = interp1d(p_data_dm, rho_data_dm, kind='linear', fill_value='extrapolate')
-    rho = interp_func(p_B)
+    elif p_B <= 1e-20:
+        Gamma = 5/3
+        K = ((dm_m)**(-8/3))*8.0165485819726
+        rho = (p_B / K) ** (1/Gamma)
+    
+    else:
+        interp_func = interp1d(p_data_dm, rho_data_dm, kind='linear', fill_value='extrapolate')
+        rho = interp_func(p_B)
     
     return rho
 
@@ -970,7 +956,7 @@ def read_create_dm_eos (dm_m):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'middle', 1.5, 'M', 1.0, 'l', 0.05)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 2, 0, 'soft', 1.0, 'pc', 1e-05, 'None', None)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
@@ -1046,7 +1032,7 @@ if mode == 1:
         ax1.axvline(0, color='k', linewidth=1.0, linestyle='--')
         
         # Set limits
-        if True == True:
+        if False == True:
             ax1.set_xlim(0, 11.82)
             ax1.set_ylim(0, 4e-5)
             ax2.set_ylim(0, 1.5)
@@ -1060,7 +1046,7 @@ if mode == 1:
         ax2.minorticks_on()
         
         # Configure ticks spacing
-        if True == True:
+        if False == True:
             ax1.set_xticks(np.arange(0, 11.83, 1))
             #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
             ax1.set_yticks(np.arange(0, 3.51e-5, 0.5e-5))
@@ -1081,7 +1067,7 @@ if mode == 1:
             
         # Add a legend
         ax1.legend(fontsize=15, frameon=True, fancybox=False, loc = "center left", bbox_to_anchor=(0.01, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
-        ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "upper right", bbox_to_anchor=(0.99, 0.99), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+        ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "center right", bbox_to_anchor=(0.99, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
             
         # Save the plot as a PDF
         
