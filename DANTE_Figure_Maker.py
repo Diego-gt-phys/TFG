@@ -590,7 +590,7 @@ for p1_v in p1_v_list:
     data[f'{p1_v}_NR'] = df_NR
 
 # Configure the plot
-fig, ax1 = plt.subplots(figsize=(9.71, 6))
+fig, ax1 = plt.subplots(figsize=(9.8, 6))
 colors = sns.color_palette("Set1", 10)
 c=0
 
@@ -630,8 +630,8 @@ if True == True:
     #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
     ax1.set_yticks(np.geomspace(1e-15, 1e-5, 11))
     #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
-    ax2.set_yticks(np.arange(0, 0.51, 0.1))
-    #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
+    ax2.set_yticks(np.arange(0, 0.51, 0.05))
+    ax2.set_yticks(np.arange(0, 0.51, 0.01), minor=True)
     
 for ax in [ax1, ax2]:
     ax.spines['top'].set_linewidth(1.5)
