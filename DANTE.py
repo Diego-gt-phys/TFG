@@ -62,7 +62,7 @@ def eos_A (p_A): # BM
     
     return rho
 
-def eos_B (p_B): # DM
+def eos_B (p_B, cutoff = 1e-20): # DM
     """
     Guiven the arrays 'p_data_dm' and 'rho_data_d,' which contain the information for the equation of state for the dark matter,
     this funtion interpolates the value of rho for a guiven  p. 
@@ -71,6 +71,9 @@ def eos_B (p_B): # DM
     ----------
     p_B : float
         Preassure of fluid B at which we want to evaluate the eos.
+        
+    cutoff : float
+        Value for wich the eos uses the nonrelativistic aproximation.
 
     Returns
     -------
@@ -80,7 +83,7 @@ def eos_B (p_B): # DM
     if p_B <= 0:
         return 0
     
-    elif p_B <= 1e-20:
+    elif p_B <= cutoff:
         Gamma = 5/3
         K = ((dm_m)**(-8/3))*8.0165485819726
         rho = (p_B / K) ** (1/Gamma)
@@ -956,7 +959,7 @@ def read_create_dm_eos (dm_m):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 2, 0, 'soft', 1.0, 'pc', 1e-05, 'None', None)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 2, 0, 'soft', 1.0, 'pc', 1e-3, 'None', None)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
