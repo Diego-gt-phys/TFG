@@ -507,7 +507,7 @@ def find_sc (M_target, l_target):
         
         return M-M_target, l-l_target
     
-    x0 = [M_target*1e-4, l_target] # Inital Guess
+    x0 = [M_target*5e-5, l_target] # Inital Guess
     sol = opt.root(f, x0, method='hybr')
     
     if sol.success:
@@ -901,7 +901,7 @@ def calc_CDIFG (dm_m):
     
     k = (dm_m)**(4) * 1.4777498161008e-3
         
-    x_vals = np.geomspace(1e-6, 10, 10000)
+    x_vals = np.geomspace(1e-6, 10, 500)
     
     pressures = []
     densities = []
@@ -959,7 +959,7 @@ def read_create_dm_eos (dm_m):
 
 print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
 
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 2, 0, 'soft', 1.0, 'pc', 1e-3, 'None', None)
+mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 2, 0, 'soft', 1.0, 'M', 0.1, 'None', None)
 
 print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
 
@@ -1036,9 +1036,9 @@ if mode == 1:
         
         # Set limits
         if False == True:
-            ax1.set_xlim(0, 11.82)
-            ax1.set_ylim(0, 4e-5)
-            ax2.set_ylim(0, 1.5)
+            ax1.set_xlim(0, 6.41)
+            ax1.set_ylim(0, 1e-3)
+            ax2.set_ylim(0, 1)
         
         # Configure ticks
         ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
@@ -1069,8 +1069,8 @@ if mode == 1:
             ax.spines['left'].set_color('k')
             
         # Add a legend
-        ax1.legend(fontsize=15, frameon=True, fancybox=False, loc = "center left", bbox_to_anchor=(0.01, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
-        ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "center right", bbox_to_anchor=(0.99, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+        #ax1.legend(fontsize=15, frameon=True, fancybox=False, loc = "center left", bbox_to_anchor=(0.01, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+        #ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "center right", bbox_to_anchor=(0.99, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
             
         # Save the plot as a PDF
         

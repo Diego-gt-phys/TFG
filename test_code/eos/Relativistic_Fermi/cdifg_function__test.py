@@ -46,7 +46,7 @@ def calc_CDIFG (dm_m):
 
     k = (dm_m)**(4) * 1.4777498161008e-3
     
-    x_vals = np.geomspace(1e-6, 10, 10000)
+    x_vals = np.geomspace(1e-6, 10, 1000)
 
     pressures = []
     densities = []
@@ -124,7 +124,7 @@ def eos_B (p_B):
 
 p_data_dm, rho_data_dm = read_create_dm_eos(1)
 
-p_list = np.geomspace(1e-18, 1e2)
+p_list = np.geomspace(1e-18, 1e2, 1000)
 p = []
 rho = []
 
