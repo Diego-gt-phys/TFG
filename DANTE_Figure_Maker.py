@@ -444,7 +444,7 @@ ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
 #ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
 #ax2.tick_params(axis='y', colors='k')
 
-## The plot thickenss
+# The plot thickenss
 for p2_v in p2_list:
     if c == 5:
         c+=1
@@ -573,4 +573,93 @@ plt.show()
 ###############################################################################
 # DM star Relativity check
 ###############################################################################
+
+data = {}
+
+s_type = 2
+d_type = 0
+eos_c = 'soft'
+dm_m = 1.0
+p1_c = 'M'
+p1_v_list = [0.1, 0.2, 0.3, 0.4]
+
+for p1_v in p1_v_list:
+    df = pd.read_csv(f"data\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.csv")
+    df_NR = pd.read_csv(f"data\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}_NR.csv")
+    data[f'{p1_v}'] = df
+    data[f'{p1_v}_NR'] = df_NR
+
+# Configure the plot
+fig, ax1 = plt.subplots(figsize=(9.71, 6))
+colors = sns.color_palette("Set1", 10)
+c=0
+
+# Set the axis.
+ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+ax1.tick_params(axis='y', colors='k')
+ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
+ax1.set_yscale('log')
+ax2 = ax1.twinx()
+ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
+ax2.tick_params(axis='y', colors='k')
+
+# The plot thickenss
+for p1_v in p1_v_list:
+    ax1.plot(data[f"{p1_v}"]['r'], data[f"{p1_v}"]['p_B'], color = colors[c], linewidth=1.5, linestyle='-')
+    ax2.plot(data[f"{p1_v}"]['r'], data[f"{p1_v}"]['m'], color = colors[c], linewidth=1.5, linestyle=':')
+    ax1.plot(data[f"{p1_v}_NR"]['r'], data[f"{p1_v}_NR"]['p_B'], color = colors[c], linewidth=1.5, linestyle='--')
+    ax2.plot(data[f"{p1_v}_NR"]['r'], data[f"{p1_v}_NR"]['m'], color = colors[c], linewidth=1.5, linestyle='-.')
+    c+=1
+
+if True == True:
+    ax1.set_xlim(0, 28)
+    ax1.set_ylim(1e-15, 1e-5)
+    ax2.set_ylim(0, 0.5)
+
+ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
+ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True)
+ax1.minorticks_on()
+ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+ax2.minorticks_on()
+
+if True == True:
+    ax1.set_xticks(np.arange(0, 28, 2))
+    #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
+    ax1.set_yticks(np.geomspace(1e-15, 1e-5, 11))
+    #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
+    ax2.set_yticks(np.arange(0, 0.51, 0.1))
+    #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
+    
+for ax in [ax1, ax2]:
+    ax.spines['top'].set_linewidth(1.5)
+    ax.spines['right'].set_linewidth(1.5)
+    ax.spines['bottom'].set_linewidth(1.5)
+    ax.spines['left'].set_linewidth(1.5)
+    ax.spines['top'].set_color('k')
+    ax.spines['right'].set_color('k')
+    ax.spines['bottom'].set_color('k')
+    ax.spines['left'].set_color('k')
+
+    
+handles_list = [
+    mlines.Line2D([], [], color=colors[0], linestyle='-', label=r"$M=0.1$"),
+    mlines.Line2D([], [], color=colors[1], linestyle='-', label=r"$M=0.2$"),
+    mlines.Line2D([], [], color='k', linestyle='-', label=r"$p(r)$"),
+    mlines.Line2D([], [], color='k', linestyle='--', label=r"$p_{{NR}}(r)$"),
+    mlines.Line2D([], [], color=colors[2], linestyle='-', label=r"$M=0.3$"),
+    mlines.Line2D([], [], color=colors[3], linestyle='-', label=r"$M=0.4$"),
+    mlines.Line2D([], [], color='k', linestyle=':', label=r"$m(r)$"),
+    mlines.Line2D([], [], color='k', linestyle='-.', label=r"$m_{{NR}}(r)$")]
+
+plt.legend(handles=handles_list, loc = "upper right", bbox_to_anchor=(0.99, 0.99), fontsize=15, frameon=True, fancybox=False, ncol = 2, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+
+# Save plot as PDF
+plt.title(rf'DM Stars, Relativity check. $m_{{\xi}} = {dm_m}$', loc='left', fontsize=15, fontweight='bold')
+plt.tight_layout()
+plt.savefig(f"figures\{s_type}_relativity_check_{dm_m}.pdf", format="pdf", bbox_inches="tight")
+
+plt.show()
 
