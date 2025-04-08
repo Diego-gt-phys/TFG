@@ -63,7 +63,7 @@ def read_create_dm_eos (dm_m):
         Array containing density values extracted from the EOS file.
     """
     try:
-        eos_data = pd.read_excel(f'data_eos\eos_cdifg_{dm_m}.xlsx')
+        eos_data = pd.read_excel(f'eos_cdifg_{dm_m}.xlsx')
         rho_data_dm = eos_data['rho'].values
         p_data_dm = eos_data['P'].values
     except FileNotFoundError:
@@ -124,13 +124,67 @@ def calc_CDIFG (dm_m):
         
     df = pd.DataFrame({'rho': densities,'P': pressures})
     
-    df.to_excel(rf'data_eos\eos_cdifg_{dm_m}.xlsx', index=False)
+    df.to_excel(rf'eos_cdifg_{dm_m}.xlsx', index=False)
         
     return df
 
 ###############################################################################
 
 dm_m = 1
+p_data_dm, rho_data_dm = read_create_dm_eos(dm_m)
 
+p = np.geomspace(1e-10, 1e-3, 1000)
+rho_theo = []
+rho_nr = []
 
+for p_i in p:
+    
+    rho_theo_i = eos_B(p_i)
+    rho_nr_i = eos_B(p_i, cutoff=1e-2)
 
+    rho_theo.append(rho_theo_i)
+    rho_nr.append(rho_nr_i)
+    
+res = np.array(rho_theo) - np.array(rho_nr)
+
+fig, (ax_main, ax_resid) = plt.subplots(1, 2, sharey=True, figsize=(9.71, 6), gridspec_kw={"width_ratios": [2.5, 1], "wspace": 0})
+colors = sns.color_palette("Set1", 11)
+    
+ax_main.plot(rho_theo, p, label=r'R', color=colors[0], linewidth=1.5, linestyle='-')
+ax_main.plot(rho_nr, p, label=r'NR', color=colors[1], linewidth=1.5, linestyle='-.')
+ax_resid.plot(res, p, label=r'RESD', color='k', linewidth=1.5, linestyle='-')
+
+ax_main.set_xlabel(r'$\rho$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+ax_main.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+ax_main.xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax_main.ticklabel_format(style='sci', axis='x', scilimits=(-2, 2))
+ax_main.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax_main.ticklabel_format(style='sci', axis='y', scilimits=(-2, 2))
+ax_main.set_xscale('log')
+ax_main.set_yscale('log')
+
+ax_resid.set_xlabel(r'$\Delta \rho$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+ax_resid.set_xscale('log')
+
+ax_main.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=False)
+ax_main.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=False)
+ax_main.minorticks_on()
+ax_resid.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True, left=False)
+ax_resid.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True, left=False)
+ax_resid.minorticks_on()
+
+# Set thicker axes
+for ax in [ax_main, ax_resid]:
+    ax.spines['top'].set_linewidth(1.5)
+    ax.spines['right'].set_linewidth(1.5)
+    ax.spines['bottom'].set_linewidth(1.5)
+    ax.spines['left'].set_linewidth(1.5)
+    ax.spines['top'].set_color('k')
+    ax.spines['right'].set_color('k')
+    ax.spines['bottom'].set_color('k')
+    ax.spines['left'].set_color('k')
+
+plt.tight_layout()
+plt.savefig("Cutoff_test.pdf", format="pdf", bbox_inches="tight")
+
+plt.show()
