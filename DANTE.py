@@ -241,6 +241,11 @@ def TOV_solver (y0, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm):
     
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values, R_A)
 
+def solve_single_star_MR_curve(args):
+    pc, alpha, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm = args
+    r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha * pc, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
+    return R_A, m_i[-1], m_a[-1], m_b[-1]
+
 def MR_curve (pc_range, alpha, r_range, h, n, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Creates the mass radius curve of a family of 2-fluid stars by solving the TOV equations.
@@ -270,37 +275,26 @@ def MR_curve (pc_range, alpha, r_range, h, n, p_data, rho_data, p_data_dm, rho_d
     MB_values : array
         Array containing the mass of fluid B of the stars.
     """
-    
     pc_start, pc_end = pc_range
-    pc_list = np.geomspace(pc_start, pc_end, n) 
-    R_values = []
-    M_values = []
-    MA_values = []
-    MB_values = []
-    cont = 0
+    pc_list = np.geomspace(pc_start, pc_end, n)
+    args_list = [(pc, alpha, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm) for pc in pc_list]
     
-    for pc in pc_list:
-        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
-        
-        R_i = R_A
-        M_i = m_i[-1]
-        MA_i = m_a[-1]
-        MB_i = m_b[-1]
-        
-        R_values.append(R_i)
-        M_values.append(M_i)
-        MA_values.append(MA_i)
-        MB_values.append(MB_i)
-        
-        cont += 1
-        print(cont)
-    
-    return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
+    with mp.Pool(mp.cpu_count()) as pool:
+        results = list(tqdm(pool.imap(solve_single_star_MR_curve, args_list), total=n, desc="Processing MR_curve_lambda"))
+
+    R_values, M_values, MA_values, MB_values = zip(*results)
+    return np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values)
+
+def solve_single_star_MR_curve_lambda(args):
+    pc, l, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm = args
+    alpha = find_alpha(pc, l, p_data, rho_data, p_data_dm, rho_data_dm)
+    r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha * pc, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
+    return R_A, m_i[-1], m_a[-1], m_b[-1]
 
 def MR_curve_lambda (pc_range, l, r_range, h, n, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Creates the mass radius curve of a family of 2-fluid stars by solving the TOV equations.
-    The amount of matter B inside the star is fixed for every point by the value of l
+    The amount of matter B inside the star is fixed for every point by the value of l.
     
     Parameters
     ----------
@@ -327,31 +321,14 @@ def MR_curve_lambda (pc_range, l, r_range, h, n, p_data, rho_data, p_data_dm, rh
         Array containing the mass of fluid B of the stars.
     """
     pc_start, pc_end = pc_range
-    pc_list = np.geomspace(pc_start, pc_end, n) 
-    R_values = []
-    M_values = []
-    MA_values = []
-    MB_values = []
-    cont = 0
-    
-    for pc in pc_list:
-        alpha = find_alpha(pc, l)
-        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
-        
-        R_i = R_A
-        M_i = m_i[-1]
-        MA_i = m_a[-1]
-        MB_i = m_b[-1]
-        
-        R_values.append(R_i)
-        M_values.append(M_i)
-        MA_values.append(MA_i)
-        MB_values.append(MB_i)
-        
-        cont += 1
-        print(cont)
-    
-    return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
+    pc_list = np.geomspace(pc_start, pc_end, n)
+    args_list = [(pc, l, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm) for pc in pc_list]
+
+    with mp.Pool(mp.cpu_count()) as pool:
+        results = list(tqdm(pool.imap(solve_single_star_MR_curve_lambda, args_list), total=n, desc="Processing MR_curve_lambda"))
+
+    R_values, M_values, MA_values, MB_values = zip(*results)
+    return np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values)
 
 def find_alpha (pc, l_target, p_data, rho_data, p_data_dm, rho_data_dm):
     """
@@ -792,8 +769,7 @@ def MR_curve_1f(pc_range, s_type, r_range, h, n, p_data, rho_data, p_data_dm, rh
         Array containing the radii of the stars.
     M_values : array
         Array containing the total masses of the stars.
-    """
-        
+    """    
     pc_start, pc_end = pc_range
     pc_list = np.geomspace(pc_start, pc_end, n)
     args_list = [(pc, s_type, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm) for pc in pc_list]
@@ -948,7 +924,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 1, 'stiff', 1, 'None', None, 'None', None)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 1, 'soft', 1.0, 'None', None, 'l', 0.0)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
