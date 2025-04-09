@@ -243,7 +243,7 @@ def TOV_solver (y0, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm):
 
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values, R_A)
 
-def MR_curve (pc_range, alpha, r_range, h, n, p_data_dm, rho_data_dm):
+def MR_curve (pc_range, alpha, r_range, h, n, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Creates the mass radius curve of a family of 2-fluid stars by solving the TOV equations.
     The different masses are calculating by changing the central pressure of fluid A and mantaining the alpha value of fluid B. 
@@ -282,7 +282,7 @@ def MR_curve (pc_range, alpha, r_range, h, n, p_data_dm, rho_data_dm):
     cont = 0
     
     for pc in pc_list:
-        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h, p_data_dm, rho_data_dm)
+        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
         
         R_i = R_A
         M_i = m_i[-1]
@@ -299,7 +299,7 @@ def MR_curve (pc_range, alpha, r_range, h, n, p_data_dm, rho_data_dm):
     
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
 
-def MR_curve_lambda (pc_range, l, r_range, h, n, p_data_dm, rho_data_dm):
+def MR_curve_lambda (pc_range, l, r_range, h, n, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Creates the mass radius curve of a family of 2-fluid stars by solving the TOV equations.
     The amount of matter B inside the star is fixed for every point by the value of l
@@ -338,7 +338,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n, p_data_dm, rho_data_dm):
     
     for pc in pc_list:
         alpha = find_alpha(pc, l)
-        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h, p_data_dm, rho_data_dm)
+        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
         
         R_i = R_A
         M_i = m_i[-1]
@@ -393,7 +393,7 @@ def find_alpha (pc, l_target, p_data, rho_data, p_data_dm, rho_data_dm):
             differnce betwen lambda (M_B/M) and the target lambda.
 
         """
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3)
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         l = m_B[-1]/m[-1]
         return l-l_target
     if l_target == 0:
@@ -444,11 +444,11 @@ def find_pc (M_target, s_type, alpha, p_data, rho_data, p_data_dm, rho_data_dm):
             Residual of Mass compared to M_target.
         """
         if s_type == 1:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 50), 1e-3)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         elif s_type == 2:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 50), 1e-3)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         else:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         M = m[-1]
         return M - M_target
     pc_guess = M_target*5e-5
@@ -500,7 +500,7 @@ def find_sc (M_target, l_target, p_data, rho_data, p_data_dm, rho_data_dm):
             Residual of calculated l to a l_taget.
         """
         p_c, alpha = x
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, p_c, alpha*p_c, 0, 0), (1e-6, 100), 1e-3)
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, p_c, alpha*p_c, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         M = m[-1]
         l = m_B[-1]/m[-1]
         
@@ -790,7 +790,7 @@ def MR_curve_1f (pc_range, s_type, r_range, h, n, p_data_dm, rho_data_dm):
     
     if s_type == 1:
         for pc in pc_list:
-            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, 0, 0, 0), r_range, h, p_data_dm, rho_data_dm)
+            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, 0, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
             
             R_i = r_i[-1]
             M_i = m_i[-1]
@@ -802,7 +802,7 @@ def MR_curve_1f (pc_range, s_type, r_range, h, n, p_data_dm, rho_data_dm):
             print(cont)
     else:
         for pc in pc_list:
-            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, 0, pc, 0, 0), r_range, h, p_data_dm, rho_data_dm)
+            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, 0, pc, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
             
             R_i = r_i[-1]
             M_i = m_i[-1]
