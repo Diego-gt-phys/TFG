@@ -810,7 +810,7 @@ def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_d
     pc_range = PCS[eos_c]
     
     if s_type != 3:
-        R, M = MR_curve_1f(pc_range, s_type, (1e-6, 100), 1e-3, 20, p_data, rho_data, p_data_dm, rho_data_dm)
+        R, M = MR_curve_1f(pc_range, s_type, (1e-6, 100), 1e-3, 30, p_data, rho_data, p_data_dm, rho_data_dm)
         data["R"] = R
         data["M"] = M
         df = pd.DataFrame(data)
@@ -821,9 +821,9 @@ def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_d
             
     else:
         if p2_c == 'a':
-            R, M, M_A, M_B = MR_curve(pc_range, p2_v, (1e-6, 100), 1e-3, 20,  p_data, rho_data, p_data_dm, rho_data_dm)
+            R, M, M_A, M_B = MR_curve(pc_range, p2_v, (1e-6, 100), 1e-3, 30,  p_data, rho_data, p_data_dm, rho_data_dm)
         else:
-            R, M, M_A, M_B = MR_curve_lambda(pc_range, p2_v, (1e-6, 100), 1e-3, 20,  p_data, rho_data, p_data_dm, rho_data_dm)
+            R, M, M_A, M_B = MR_curve_lambda(pc_range, p2_v, (1e-6, 100), 1e-3, 30,  p_data, rho_data, p_data_dm, rho_data_dm)
         
         data["R"] = R
         data["M"] = M
@@ -924,7 +924,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 0, 'stiff', 1, 'M', 1.0, 'None', None)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 1, 1, 'stiff', 1, 'None', None, 'None', None)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
