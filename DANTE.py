@@ -924,7 +924,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 1, 'soft', 1.0, 'None', None, 'l', 0.0)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 0, 'stiff', 1, 'M', 1.0, 'None', None)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
@@ -937,7 +937,7 @@ if __name__ == '__main__':
         p_data_dm, rho_data_dm = read_create_dm_eos(dm_m)
                 
         if d_type == 0:
-            df = Save_TOV(s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v)
+            df = Save_TOV(s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
             print()
             print(df)
             print("\nData Saved.")

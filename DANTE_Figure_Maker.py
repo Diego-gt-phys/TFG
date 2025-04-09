@@ -76,7 +76,7 @@ plt.show()
 ###############################################################################
 # Stiffness test for NSs
 ###############################################################################
-"""
+#"""
 # READ THE DATA
 data = {}
 
@@ -84,7 +84,7 @@ s_type = 1
 d_type = 0
 EsOS = ['soft', 'middle', 'stiff']
 p1_c = 'M'
-p1_v = 1.5
+p1_v = 1.0
 
 for eos_c in EsOS:
     df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.csv")
@@ -163,7 +163,7 @@ plt.tight_layout()
 plt.savefig(f"figures\stiffness_test_NS_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
-"""
+#"""
 ###############################################################################
 # Dark Matter Mass Test (DMMT)
 ###############################################################################
@@ -662,4 +662,3 @@ plt.tight_layout()
 plt.savefig(f"figures\{s_type}_relativity_check_{dm_m}.pdf", format="pdf", bbox_inches="tight")
 
 plt.show()
-
