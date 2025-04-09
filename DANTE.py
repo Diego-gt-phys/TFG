@@ -239,8 +239,6 @@ def TOV_solver (y0, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm):
     m_A_values = y_values[:, 3]
     m_B_values = y_values[:, 4]
     
-    print("TOV solved")
-
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values, R_A)
 
 def MR_curve (pc_range, alpha, r_range, h, n, p_data, rho_data, p_data_dm, rho_data_dm):
@@ -756,64 +754,55 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v, p_data, rho_data, p_d
     
     return df
 
-def MR_curve_1f (pc_range, s_type, r_range, h, n, p_data_dm, rho_data_dm):
+def solve_single_star_MR_curve_1f(args):
+    
+    pc, s_type, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm = args
+        
+    if s_type == 1:
+        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, 0, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
+    elif s_type == 2:
+        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, 0, pc, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
+            
+    R_i = r_i[-1]
+    M_i = m_i[-1]
+        
+    return R_i, M_i
+
+def MR_curve_1f(pc_range, s_type, r_range, h, n, p_data, rho_data, p_data_dm, rho_data_dm):
     """
-    Creates the mass radius curve of a family of 1-fluid stars by solving the TOV equations.
-    The different masses are calculating by changing the central pressure. 
+    Creates the mass-radius curve of a family of 1-fluid stars by solving the TOV equations.
+    The different masses are calculated by changing the central pressure. Now parallelized.
     
     Parameters
     ----------
     pc_range : tuple
         Range of central pressures to integrate: (pc_start, pc_end)
-    style : str
+    s_type : int
         Type of star: 1 for NS or 2 for DMS
     r_range : tuple
         Range of radius integration: (r_0, r_max)
     h : float
-        integration step.
+        Integration step.
     n : int
         Number of datapoints of the curve.
         
     Returns
     -------
     R_values : array
-        Array containig the radius of the stars.
+        Array containing the radii of the stars.
     M_values : array
         Array containing the total masses of the stars.
     """
-    
+        
     pc_start, pc_end = pc_range
-    pc_list = np.geomspace(pc_start, pc_end, n) 
-    R_values = []
-    M_values = []
-    cont = 0
+    pc_list = np.geomspace(pc_start, pc_end, n)
+    args_list = [(pc, s_type, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm) for pc in pc_list]
     
-    if s_type == 1:
-        for pc in pc_list:
-            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, 0, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
-            
-            R_i = r_i[-1]
-            M_i = m_i[-1]
-            
-            R_values.append(R_i)
-            M_values.append(M_i)
-            
-            cont += 1
-            print(cont)
-    else:
-        for pc in pc_list:
-            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, 0, pc, 0, 0), r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
-            
-            R_i = r_i[-1]
-            M_i = m_i[-1]
-            
-            R_values.append(R_i)
-            M_values.append(M_i)
-            
-            cont += 1
-            print(cont)
-    
-    return (np.array(R_values), np.array(M_values))
+    with mp.Pool(mp.cpu_count()) as pool:
+        results = list(tqdm(pool.imap(solve_single_star_MR_curve_1f, args_list), total=n, desc="Processing Stars"))
+        
+    R_values, M_values = zip(*results)
+    return np.array(R_values), np.array(M_values)
 
 def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm):
     """
@@ -845,7 +834,7 @@ def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_d
     pc_range = PCS[eos_c]
     
     if s_type != 3:
-        R, M = MR_curve_1f(pc_range, s_type, (1e-6, 100), 1e-3, 20, p_data_dm, rho_data_dm)
+        R, M = MR_curve_1f(pc_range, s_type, (1e-6, 100), 1e-3, 20, p_data, rho_data, p_data_dm, rho_data_dm)
         data["R"] = R
         data["M"] = M
         df = pd.DataFrame(data)
@@ -856,9 +845,9 @@ def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_d
             
     else:
         if p2_c == 'a':
-            R, M, M_A, M_B = MR_curve(pc_range, p2_v, (1e-6, 100), 1e-3, 20, p_data_dm, rho_data_dm)
+            R, M, M_A, M_B = MR_curve(pc_range, p2_v, (1e-6, 100), 1e-3, 20,  p_data, rho_data, p_data_dm, rho_data_dm)
         else:
-            R, M, M_A, M_B = MR_curve_lambda(pc_range, p2_v, (1e-6, 100), 1e-3, 20, p_data_dm, rho_data_dm)
+            R, M, M_A, M_B = MR_curve_lambda(pc_range, p2_v, (1e-6, 100), 1e-3, 20,  p_data, rho_data, p_data_dm, rho_data_dm)
         
         data["R"] = R
         data["M"] = M
@@ -952,209 +941,213 @@ def read_create_dm_eos (dm_m):
         
     return p_data_dm, rho_data_dm
 
+if __name__ == '__main__':
 ###############################################################################
 # Define the parameters
 ###############################################################################
-
-print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
-
-mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 1, 1, 'soft', 1, 'None', None, 'None', None)
-
-print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
-
+    
+    print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
+    
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 1, 'stiff', 1, 'None', None, 'None', None)
+    
+    print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
+    
 ###############################################################################
 # Calculate the data
 ###############################################################################
-
-if mode == 0:
-    p_data, rho_data = read_eos(eos_c)
-    p_data_dm, rho_data_dm = read_create_dm_eos(dm_m)
     
-    if d_type == 0:
-        df = Save_TOV(s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
-        print(df)
-        print("\nData Saved.")
+    if mode == 0:
+        p_data, rho_data = read_eos(eos_c)
+        p_data_dm, rho_data_dm = read_create_dm_eos(dm_m)
+                
+        if d_type == 0:
+            df = Save_TOV(s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v)
+            print()
+            print(df)
+            print("\nData Saved.")
+        
+        else:
+            df = Save_MR(s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
+            print()
+            print(df)
+            print("\nData Saved.")
     
-    else:
-        df = Save_MR(s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
-        print(df)
-        print("\nData Saved.")
-
 ###############################################################################
 # Plot the data
 ###############################################################################
-
-if mode == 1:
     
-    if d_type == 0:
-        # Read data
-        if s_type == 1:
-            df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.csv")
-        elif s_type == 2:
-            df = pd.read_csv(f"data\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.csv")
-        else:
-            df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.csv")
+    if mode == 1:
         
-        r = df['r']
-        m = df['m']
-        p_A = df['p_A']
-        p_B = df['p_B']
-        m_A = df['m_A']
-        m_B = df['m_B']
-        
-        # Configure the plot
-        fig, ax1 = plt.subplots(figsize=(9.71, 6))
-        colors = sns.color_palette("Set1", 10)
-        eos_colors = {"soft": 0, "middle": 1, "stiff": 2, "DM": 3}
-        c = eos_colors[eos_c]
-        
-        # Plot pressures 
-        if s_type != 2:
-            pa = ax1.plot(r, p_A, label=rf'$p_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-')
-        if s_type != 1:
-            pb = ax1.plot(r, p_B, label=r'$p_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-')
-        ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
-        ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
-        ax1.tick_params(axis='y', colors='k')
-        ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-        ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
-        #ax1.set_yscale('log')
-        
-        # Plot Mass
-        ax2 = ax1.twinx()
-        m = ax2.plot(r, m, label=r'$m(r)$', color = 'k', linewidth=1.5, linestyle='--')
-        if s_type == 3:
-            ma = ax2.plot(r, m_A, label=rf'$m_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-.')
-            mb = ax2.plot(r, m_B, label=r'$m_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-.')
-        ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
-        ax2.tick_params(axis='y', colors='k')
+        if d_type == 0:
+            # Read data
+            if s_type == 1:
+                df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.csv")
+            elif s_type == 2:
+                df = pd.read_csv(f"data\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.csv")
+            else:
+                df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.csv")
+            
+            r = df['r']
+            m = df['m']
+            p_A = df['p_A']
+            p_B = df['p_B']
+            m_A = df['m_A']
+            m_B = df['m_B']
+            
+            # Configure the plot
+            fig, ax1 = plt.subplots(figsize=(9.71, 6))
+            colors = sns.color_palette("Set1", 10)
+            eos_colors = {"soft": 0, "middle": 1, "stiff": 2, "DM": 3}
+            c = eos_colors[eos_c]
+            
+            # Plot pressures 
+            if s_type != 2:
+                pa = ax1.plot(r, p_A, label=rf'$p_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-')
+            if s_type != 1:
+                pb = ax1.plot(r, p_B, label=r'$p_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-')
+            ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+            ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+            ax1.tick_params(axis='y', colors='k')
+            ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+            ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
+            #ax1.set_yscale('log')
+            
+            # Plot Mass
+            ax2 = ax1.twinx()
+            m = ax2.plot(r, m, label=r'$m(r)$', color = 'k', linewidth=1.5, linestyle='--')
+            if s_type == 3:
+                ma = ax2.plot(r, m_A, label=rf'$m_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-.')
+                mb = ax2.plot(r, m_B, label=r'$m_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-.')
+            ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
+            ax2.tick_params(axis='y', colors='k')
+                    
+            # Add axis lines
+            ax1.axhline(0, color='k', linewidth=1.0, linestyle='--')
+            ax1.axvline(0, color='k', linewidth=1.0, linestyle='--')
+            
+            # Set limits
+            if False == True:
+                ax1.set_xlim(0, 6.41)
+                ax1.set_ylim(0, 1e-3)
+                ax2.set_ylim(0, 1)
+            
+            # Configure ticks
+            ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
+            ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True)
+            ax1.minorticks_on()
+            ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+            ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+            ax2.minorticks_on()
+            
+            # Configure ticks spacing
+            if False == True:
+                ax1.set_xticks(np.arange(0, 11.83, 1))
+                #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
+                ax1.set_yticks(np.arange(0, 3.51e-5, 0.5e-5))
+                #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
+                ax2.set_yticks(np.arange(0, 1.51, 0.2))
+                #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
+            
+            # Set thicker axes
+            for ax in [ax1, ax2]:
+                ax.spines['top'].set_linewidth(1.5)
+                ax.spines['right'].set_linewidth(1.5)
+                ax.spines['bottom'].set_linewidth(1.5)
+                ax.spines['left'].set_linewidth(1.5)
+                ax.spines['top'].set_color('k')
+                ax.spines['right'].set_color('k')
+                ax.spines['bottom'].set_color('k')
+                ax.spines['left'].set_color('k')
                 
-        # Add axis lines
-        ax1.axhline(0, color='k', linewidth=1.0, linestyle='--')
-        ax1.axvline(0, color='k', linewidth=1.0, linestyle='--')
-        
-        # Set limits
-        if False == True:
-            ax1.set_xlim(0, 6.41)
-            ax1.set_ylim(0, 1e-3)
-            ax2.set_ylim(0, 1)
-        
-        # Configure ticks
-        ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
-        ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True)
-        ax1.minorticks_on()
-        ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
-        ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
-        ax2.minorticks_on()
-        
-        # Configure ticks spacing
-        if False == True:
-            ax1.set_xticks(np.arange(0, 11.83, 1))
-            #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
-            ax1.set_yticks(np.arange(0, 3.51e-5, 0.5e-5))
-            #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
-            ax2.set_yticks(np.arange(0, 1.51, 0.2))
-            #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
-        
-        # Set thicker axes
-        for ax in [ax1, ax2]:
-            ax.spines['top'].set_linewidth(1.5)
-            ax.spines['right'].set_linewidth(1.5)
-            ax.spines['bottom'].set_linewidth(1.5)
-            ax.spines['left'].set_linewidth(1.5)
-            ax.spines['top'].set_color('k')
-            ax.spines['right'].set_color('k')
-            ax.spines['bottom'].set_color('k')
-            ax.spines['left'].set_color('k')
+            # Add a legend
+            #ax1.legend(fontsize=15, frameon=True, fancybox=False, loc = "center left", bbox_to_anchor=(0.01, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+            #ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "center right", bbox_to_anchor=(0.99, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+                
+            # Save the plot as a PDF
             
-        # Add a legend
-        #ax1.legend(fontsize=15, frameon=True, fancybox=False, loc = "center left", bbox_to_anchor=(0.01, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
-        #ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "center right", bbox_to_anchor=(0.99, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+            if s_type == 1:
+                plt.title(rf'TOV solution NS: $EoS={eos_c},$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
+                plt.tight_layout()
+                plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
+            elif s_type == 2:
+                plt.title(rf'TOV solution DMS: 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
+                plt.tight_layout()
+                plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
+            else:
+                DM_ps = {'a':'\alpha', 'l':'\lambda'}
+                DM_p = DM_ps[p2_c]
+                plt.title(rf'TOV solution DANS: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v},$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
+                plt.tight_layout()
+                plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
+            plt.show()
+        
+        else:
+            if s_type == 1:
+                df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}.csv")
+            elif s_type == 2:
+                df = pd.read_csv(f"data\{s_type}_{d_type}_{dm_m}.csv")
+            else:
+                df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p2_c}_{p2_v}.csv")
+                M_A = df["M_A"]
+                M_B = df["M_B"]
             
-        # Save the plot as a PDF
-        
-        if s_type == 1:
-            plt.title(rf'TOV solution NS: $EoS={eos_c},$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
-            plt.tight_layout()
-            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
-        elif s_type == 2:
-            plt.title(rf'TOV solution DMS: 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
-            plt.tight_layout()
-            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
-        else:
-            DM_ps = {'a':'\alpha', 'l':'\lambda'}
-            DM_p = DM_ps[p2_c]
-            plt.title(rf'TOV solution DANS: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v},$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
-            plt.tight_layout()
-            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
-        plt.show()
-    
-    else:
-        if s_type == 1:
-            df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}.csv")
-        elif s_type == 2:
-            df = pd.read_csv(f"data\{s_type}_{d_type}_{dm_m}.csv")
-        else:
-            df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p2_c}_{p2_v}.csv")
-            M_A = df["M_A"]
-            M_B = df["M_B"]
-        
-        R = df["R"]
-        M = df["M"]
-        
-        # Configure the plot
-        plt.figure(figsize=(9.71, 6))
-        colors = sns.color_palette("Set1", 10)
-        eos_colors = {"soft": 0, "middle": 1, "stiff": 2}
-        c = eos_colors[eos_c]
-        
-        # Plot the data
-        plt.plot(R, M, label = r'$M(R)$', color = 'k', linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-        if s_type == 3:
-            plt.plot(R, M_A, label = rf'$M_{{{eos_c}}}(R)$', color = colors[c], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-            plt.plot(R, M_B, label = r'$M_{{DM}}(R)$', color = colors[3], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
-        
-        # Add labels and title
-        plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
-        plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
-        
-        # Set limits
-        plt.xlim(8, 17)
-        plt.ylim(0, 3.5)
-        
-        # Configure ticks for all four sides
-        plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
-        plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
-        plt.minorticks_on()
-        
-        # Customize tick spacing
-        plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
-        plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
-        
-        # Set thicker axes
-        plt.gca().spines['top'].set_linewidth(1.5)
-        plt.gca().spines['right'].set_linewidth(1.5)
-        plt.gca().spines['bottom'].set_linewidth(1.5)
-        plt.gca().spines['left'].set_linewidth(1.5)
-        
-        # Add a legend
-        plt.legend(fontsize=15, frameon=True, fancybox=False, ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
-        
-        # Save plot as PDF
-        if s_type == 1:
-            plt.title(rf'MR curve NS: $EoS={eos_c}.$', loc='left', fontsize=15, fontweight='bold')
-            plt.tight_layout()
-            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}.pdf", format="pdf", bbox_inches="tight")
-        elif s_type == 2:
-            plt.title(rf'MR curve DMS: 'r'$m_{\chi}=$'rf'${dm_m}$  $\left[ GeV \right].$', loc='left', fontsize=15, fontweight='bold')
-            plt.tight_layout()
-            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}.pdf", format="pdf", bbox_inches="tight")
-        else:
-            DM_ps = {'a':r'\alpha', 'l':r'\lambda'}
-            DM_p = DM_ps[p2_c]
-            plt.title(rf'MR curve DANS: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
-            plt.tight_layout()
-            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
+            R = df["R"]
+            M = df["M"]
             
-        plt.show()
+            # Configure the plot
+            plt.figure(figsize=(9.71, 6))
+            colors = sns.color_palette("Set1", 10)
+            eos_colors = {"soft": 0, "middle": 1, "stiff": 2}
+            c = eos_colors[eos_c]
+            
+            # Plot the data
+            plt.plot(R, M, label = r'$M(R)$', color = 'k', linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+            if s_type == 3:
+                plt.plot(R, M_A, label = rf'$M_{{{eos_c}}}(R)$', color = colors[c], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+                plt.plot(R, M_B, label = r'$M_{{DM}}(R)$', color = colors[3], linewidth = 1.5, linestyle = '-', marker = "*",  mfc='k', mec = 'k', ms = 5)
+            
+            # Add labels and title
+            plt.xlabel(r'$R$ $\left[km\right]$', fontsize=15, loc='center')
+            plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
+            
+            # Set limits
+            plt.xlim(8, 17)
+            plt.ylim(0, 3.5)
+            
+            # Configure ticks for all four sides
+            plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+            plt.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+            plt.minorticks_on()
+            
+            # Customize tick spacing
+            plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
+            plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
+            
+            # Set thicker axes
+            plt.gca().spines['top'].set_linewidth(1.5)
+            plt.gca().spines['right'].set_linewidth(1.5)
+            plt.gca().spines['bottom'].set_linewidth(1.5)
+            plt.gca().spines['left'].set_linewidth(1.5)
+            
+            # Add a legend
+            plt.legend(fontsize=15, frameon=True, fancybox=False, ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+            
+            # Save plot as PDF
+            if s_type == 1:
+                plt.title(rf'MR curve NS: $EoS={eos_c}.$', loc='left', fontsize=15, fontweight='bold')
+                plt.tight_layout()
+                plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}.pdf", format="pdf", bbox_inches="tight")
+            elif s_type == 2:
+                plt.title(rf'MR curve DMS: 'r'$m_{\chi}=$'rf'${dm_m}$  $\left[ GeV \right].$', loc='left', fontsize=15, fontweight='bold')
+                plt.tight_layout()
+                plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}.pdf", format="pdf", bbox_inches="tight")
+            else:
+                DM_ps = {'a':r'\alpha', 'l':r'\lambda'}
+                DM_p = DM_ps[p2_c]
+                plt.title(rf'MR curve DANS: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
+                plt.tight_layout()
+                plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
+                
+            plt.show()
+
 
