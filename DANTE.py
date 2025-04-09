@@ -41,7 +41,7 @@ PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2
 # Define the functions
 ###############################################################################
 
-def eos_A (p_A): # BM
+def eos_A (p_A, p_data, rho_data): # BM
     """
     Guiven the arrays 'p_data' and 'rho_data' which contain the information for the equation of state, this funtion interpolates the value of rho for a guiven  p. 
 
@@ -64,7 +64,7 @@ def eos_A (p_A): # BM
     
     return rho
 
-def eos_B (p_B, cutoff = 1e-20): # DM
+def eos_B (p_B, p_data_dm, rho_data_dm): # DM
     """
     Guiven the arrays 'p_data_dm' and 'rho_data_d,' which contain the information for the equation of state for the dark matter,
     this funtion interpolates the value of rho for a guiven  p. 
@@ -74,9 +74,6 @@ def eos_B (p_B, cutoff = 1e-20): # DM
     p_B : float
         Preassure of fluid B at which we want to evaluate the eos.
         
-    cutoff : float
-        Value for wich the eos uses the nonrelativistic aproximation.
-
     Returns
     -------
     rho : float
@@ -85,7 +82,7 @@ def eos_B (p_B, cutoff = 1e-20): # DM
     if p_B <= 0:
         return 0
     
-    elif p_B <= cutoff:
+    elif p_B <= 1e-20:
         Gamma = 5/3
         K = ((dm_m)**(-8/3))*8.0165485819726
         rho = (p_B / K) ** (1/Gamma)
@@ -96,7 +93,7 @@ def eos_B (p_B, cutoff = 1e-20): # DM
     
     return rho
 
-def system_of_ODE (r, y):
+def system_of_ODE (r, y, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Function that calculates the derivatives of m and the pressures. This function is used for the runge-Kutta method. 
 
@@ -122,8 +119,8 @@ def system_of_ODE (r, y):
     """
     
     m, p_A, p_B, m_A, m_B = y
-    rho_A = eos_A(p_A)
-    rho_B = eos_B(p_B)
+    rho_A = eos_A(p_A, p_data, rho_data)
+    rho_B = eos_B(p_B, p_data_dm, rho_data_dm)
     
     dm_dr = 4 * np.pi * (rho_A + rho_B) * r**2
     
@@ -139,7 +136,7 @@ def system_of_ODE (r, y):
     
     return (dm_dr, dpA_dr, dpB_dr, dmA_dr, dmB_dr)
 
-def RK4O_with_stop (y0, r_range, h):
+def RK4O_with_stop (y0, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Function that integrates the y vector using a Runge-Kutta 4th orther method.
     Due to the physics of our problem. The function is built with a condition that doesn't allow negative pressures. If both of them are 0 then the integration stops. 
@@ -175,10 +172,10 @@ def RK4O_with_stop (y0, r_range, h):
     R_A = 0
 
     while r <= r_end:
-        k1 = h * np.array(system_of_ODE(r, y))
-        k2 = h * np.array(system_of_ODE(r + h / 2, y + k1 / 2))
-        k3 = h * np.array(system_of_ODE(r + h / 2, y + k2 / 2))
-        k4 = h * np.array(system_of_ODE(r + h, y + k3))
+        k1 = h * np.array(system_of_ODE(r, y, p_data, rho_data, p_data_dm, rho_data_dm))
+        k2 = h * np.array(system_of_ODE(r + h / 2, y + k1 / 2, p_data, rho_data, p_data_dm, rho_data_dm))
+        k3 = h * np.array(system_of_ODE(r + h / 2, y + k2 / 2, p_data, rho_data, p_data_dm, rho_data_dm))
+        k4 = h * np.array(system_of_ODE(r + h, y + k3, p_data, rho_data, p_data_dm, rho_data_dm))
 
         y_next = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6
 
@@ -206,7 +203,7 @@ def RK4O_with_stop (y0, r_range, h):
         
     return (np.array(r_values), np.array(y_values), R_A)
 
-def TOV_solver (y0, r_range, h):
+def TOV_solver (y0, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Using a 4th Runge Kutta method, it solves the TOV for a 2 perfect fluid star.
     It guives the mass and preassure values for both fluids in all of the stars radius.
@@ -234,7 +231,7 @@ def TOV_solver (y0, r_range, h):
         Value of the radius of the star of fluid A
     """
     
-    r_values, y_values, R_A = RK4O_with_stop(y0, r_range, h)
+    r_values, y_values, R_A = RK4O_with_stop(y0, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm)
     
     m_values = y_values[:, 0]
     p_A_values = y_values[:, 1]
@@ -246,7 +243,7 @@ def TOV_solver (y0, r_range, h):
 
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values, R_A)
 
-def MR_curve (pc_range, alpha, r_range, h, n):
+def MR_curve (pc_range, alpha, r_range, h, n, p_data_dm, rho_data_dm):
     """
     Creates the mass radius curve of a family of 2-fluid stars by solving the TOV equations.
     The different masses are calculating by changing the central pressure of fluid A and mantaining the alpha value of fluid B. 
@@ -285,7 +282,7 @@ def MR_curve (pc_range, alpha, r_range, h, n):
     cont = 0
     
     for pc in pc_list:
-        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
+        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h, p_data_dm, rho_data_dm)
         
         R_i = R_A
         M_i = m_i[-1]
@@ -302,7 +299,7 @@ def MR_curve (pc_range, alpha, r_range, h, n):
     
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
 
-def MR_curve_lambda (pc_range, l, r_range, h, n):
+def MR_curve_lambda (pc_range, l, r_range, h, n, p_data_dm, rho_data_dm):
     """
     Creates the mass radius curve of a family of 2-fluid stars by solving the TOV equations.
     The amount of matter B inside the star is fixed for every point by the value of l
@@ -341,7 +338,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
     
     for pc in pc_list:
         alpha = find_alpha(pc, l)
-        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h)
+        r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), r_range, h, p_data_dm, rho_data_dm)
         
         R_i = R_A
         M_i = m_i[-1]
@@ -358,7 +355,7 @@ def MR_curve_lambda (pc_range, l, r_range, h, n):
     
     return (np.array(R_values), np.array(M_values), np.array(MA_values), np.array(MB_values))
 
-def find_alpha (pc, l_target):
+def find_alpha (pc, l_target, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Finds the alpha parameter for which lambda becomes lambda_target by using the secant method for finding the roots of a function.
 
@@ -409,7 +406,7 @@ def find_alpha (pc, l_target):
         else:
             raise ValueError("Root-finding did not converge")
 
-def find_pc (M_target, s_type, alpha):
+def find_pc (M_target, s_type, alpha, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Finds the central pressure that guives a 1 fluid star a certain Target Mass by using the secant method for finding the roots of a function.
 
@@ -461,7 +458,7 @@ def find_pc (M_target, s_type, alpha):
     else:
         raise ValueError("Root-finding did not converge")
 
-def find_sc (M_target, l_target):
+def find_sc (M_target, l_target, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Function that calculates the starting conditions [p_c, alpha], that guive a certain M_target, l_target.
     The function uses a hybrid method to solve the roots of a vector function
@@ -671,7 +668,7 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
     
     return mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v
 
-def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
+def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Calculates and Saves the solution of the TOV, for a systems whose imputs are 
     this functions parameters.
@@ -716,29 +713,29 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
     """
     if s_type == 3: # DANS
         if p1_c == "M" and p2_c == "l":
-            pc, alpha = find_sc(p1_v, p2_v)
+            pc, alpha = find_sc(p1_v, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
         elif p1_c == "M" and p2_c == "a": #DEBUG
-            pc = find_pc(p1_v, s_type, p2_v)
+            pc = find_pc(p1_v, s_type, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
             alpha = p2_v
         elif p2_c == "l" and p1_c == "pc": #DEBUG
             pc = p1_v
-            alpha = find_alpha(p1_v, p2_v)
+            alpha = find_alpha(p1_v, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
             print(alpha)
         else:
             pc, alpha = [p1_v, p2_v]
         
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 100), 1e-3)
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         
     else:
         if p1_c == "M":
-            pc = find_pc(p1_v, s_type, None)
+            pc = find_pc(p1_v, s_type, None, p_data, rho_data, p_data_dm, rho_data_dm)
         else:
             pc = p1_v
             
         if s_type == 1:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 100), 1e-3)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         else:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 100), 1e-3)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
             
     data = {}
     data["r"] = r
@@ -759,7 +756,7 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v):
     
     return df
 
-def MR_curve_1f (pc_range, s_type, r_range, h, n):
+def MR_curve_1f (pc_range, s_type, r_range, h, n, p_data_dm, rho_data_dm):
     """
     Creates the mass radius curve of a family of 1-fluid stars by solving the TOV equations.
     The different masses are calculating by changing the central pressure. 
@@ -793,7 +790,7 @@ def MR_curve_1f (pc_range, s_type, r_range, h, n):
     
     if s_type == 1:
         for pc in pc_list:
-            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, 0, 0, 0), r_range, h)
+            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, pc, 0, 0, 0), r_range, h, p_data_dm, rho_data_dm)
             
             R_i = r_i[-1]
             M_i = m_i[-1]
@@ -805,7 +802,7 @@ def MR_curve_1f (pc_range, s_type, r_range, h, n):
             print(cont)
     else:
         for pc in pc_list:
-            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, 0, pc, 0, 0), r_range, h)
+            r_i, m_i, p_A, p_B, m_a, m_b, R_A = TOV_solver((0, 0, pc, 0, 0), r_range, h, p_data_dm, rho_data_dm)
             
             R_i = r_i[-1]
             M_i = m_i[-1]
@@ -818,7 +815,7 @@ def MR_curve_1f (pc_range, s_type, r_range, h, n):
     
     return (np.array(R_values), np.array(M_values))
 
-def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v):
+def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm):
     """
     Calculates and Saves the solution of the TOV, for a systems whose imputs are 
     this functions parameters.
@@ -848,7 +845,7 @@ def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v):
     pc_range = PCS[eos_c]
     
     if s_type != 3:
-        R, M = MR_curve_1f(pc_range, s_type, (1e-6, 100), 1e-3, 20)
+        R, M = MR_curve_1f(pc_range, s_type, (1e-6, 100), 1e-3, 20, p_data_dm, rho_data_dm)
         data["R"] = R
         data["M"] = M
         df = pd.DataFrame(data)
@@ -859,9 +856,9 @@ def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v):
             
     else:
         if p2_c == 'a':
-            R, M, M_A, M_B = MR_curve(pc_range, p2_v, (1e-6, 100), 1e-3, 20)
+            R, M, M_A, M_B = MR_curve(pc_range, p2_v, (1e-6, 100), 1e-3, 20, p_data_dm, rho_data_dm)
         else:
-            R, M, M_A, M_B = MR_curve_lambda(pc_range, p2_v, (1e-6, 100), 1e-3, 20)
+            R, M, M_A, M_B = MR_curve_lambda(pc_range, p2_v, (1e-6, 100), 1e-3, 20, p_data_dm, rho_data_dm)
         
         data["R"] = R
         data["M"] = M
@@ -974,12 +971,12 @@ if mode == 0:
     p_data_dm, rho_data_dm = read_create_dm_eos(dm_m)
     
     if d_type == 0:
-        df = Save_TOV(s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v)
+        df = Save_TOV(s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
         print(df)
         print("\nData Saved.")
     
     else:
-        df = Save_MR(s_type, eos_c, dm_m, p2_c, p2_v)
+        df = Save_MR(s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
         print(df)
         print("\nData Saved.")
 
