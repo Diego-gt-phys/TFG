@@ -239,6 +239,8 @@ def TOV_solver (y0, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm):
     m_A_values = y_values[:, 3]
     m_B_values = y_values[:, 4]
     
+    print("Star Solved")
+    
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values, R_A)
 
 def solve_single_star_MR_curve(args):
@@ -427,7 +429,7 @@ def find_pc (M_target, s_type, alpha, p_data, rho_data, p_data_dm, rho_data_dm):
         M = m[-1]
         return M - M_target
     pc_guess = M_target*5e-5
-    result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1)
+    result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1, xtol=1e-10, rtol=1e-12, maxiter=15)
     if result.converged:
         return result.root
     else:
@@ -924,7 +926,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 0, 'soft', 1, 'pc', 0.0005478, 'None', None)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'middle', 1.0, 'M', 1.25, 'l', 0.2)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
@@ -1046,13 +1048,13 @@ if __name__ == '__main__':
                 plt.tight_layout()
                 plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
             elif s_type == 2:
-                plt.title(rf'TOV solution DMS: 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
+                plt.title(rf'TOV solution DMS: 'r'$m_{\chi}$'rf'$={dm_m},$ ${p1_c} = {p1_v}.$', loc='left', fontsize=15, fontweight='bold')
                 plt.tight_layout()
                 plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
             else:
                 DM_ps = {'a':'\alpha', 'l':'\lambda'}
                 DM_p = DM_ps[p2_c]
-                plt.title(rf'TOV solution DANS: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m}$ $\left[ GeV \right],$ ${p1_c} = {p1_v},$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
+                plt.title(rf'TOV solution DANS: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m},$ ${p1_c} = {p1_v},$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
                 plt.tight_layout()
                 plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
             plt.show()
@@ -1087,8 +1089,8 @@ if __name__ == '__main__':
             plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
             
             # Set limits
-            plt.xlim(8, 17)
-            plt.ylim(0, 3.5)
+            #plt.xlim(8, 17)
+            #plt.ylim(0, 3.5)
             
             # Configure ticks for all four sides
             plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
@@ -1096,8 +1098,8 @@ if __name__ == '__main__':
             plt.minorticks_on()
             
             # Customize tick spacing
-            plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
-            plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
+            #plt.gca().set_xticks(np.arange(8, 17.1, 1))  # Major x ticks 
+            #plt.gca().set_yticks(np.arange(0, 3.51, 0.5))  # Major y ticks 
             
             # Set thicker axes
             plt.gca().spines['top'].set_linewidth(1.5)
