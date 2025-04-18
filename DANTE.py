@@ -429,7 +429,7 @@ def find_pc (M_target, s_type, alpha, p_data, rho_data, p_data_dm, rho_data_dm):
         M = m[-1]
         return M - M_target
     pc_guess = M_target*5e-5
-    result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1, xtol=1e-10, rtol=1e-12, maxiter=15)
+    result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1)
     if result.converged:
         return result.root
     else:
@@ -926,7 +926,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 3, 1, 'soft', 1.0, 'None', None, 'l', 0.04)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'soft', 0.6, 'M', 1.0, 'l', 0.3)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
@@ -1052,9 +1052,9 @@ if __name__ == '__main__':
                 plt.tight_layout()
                 plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
             else:
-                DM_ps = {'a':'\alpha', 'l':'\lambda'}
+                DM_ps = {'a':r'\alpha', 'l':r'\lambda'}
                 DM_p = DM_ps[p2_c]
-                plt.title(rf'TOV solution DANS: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m},$ ${p1_c} = {p1_v},$ ${DM_p} = {p2_v}.$', loc='left', fontsize=15, fontweight='bold')
+                plt.title(rf'TOV solution DANS: $EoS={eos_c},$ 'r'$m_{\chi}$'rf'$={dm_m},$ ${p1_c} = {p1_v},$ ${DM_p} = {p2_v}$', loc='left', fontsize=15, fontweight='bold')
                 plt.tight_layout()
                 plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
             plt.show()
