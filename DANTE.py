@@ -240,6 +240,7 @@ def TOV_solver (y0, r_range, h, p_data, rho_data, p_data_dm, rho_data_dm):
     m_B_values = y_values[:, 4]
     
     print("Star Solved")
+    #print(p_A_values[0], p_B_values[0]/p_A_values[0]) #DEBUG
     
     return (r_values, m_values, p_A_values, p_B_values, m_A_values, m_B_values, R_A)
 
@@ -477,9 +478,10 @@ def find_sc (M_target, l_target, p_data, rho_data, p_data_dm, rho_data_dm):
             Residual of calculated l to a l_taget.
         """
         p_c, alpha = x
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, p_c, alpha*p_c, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((1, p_c, alpha*p_c, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         M = m[-1]
         l = m_B[-1]/m[-1]
+        #print(M, l) #DEBUG
         
         return M-M_target, l-l_target
     
@@ -926,7 +928,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'soft', 1.1, 'M', 1.0, 'l', 0.3)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'soft', 1.0, 'M', 1.0, 'a', 1)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
