@@ -973,8 +973,6 @@ def find_alpha_max(p1_v, p_data, rho_data, p_data_dm, rho_data_dm):
     
     result = opt.minimize_scalar(neg_lambda, bounds=(1, 6), method='bounded')
     
-    print(result) #DEBUG
-    
     if result.success:
         return result.x
     else:
@@ -985,7 +983,7 @@ def find_alpha_max(p1_v, p_data, rho_data, p_data_dm, rho_data_dm):
 ###############################################################################
 
 s_type = 3
-d_type = 0
+d_type = 2
 eos_c = 'soft'
 dm_m = 1.0
 p1_c = 'M'

@@ -386,7 +386,7 @@ def find_alpha (pc, l_target, p_data, rho_data, p_data_dm, rho_data_dm):
 
 def find_pc (M_target, s_type, alpha, p_data, rho_data, p_data_dm, rho_data_dm):
     """
-    Finds the central pressure that guives a 1 fluid star a certain Target Mass by using the secant method for finding the roots of a function.
+    Finds the central pressure that guives a star a certain Target Mass by using the secant method for finding the roots of a function.
 
     Parameters
     ----------
@@ -529,7 +529,7 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
     s_type_DB : int
         1 for a Neutron Star, 2 for a Dark Matter Star, 3 for a DANS.
     d_type_DB : int
-        0 for a TOV solution or 1 for a MR curve.
+        0 for a TOV solution, 1 for a MR curve, 2 for a l_max finder.
     eos_c_DB : str
         'soft', 'middle', 'stiff' for the EoS to use for baryonic matter.
     dm_m_DB : float
@@ -570,10 +570,16 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
         
         while True: # Find d_type
             try:
-                d_type = int(input("\nWhich type of calculation? \n0 : TOV equation. \n1 : Mass Radius curve. \n Enter choice (0, 1) -> "))
-                if d_type not in [0, 1]:
-                    raise ValueError("Invalid choice. Enter a 0 or 1.")
-                break
+                if s_type==3:
+                    d_type = int(input("\nWhich type of calculation? \n0 : TOV equation. \n1 : Mass Radius curve. \n2 : Find l max. \n Enter choice (0, 1, 2) -> "))
+                    if d_type not in [0, 1, 2]:
+                        raise ValueError("Invalid choice. Enter a 0, 1 or 2.")
+                    break
+                else:
+                    d_type = int(input("\nWhich type of calculation? \n0 : TOV equation. \n1 : Mass Radius curve. \n Enter choice (0, 1) -> "))
+                    if d_type not in [0, 1]:
+                        raise ValueError("Invalid choice. Enter a 0 or 1.")
+                    break
             except ValueError as e:
                 print(e)
         
@@ -602,7 +608,7 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
         else:
             dm_m = 1
         
-        if d_type  == 0: # Calculate the parameters when it applies 
+        if d_type  in [0, 2]: # Calculate the parameters when it applies 
             while True: # Calculate p1
                 try:
                     p1_c = input("\nWhat parameter of matter do you want to use? \n'pc' : Central Pressure. \n'M' : Total mass of the star. \nEnter choice ('pc','M') -> ")
@@ -613,7 +619,7 @@ def get_inputs (mode_DB, s_type_DB, d_type_DB, eos_c_DB, dm_m_DB, p1_c_DB, p1_v_
                 except ValueError as e:
                     print(e)
             
-            if s_type == 3: # Calculate p2
+            if s_type == 3 and d_type != 2: # Calculate p2
                 while True:
                     try:
                         p2_c = input("\nWhat parameter of DM do you want to use? \n'a' : central pressure fraction. \n'l' : Mass fraction of DM. \nEnter choice ('a', 'l') -> ")
@@ -807,7 +813,7 @@ def Save_MR (s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_d
         
     Returns
     -------
-    f : Pandas DataFrame
+    df : Pandas DataFrame
         DF containing all the datapoints of the MR curve.
     """
     data = {}
@@ -921,6 +927,121 @@ def read_create_dm_eos (dm_m):
         
     return p_data_dm, rho_data_dm
 
+def find_alpha_max(p1_c, p1_v, p_data, rho_data, p_data_dm, rho_data_dm):
+    """
+    Finds the alpha parameter for which lambda (M_B/M) reaches its maximum value,
+    using scalar optimization.
+    
+    Parameters
+    ----------
+    p1_c : str
+        Parameter type for the first input value (e.g., "M" for mass, "pc" for central pressure).
+    p1_v : float
+        Value corresponding to the first parameter.
+    p_data : array_like
+        Pressure data for fluid A (baryonic matter).
+    rho_data : array_like
+        Density data for fluid A (baryonic matter).
+    p_data_dm : array_like
+        Pressure data for fluid B (dark matter).
+    rho_data_dm : array_like
+        Density data for fluid B (dark matter).
+        
+    Returns
+    -------
+    float
+        Value of alpha for which lambda is maximized.
+    """
+    
+    def lambda_func(alpha):
+        """
+        Auxiliary function used to calculate lambda = M_B / M as a function of alpha.
+        
+        Parameters
+        ----------
+        alpha : float
+            Ratio of central pressure of fluid B to fluid A (pc_B / pc_A).
+            
+        Returns
+        -------
+        float
+            The value of lambda for the given alpha.
+        """
+        if p1_c == 'M':
+            pc = find_pc(p1_v, s_type, alpha, p_data, rho_data, p_data_dm, rho_data_dm)
+            
+        else:
+            pc = p1_v
+        
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver(
+            (0, pc, alpha * pc, 0, 0),
+            (1e-6, 50),
+            1e-3,
+            p_data, rho_data, p_data_dm, rho_data_dm
+        )
+        print(m_B[-1] / m[-1]) #DEBUG
+        return m_B[-1] / m[-1]
+    
+    def neg_lambda(alpha):
+        """
+        Negative lambda, used to find the maximum by minimizing this value.
+        """
+        return -lambda_func(alpha)
+    
+    result = opt.minimize_scalar(neg_lambda, bounds=(1, 6), method='bounded')
+    
+    if result.success:
+        return result.x
+    else:
+        raise ValueError("Optimization did not converge")
+
+def save_l_max(s_type, eos_c, dm_m, p1_c, p1_v, p_data, rho_data, p_data_dm, rho_data_dm):
+    """
+    Calculates and Saves the solution of the TOV for a star with maximum amount of DM.
+    
+    Parameters
+    ----------
+    s_type : int
+        Type of star configuration:
+        - 1: Neutron Star (NS)
+        - 2: Dark Matter Admixed Neutron Star (DANS)
+        - 3: Double Admixed Neutron Star (DANS with extra parameters)
+    eos_c : str
+        Identifier of the equation of state (EOS) used for baryonic matter.
+    dm_m : float
+        Dark matter particle mass, relevant for s_type = 2 or 3.
+    p1_c : str
+        Parameter type for the first input value (e.g., "M" for mass, "pc" for central pressure).
+    p1_v : float
+        Value corresponding to the first parameter.
+        
+    Returns
+    -------
+    df : pandas.DataFrame
+        Dataframe containing the computed radial profile of the star.
+    """
+    alpha = find_alpha_max(p1_c, p1_v, p_data, rho_data, p_data_dm, rho_data_dm)
+    
+    if p1_c == 'M':
+        pc = find_pc(p1_v, s_type, alpha, p_data, rho_data, p_data_dm, rho_data_dm)
+        
+    else:
+        pc = p1_v
+        
+    r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+    data = {}
+    data["r"] = r
+    data["m"] = m
+    data["p_A"] = p_A
+    data["p_B"] = p_B
+    data["m_A"] = m_A
+    data["m_B"] = m_B
+    data["R_A"] = R_A
+    df = pd.DataFrame(data)
+    df.to_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}.csv", index=False)
+    
+    return df
+
 if __name__ == '__main__':
 ###############################################################################
 # Define the parameters
@@ -946,7 +1067,7 @@ if __name__ == '__main__':
             print(df)
             print("\nData Saved.")
         
-        else:
+        elif d_type == 1:
             df = Save_MR(s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
             print()
             print(df)
