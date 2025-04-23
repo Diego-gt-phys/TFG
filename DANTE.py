@@ -988,7 +988,7 @@ def find_alpha_max(p1_c, p1_v, p_data, rho_data, p_data_dm, rho_data_dm):
         """
         return -lambda_func(alpha)
     
-    result = opt.minimize_scalar(neg_lambda, bounds=(1, 6), method='bounded')
+    result = opt.minimize_scalar(neg_lambda, bounds=(2, 14), method='bounded')
     
     if result.success:
         return result.x
@@ -1049,7 +1049,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'soft', 1.0, 'M', 1.0, 'a', 1)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 2, 'stiff', 1.5, 'M', 1.0, 'None', None)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
@@ -1069,6 +1069,12 @@ if __name__ == '__main__':
         
         elif d_type == 1:
             df = Save_MR(s_type, eos_c, dm_m, p2_c, p2_v, p_data, rho_data, p_data_dm, rho_data_dm)
+            print()
+            print(df)
+            print("\nData Saved.")
+            
+        elif d_type == 2:
+            df = save_l_max(s_type, eos_c, dm_m, p1_c, p1_v, p_data, rho_data, p_data_dm, rho_data_dm)
             print()
             print(df)
             print("\nData Saved.")
@@ -1182,7 +1188,7 @@ if __name__ == '__main__':
                 plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}_{p2_c}_{p2_v}.pdf", format="pdf", bbox_inches="tight")
             plt.show()
         
-        else:
+        elif d_type == 1:
             if s_type == 1:
                 df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}.csv")
             elif s_type == 2:
@@ -1251,4 +1257,88 @@ if __name__ == '__main__':
                 
             plt.show()
 
-
+        elif d_type == 2:
+            # Read data
+            df = pd.read_csv(f"data\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}.csv")
+            r = df['r']
+            m = df['m']
+            p_A = df['p_A']
+            p_B = df['p_B']
+            m_A = df['m_A']
+            m_B = df['m_B']
+            
+            # Configure the plot
+            fig, ax1 = plt.subplots(figsize=(9.71, 6))
+            colors = sns.color_palette("Set1", 10)
+            eos_colors = {"soft": 0, "middle": 1, "stiff": 2, "DM": 3}
+            c = eos_colors[eos_c]
+            
+            # Plot pressures
+            pa = ax1.plot(r, p_A, label=rf'$p_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-')
+            pb = ax1.plot(r, p_B, label=r'$p_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-')
+            ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+            ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+            ax1.tick_params(axis='y', colors='k')
+            ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+            ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
+            
+            # Plot Mass
+            ax2 = ax1.twinx()
+            m = ax2.plot(r, m, label=r'$m(r)$', color = 'k', linewidth=1.5, linestyle='--')
+            ma = ax2.plot(r, m_A, label=rf'$m_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-.')
+            mb = ax2.plot(r, m_B, label=r'$m_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-.')
+            ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
+            ax2.tick_params(axis='y', colors='k')
+            
+            # Add axis lines
+            ax1.axhline(0, color='k', linewidth=1.0, linestyle='--')
+            ax1.axvline(0, color='k', linewidth=1.0, linestyle='--')
+            
+            # Set limits
+            if False == True:
+                ax1.set_xlim(0, 6.41)
+                ax1.set_ylim(0, 1e-3)
+                ax2.set_ylim(0, 1)
+            
+            # Configure ticks
+            ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
+            ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True)
+            ax1.minorticks_on()
+            ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+            ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+            ax2.minorticks_on()
+            
+            # Configure ticks spacing
+            if False == True:
+                ax1.set_xticks(np.arange(0, 11.83, 1))
+                #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
+                ax1.set_yticks(np.arange(0, 3.51e-5, 0.5e-5))
+                #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
+                ax2.set_yticks(np.arange(0, 1.51, 0.2))
+                #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
+            
+            # Set thicker axes
+            for ax in [ax1, ax2]:
+                ax.spines['top'].set_linewidth(1.5)
+                ax.spines['right'].set_linewidth(1.5)
+                ax.spines['bottom'].set_linewidth(1.5)
+                ax.spines['left'].set_linewidth(1.5)
+                ax.spines['top'].set_color('k')
+                ax.spines['right'].set_color('k')
+                ax.spines['bottom'].set_color('k')
+                ax.spines['left'].set_color('k')
+                
+            # Add a legend
+            #ax1.legend(fontsize=15, frameon=True, fancybox=False, loc = "center left", bbox_to_anchor=(0.01, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+            #ax2.legend(fontsize=15, frameon=True, fancybox=False, loc = "center right", bbox_to_anchor=(0.99, 0.5), ncol = 1, edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+                
+            # Save the plot as a PDF
+            plt.title(
+                rf'TOV solution for max $\lambda$ star: $M={p1_v},$ $m_\chi={dm_m}$',
+                loc='left',
+                fontsize=15,
+                fontweight='bold')
+            plt.tight_layout()
+            plt.savefig(f"preliminary_figures\{s_type}_{d_type}_{eos_c}_{dm_m}_{p1_c}_{p1_v}.pdf", format="pdf", bbox_inches="tight")
+            plt.show()
+            
