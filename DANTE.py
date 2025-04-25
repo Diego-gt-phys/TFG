@@ -988,7 +988,7 @@ def find_alpha_max(p1_c, p1_v, p_data, rho_data, p_data_dm, rho_data_dm):
         """
         return -lambda_func(alpha)
     
-    result = opt.minimize_scalar(neg_lambda, bounds=(1, 14), method='bounded')
+    result = opt.minimize_scalar(neg_lambda, bounds=(1, 6), method='bounded')
     
     if result.success:
         return result.x
@@ -1049,7 +1049,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 2, 1, 'soft', 1.0, 'None', None, 'None', None)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 2, 'stiff', 0.9, 'M', 1.5, 'None', None)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
@@ -1284,7 +1284,7 @@ if __name__ == '__main__':
             
             # Plot Mass
             ax2 = ax1.twinx()
-            m = ax2.plot(r, m, label=r'$m(r)$', color = 'k', linewidth=1.5, linestyle='--')
+            mt = ax2.plot(r, m, label=r'$m(r)$', color = 'k', linewidth=1.5, linestyle='--')
             ma = ax2.plot(r, m_A, label=rf'$m_{{{eos_c}}}$', color = colors[c], linewidth=1.5, linestyle='-.')
             mb = ax2.plot(r, m_B, label=r'$m_{{DM}}$', color = colors[3], linewidth=1.5, linestyle='-.')
             ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
