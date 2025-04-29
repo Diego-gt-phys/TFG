@@ -369,7 +369,7 @@ def find_alpha (pc, l_target, p_data, rho_data, p_data_dm, rho_data_dm):
             differnce betwen lambda (M_B/M) and the target lambda.
 
         """
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         l = m_B[-1]/m[-1]
         return l-l_target
     if l_target == 0:
@@ -420,11 +420,11 @@ def find_pc (M_target, s_type, alpha, p_data, rho_data, p_data_dm, rho_data_dm):
             Residual of Mass compared to M_target.
         """
         if s_type == 1:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         elif s_type == 2:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         else:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         M = m[-1]
         return M - M_target
     pc_guess = M_target*5e-5
@@ -1047,7 +1047,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 3, 0, 'soft', 0.8, 'M', 0.5, 'a', 4.0)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 0, 'middle', 1, 'M', 1.0, 'None', None)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
