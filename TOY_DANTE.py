@@ -177,17 +177,81 @@ def TOV_solver (y0, r_range, h, eos_type):
     return (r_values, m_values, p_values)
 
 def find_pc (M_target, eos_type):
+    """
+    Finds the value of central pressure that creates a star of mass M_target.
+
+    Parameters
+    ----------
+    M_target : float
+        Desired mass.
+    eos_type : int
+        Type of EoS to use. 0 for an EoS of constant density. 1 for a Polytropic EoS.
+
+    Raises
+    ------
+    ValueError
+        When the root finding algorithm does not converge.
+
+    Returns
+    -------
+    float
+        value of pc that creates a star of mass M_target.
+    """
     def f(pc):
         r, m, p = TOV_solver((0, pc), (1e-6, 100), 1e-3, eos_type)
+        M = m[-1]
+        return M-M_target
     
+    pc_guess = M_target*5e-5
+    result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1)
+    if result.converged:
+        return result.root
+    else:
+        raise ValueError("Root-finding did not converge")
+
+def theoretical_data (M):
+    """
+    Solves the hydrostatic equillibrium of a star of constant density and mass M ussing the theoretical equations.
+
+    Parameters
+    ----------
+    M : float
+        Mass of the star.
+
+    Returns
+    -------
+    r_teo : array
+        Array containing the theoretical values of r.
+    m_teo : TYPE
+        Array containing the theoretical values of m(r).
+    p_teo : TYPE
+        Array containing the theoretical values of p(r).
+    """
+    rho = 2e-4
+    R = (3/4 * M/(rho*np.pi))**(1/3)
     
+    r_teo = np.linspace(0, R, 500)
+    m_teo = 4/3 * rho * np.pi * r_teo
+    term1 = np.sqrt(R**3 - 2 * G * M * R**2)
+    term2 = np.sqrt(R**3 - 2 * G * M * r_teo**2)
+    numerator = term1 - term2
+    denominator = term2 - 3 * term1
+    p_teo = rho * (numerator / denominator)
+    
+    return (r_teo, m_teo, p_teo)
+      
 ###############################################################################
 # Define the parameters
 ###############################################################################
-   
+
+M = 1
+eos_type = 0
+
 ###############################################################################
 # Calculate the data
 ###############################################################################
+
+
 
 ###############################################################################
 # Plot the data
