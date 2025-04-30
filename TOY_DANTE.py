@@ -18,6 +18,7 @@ author: Diego García Tejada
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
+import matplotlib.lines as mlines
 import seaborn as sns
 import pandas as pd
 from scipy.interpolate import interp1d
@@ -31,7 +32,7 @@ G = 1.4765679173556 # G in units of km / solar masses
 ###############################################################################
 # Define the functions
 ###############################################################################
-def eos (p, eos_type, rho_0=2e-4, k=10, gamma=2):
+def eos (p, eos_type, rho_0=5e-4, k=10, gamma=2):
     """
     Given a pressure p, gives the value of density rho in acordance to the EoS.
     The function accepts 2 types of EoS: const = Constant density, poly = Polytropic EoS.
@@ -200,10 +201,11 @@ def find_pc (M_target, eos_type):
     def f(pc):
         r, m, p = TOV_solver((0, pc), (1e-6, 100), 1e-3, eos_type)
         M = m[-1]
-        return M-M_target
+        print(M)
+        return (M - M_target) / M_target
     
-    pc_guess = M_target*5e-5
-    result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1)
+    pc_guess = M_target*1.4e-3/3.3
+    result = opt.root_scalar(f, x0=pc_guess, method='secant', x1=pc_guess*1.1, xtol=1e-4)
     if result.converged:
         return result.root
     else:
@@ -227,7 +229,7 @@ def theoretical_data (M):
     p_teo : TYPE
         Array containing the theoretical values of p(r).
     """
-    rho = 2e-4
+    rho = 5e-4
     R = (3/4 * M/(rho*np.pi))**(1/3)
     
     r_teo = np.linspace(0, R, 500)
@@ -244,15 +246,93 @@ def theoretical_data (M):
 # Define the parameters
 ###############################################################################
 
-M = 1
+M = 3.3
 eos_type = 0
 
 ###############################################################################
 # Calculate the data
 ###############################################################################
 
+pc = find_pc(M, eos_type)
 
+r, m, p = TOV_solver((0, pc), (1e-6, 100), 1e-3, eos_type)
+
+r_teo, m_teo, p_teo = theoretical_data(M)
 
 ###############################################################################
 # Plot the data
 ###############################################################################
+
+fig, ax1 = plt.subplots(figsize=(9.71, 6))
+colors = sns.color_palette("Set1", 10)
+
+# Plot p
+ax1.plot(r, p, label=r'$p(r)$', color = colors[0], linewidth=1.5, linestyle='-')
+ax1.plot(r_teo, p_teo, label=r'$p_{teo}(r)$', color = colors[1], linewidth=1, linestyle='-.')
+ax1.set_xlabel(r'$r$ $\left[km\right]$', fontsize=15, loc='center')
+ax1.set_ylabel(r'$p$ $\left[ M_{\odot} / km^3 \right]$', fontsize=15, loc='center', color='k')
+ax1.tick_params(axis='y', colors='k')
+ax1.yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax1.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
+
+# Plot m
+ax2 = ax1.twinx()
+ax2.plot(r, m, label=r'$m(r)$', color = colors[0], linewidth=1.5, linestyle='--')
+ax2.plot(r, m, label=r'$m_{theo}(r)$', color = colors[1], linewidth=1, linestyle=(0, (3, 1, 1, 1, 1, 1)))
+ax2.set_ylabel(r'$m$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center', color='k')
+ax2.tick_params(axis='y', colors='k')
+
+# Add axis lines
+ax1.axhline(0, color='k', linewidth=1.0, linestyle='--')
+ax1.axvline(0, color='k', linewidth=1.0, linestyle='--')
+
+# Configure ticks
+ax1.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True)
+ax1.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True)
+ax1.minorticks_on()
+ax2.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
+ax2.tick_params(axis='both', which='minor', direction='in', length=4, width=1, labelsize=12, top=True, right=True)
+ax2.minorticks_on()
+
+# Set thicker axes
+for ax in [ax1, ax2]:
+    ax.spines['top'].set_linewidth(1.5)
+    ax.spines['right'].set_linewidth(1.5)
+    ax.spines['bottom'].set_linewidth(1.5)
+    ax.spines['left'].set_linewidth(1.5)
+    ax.spines['top'].set_color('k')
+    ax.spines['right'].set_color('k')
+    ax.spines['bottom'].set_color('k')
+    ax.spines['left'].set_color('k')
+    
+# Set limits
+if True == True:
+    ax1.set_xlim(0, 11.8)
+    ax1.set_ylim(0, 1.5e-3)
+    ax2.set_ylim(0, 4.2)
+    
+# Configure ticks spacing
+if True == True:
+    ax1.set_xticks(np.arange(0, 12, 1))
+    #ax1.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
+    ax1.set_yticks(np.arange(0, 1.51e-3, 0.2e-3))
+    #ax1.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
+    ax2.set_yticks(np.arange(0, 4.21, 0.5))
+    #ax2.set_yticks(np.arange(0, 1.01, 0.02), minor=True)
+    
+handles_list = [
+    mlines.Line2D([], [], color=colors[0], linestyle='-', linewidth=1.5, label=r"$p(r)$"),
+    mlines.Line2D([], [], color=colors[0], linestyle='--', linewidth=1.5, label=r"$m(r)$"),
+    mlines.Line2D([], [], color=colors[1], linestyle='-.', linewidth=1, label=r"$p_{teo}(r)$"),
+    mlines.Line2D([], [], color=colors[1], linestyle=(0, (3, 1, 1, 1, 1, 1)), linewidth=1, label=r"$m_{teo}(r)$"),
+    ]
+    
+plt.legend(handles=handles_list, fontsize=15, loc = "upper right", bbox_to_anchor=(0.994, 0.99), frameon=True, fancybox=False,
+           ncol = 2,edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
+    
+plt.tight_layout()
+plt.savefig(rf"preliminary_figures\toy_{eos_type}_TOV.pdf", format="pdf", bbox_inches="tight")
+plt.show()
+
+plt.show()
+

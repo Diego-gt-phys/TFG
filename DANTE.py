@@ -369,7 +369,7 @@ def find_alpha (pc, l_target, p_data, rho_data, p_data_dm, rho_data_dm):
             differnce betwen lambda (M_B/M) and the target lambda.
 
         """
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         l = m_B[-1]/m[-1]
         return l-l_target
     if l_target == 0:
@@ -420,11 +420,11 @@ def find_pc (M_target, s_type, alpha, p_data, rho_data, p_data_dm, rho_data_dm):
             Residual of Mass compared to M_target.
         """
         if s_type == 1:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         elif s_type == 2:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         else:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         M = m[-1]
         return M - M_target
     pc_guess = M_target*5e-5
@@ -476,7 +476,7 @@ def find_sc (M_target, l_target, p_data, rho_data, p_data_dm, rho_data_dm):
             Residual of calculated l to a l_taget.
         """
         p_c, alpha = x
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((1, p_c, alpha*p_c, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((1, p_c, alpha*p_c, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         M = m[-1]
         l = m_B[-1]/m[-1]
         #print(M, l) #DEBUG
@@ -707,7 +707,7 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v, p_data, rho_data, p_d
         else:
             pc, alpha = [p1_v, p2_v]
         
-        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+        r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, alpha*pc, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         
     else:
         if p1_c == "M":
@@ -716,7 +716,7 @@ def Save_TOV (s_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v, p_data, rho_data, p_d
             pc = p1_v
             
         if s_type == 1:
-            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
+            r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, pc, 0, 0, 0), (1e-6, 50), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
         else:
             r, m, p_A, p_B, m_A, m_B, R_A = TOV_solver((0, 0, pc, 0, 0), (1e-6, 100), 1e-3, p_data, rho_data, p_data_dm, rho_data_dm)
             
@@ -1047,7 +1047,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 0, 'middle', 1, 'M', 1.0, 'None', None)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(0, 3, 0, 'soft', 1.0, 'M', 1.0, 'l', 0.01)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     

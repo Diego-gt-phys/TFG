@@ -13,7 +13,7 @@ import seaborn as sns
 
 # Physical parameters (solar mass = 198847e30 kg & 6.957e8 m)
 G = 1.4765679173556 # G in units of solar masses / solar radii
-rho = 4.775e-4  # Solar density in solar units is 0.238732. In IS units it would be 1409.82
+rho = 5e-4  # Solar density in solar units is 0.238732. In IS units it would be 1409.82
 
 def system_of_ODE(r, y):
     """
@@ -132,7 +132,7 @@ def M_R_curve (pc_range, r_range, h, n):
     return np.array(R_values), np.array(M_values)
 
 # Using the functions
-r,m,p = TOV_solver((0, 0.9e-4), (1e-6, 20), 0.001)
+r,m,p = TOV_solver((0, 5e-3), (1e-6, 20), 0.001)
 print("The star has mass:", m[-1], "and radius:", r[-1])
 
 # Create the plot
