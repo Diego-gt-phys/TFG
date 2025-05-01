@@ -4,7 +4,7 @@ Created on Mon Apr 28 11:18:11 2025
 
 Toy version of DANTE: Dark-matter Admixed Neutron-sTar solvEr
 
-Solves and plots the TOV solution for constant density and different M.
+Solves and plots the TOV solution for constant density at different M.
 
 author: Diego García Tejada
 """
