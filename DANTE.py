@@ -83,7 +83,7 @@ def eos_B (p_B, p_data_dm, rho_data_dm): # DM
     
     elif p_B <= 1e-20:
         Gamma = 5/3
-        K = ((dm_m)**(-8/3))*8.0165485819726
+        K = ((dm_m)**(-8/3))*8.0164772576254
         rho = (p_B / K) ** (1/Gamma)
     
     else:
@@ -1042,7 +1042,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 3, 0, 'middle', 1.0, 'M', 1.0, 'l', 0.1)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 1, 0, 'middle', 1, 'M', 1.0, 'None', None)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
