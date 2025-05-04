@@ -30,17 +30,16 @@ G = 1.4765679173556 # G in units of km / solar masses
 ###############################################################################
 # Define the functions
 ###############################################################################
-def eos (p, rho_0=5e-4):
+def eos (p, dm_m=0.939565):
     """
     Given a pressure p, gives the value of density rho in acordance to the EoS.
-    The function accepts 2 types of EoS: const = Constant density, poly = Polytropic EoS.
 
     Parameters
     ----------
     p : float
         Pressure.
-    rho_0 : float, optional
-        Value of denisty in the case of eos_type = 'const'. The default is 2e-4.
+    dm_m : float
+        Mass of the particle ing GeV.
 
     Returns
     -------
@@ -51,7 +50,9 @@ def eos (p, rho_0=5e-4):
     if p <= 0:
         return 0
     
-    rho = rho_0
+    Gamma = 5/3
+    K = ((dm_m)**(-8/3))*8.0164772576254
+    rho = (p / K) ** (1/Gamma)
         
     return rho
 
@@ -276,7 +277,7 @@ if __name__ == '__main__':
 # Calculate the data
 ###############################################################################
 
-    R, M = MR_curve((1e2, 1e-10), (1e-6, 100), 1e-3, 200)
+    R, M = MR_curve((1e-2, 1e-10), (1e-6, 100), 1e-3, 100)
 
 ###############################################################################
 # Plot the data
@@ -314,22 +315,22 @@ if __name__ == '__main__':
         
     # Set limits
     if True == True:
-        ax.set_xlim(0, 12.2)
-        ax.set_ylim(0, 3.7)
+        ax.set_xlim(0, 50)
+        ax.set_ylim(0, 1)
         
     # Configure ticks spacing
     if True == True:
-        ax.set_xticks(np.arange(0, 12.1, 1))
+        ax.set_xticks(np.arange(0, 50.1, 5))
         #ax.set_xticks(np.arange(0, 9.6, 0.2), minor=True)
-        ax.set_yticks(np.arange(0, 3.7, 0.5))
+        ax.set_yticks(np.arange(0, 1.001, 0.2))
         #ax.set_yticks(np.arange(0, 8.1e-5, 0.2e-5), minor=True)
         
         
-    plt.legend(fontsize=15, loc = "upper left", bbox_to_anchor=(0.01, 0.99), frameon=True, fancybox=False,
+    plt.legend(fontsize=15, loc = "upper right", bbox_to_anchor=(0.994, 0.99), frameon=True, fancybox=False,
                ncol = 3,edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
         
     plt.tight_layout()
-    plt.savefig(rf"figures\constant_MR.pdf", format="pdf", bbox_inches="tight")
+    plt.savefig(rf"figures\poly_MR.pdf", format="pdf", bbox_inches="tight")
     plt.show()
 
 
