@@ -33,7 +33,7 @@ from tqdm import tqdm
 
 # Physical parameters (solar mass = 1.98847e30 kg)
 G = 1.4765679173556 # G in units of km / solar masses
-PCS = {"soft": (2.785e-6, 5.975e-4), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
+PCS = {"soft": (1e-10, 5.975e-3), "middle": (2.747e-6, 5.713e-4), "stiff": (2.144e-6, 2.802e-4)} # Central pressure intervals for the MR curves 
 
 ###############################################################################
 # Define the functions
@@ -80,7 +80,7 @@ def eos_B (p_B, p_data_dm, rho_data_dm): # DM
     if p_B <= 0:
         return 0
     
-    elif p_B <= 1e-20:
+    elif p_B <= 1e-30:
         Gamma = 5/3
         K = ((dm_m)**(-8/3))*8.0164772576254
         rho = (p_B / K) ** (1/Gamma)
@@ -1041,7 +1041,7 @@ if __name__ == '__main__':
     
     print("Welcome to DANTE: the Dark-matter Admixed Neutron-sTar solvEr.")
     
-    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 2, 1, 'soft', 0.939565, 'None', None, 'None', None)
+    mode, s_type, d_type, eos_c, dm_m, p1_c, p1_v, p2_c, p2_v = get_inputs(1, 2, 1, 'soft', 1, 'None', None, 'None', None)
     
     print(f"\nUser Inputs: {mode}, {s_type}, {d_type}, '{eos_c}', {dm_m}, '{p1_c}', {p1_v}, '{p2_c}', {p2_v}\n")
     
@@ -1210,8 +1210,8 @@ if __name__ == '__main__':
             plt.ylabel(r'$M$ $\left[ M_{\odot} \right]$', fontsize=15, loc='center')
             
             # Set limits
-            #plt.xlim(8, 17)
-            #plt.ylim(0, 3.5)
+            plt.xlim(0, 50)
+            plt.ylim(0, 0.7)
             
             # Configure ticks for all four sides
             plt.tick_params(axis='both', which='major', direction='in', length=8, width=1.2, labelsize=12, top=True, right=True)
