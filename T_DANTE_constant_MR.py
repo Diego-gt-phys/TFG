@@ -30,7 +30,7 @@ G = 1.4765679173556 # G in units of km / solar masses
 ###############################################################################
 # Define the functions
 ###############################################################################
-def eos (p, dm_m=0.939565):
+def eos (p, dm_m=1):
     """
     Given a pressure p, gives the value of density rho in acordance to the EoS.
 
@@ -330,7 +330,7 @@ if __name__ == '__main__':
                ncol = 3,edgecolor="black", framealpha=1, labelspacing=0.2, handletextpad=0.3, handlelength=1.4, columnspacing=1)
         
     plt.tight_layout()
-    plt.savefig(rf"figures\poly_MR.pdf", format="pdf", bbox_inches="tight")
+    plt.savefig(rf"figures\poly_MR_1.pdf", format="pdf", bbox_inches="tight")
     plt.show()
 
 
