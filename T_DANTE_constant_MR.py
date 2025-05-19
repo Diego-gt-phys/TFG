@@ -333,4 +333,5 @@ if __name__ == '__main__':
     plt.savefig(rf"figures\poly_MR_1.pdf", format="pdf", bbox_inches="tight")
     plt.show()
 
-
+    df = pd.DataFrame({'R':R, 'M':M})
+    df.to_csv(r"data\2_1_1.0_NR.csv", index=False)
